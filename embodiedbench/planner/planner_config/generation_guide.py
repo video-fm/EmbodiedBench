@@ -68,3 +68,17 @@ llm_generation_guide={
     "required": ["reasoning_and_reflection", "language_plan", "executable_plan"]
 }
 
+vlm_sg_generation_guide={
+    "type": "object",
+    'properties': {
+        "scene_graph_entities": {
+            "type": "array",
+            "description": "A list of entities in the scene graph, each with a name",
+            "items": {
+                "type": "string",
+                "description": "The name of the entity in the scene graph",
+            },
+            }
+        },
+    "required": ["scene_graph_entities"],
+}

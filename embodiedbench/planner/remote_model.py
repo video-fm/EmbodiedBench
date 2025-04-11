@@ -8,7 +8,7 @@ from openai import OpenAI
 import typing_extensions as typing
 import lmdeploy
 from lmdeploy import pipeline, GenerationConfig, PytorchEngineConfig
-from embodiedbench.planner.planner_config.generation_guide import llm_generation_guide, vlm_generation_guide
+from embodiedbench.planner.planner_config.generation_guide import llm_generation_guide, vlm_generation_guide, vlm_sg_generation_guide
 from embodiedbench.planner.planner_config.generation_guide_manip import llm_generation_guide_manip, vlm_generation_guide_manip
 from embodiedbench.planner.planner_utils import convert_format_2claude, convert_format_2gemini, ActionPlan_1, ActionPlan, ActionPlan_lang, ActionPlan_1_manip, ActionPlan_manip, ActionPlan_lang_manip
 
@@ -68,9 +68,9 @@ class RemoteModel:
                     raise ValueError(f"Unsupported model name: {model_name}")
 
 
-    def respond(self, message_history: list):
+    def respond(self, message_history: list, get_scene_graph=False):
         if self.model_type == 'local':
-            return self._call_local(message_history)
+            return self._call_local(message_history, get_scene_graph)
         else:
             if "claude" in self.model_name:
                 return self._call_claude(message_history)
@@ -99,7 +99,7 @@ class RemoteModel:
             else:
                 raise ValueError(f"Unsupported model name: {self.model_name}")
 
-    def _call_local(self, message_history: list):
+    def _call_local(self, message_history: list, get_scene_graph=False):
         if self.task_type == 'manip':
             response_format = {
                 "type": "json_schema",
@@ -109,13 +109,22 @@ class RemoteModel:
                 }
             }
         else:
-            response_format = {
-                "type": "json_schema",
-                "json_schema": {
-                    "name": "embodied_planning",
-                    "schema": llm_generation_guide if self.language_only else vlm_generation_guide
+            if get_scene_graph:
+                response_format = {
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "scene_graph",
+                        "schema": vlm_sg_generation_guide
+                    }
                 }
-            }
+            else:
+                response_format = {
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "embodied_planning",
+                        "schema": llm_generation_guide if self.language_only else vlm_generation_guide
+                    }
+                }
         response = self.model(
             message_history,
             gen_config=GenerationConfig(

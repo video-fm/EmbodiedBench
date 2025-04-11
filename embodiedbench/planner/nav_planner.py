@@ -22,7 +22,21 @@ template_lang = template_lang
 MESSAGE_WINDOW_LEN = 5
 
 class EBNavigationPlanner():
-    def __init__(self, model_name = '', model_type = 'remote', actions = [], system_prompt = '', examples = '', n_shot=1, obs_key='head_rgb', chat_history=False, language_only=False, multiview = False, multistep = False, visual_icl = False, tp=1, kwargs={}):
+    def __init__(self, model_name = '', 
+                 model_type = 'remote', 
+                 actions = [], 
+                 system_prompt = '', 
+                 examples = '', 
+                 n_shot=1, 
+                 obs_key='head_rgb', 
+                 chat_history=False, 
+                 language_only=False, 
+                 multiview = False, 
+                 multistep = False, 
+                 visual_icl = False, 
+                 tp=1, 
+                 kwargs={}):
+        
         self.model_name = model_name
         self.model_type = model_type
         self.obs_key = obs_key
@@ -51,7 +65,8 @@ class EBNavigationPlanner():
             else:
                 self.icl_text_only = False
 
-
+        self.entity_extraction_prompt = f'''To achieve the task, Reason about the current visual state and your final goal. Recognize all related objects from the image, and put them in a list.'''
+        
         self.first_prompt = f'''To achieve the task, 1. Reason about the current visual state and your final goal, and 2. Reflect on the effect of previous actions. 3. Summarize how you learn from the Strategy and Examples provided \
 \nAim for about 1-2 actions in this step. !!!Notice: you cannot assess the situation until the whole plan in this planning step is finished executed, so plan accordingly.\
 \nAt last, output the action id(s) (0 ~ {len(self.actions)-1}) from the available actions to execute. 
@@ -74,7 +89,7 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
         else:
             self.model = RemoteModel(model_name, model_type, language_only, tp=tp)
 
-    
+
     def set_actions(self, actions):
         self.actions = actions
         self.available_action_str = self.get_availabel_action_prompt(actions)
@@ -316,13 +331,60 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
                    "language_plan":"invalid json, random action"}'''
             return action, out
 
+    def act_video(self, observation, user_instruction):
+        if type(observation) == dict:
+            obs = observation[self.obs_key]
+        else:
+            obs = observation # input image path
+        
+        prompt = self.process_prompt(user_instruction, prev_act_feedback=self.episode_act_feedback)
+        if self.model_type == 'custom':
+            return self.act_custom(prompt, obs)
+
+        if len(self.episode_messages) == 0:
+             self.episode_messages = self.get_message(obs, prompt)
+        else:
+            if self.chat_history:
+                self.episode_messages = self.get_message(obs, prompt, self.episode_messages)
+            else:
+                self.episode_messages = self.get_message(obs, prompt)
+        
+        for entry in self.episode_messages:
+            for content_item in entry["content"]:
+                if content_item["type"] == "text":
+                    text_content = content_item["text"]
+                    logger.debug(f"Model Input:\n{text_content}\n")
+
+        try:
+            out = self.model.respond(self.episode_messages)
+        except Exception as e:
+            print(e)
+            if 'qwen' in self.model_name:
+                return -2,'''{"visual_state_description":"qwen model generate empty action due to inappropriate content check", "reasoning_and_reflection":"invalid json, random action",
+                   "language_plan":"invalid json, random action"}'''
+
+        if self.chat_history:
+            self.episode_messages.append(
+                {
+                "role": "assistant",
+                "content": [{"type": "text", "text": out}],
+                }
+            )
+            
+        logger.debug(f"Model Output:\n{out}\n")
+        action, valid = self.json_to_action(out)
+        self.planner_steps += 1
+        if valid:
+            return action, out
+        else:
+            out = '''{"visual_state_description":"invalid json, random action", "reasoning_and_reflection":"invalid json, random action",
+                   "language_plan":"invalid json, random action"}'''
+            return action, out
+
+
     def update_info(self, info):
         """Update episode feedback history."""
         self.episode_act_feedback.append([
             info['action_id'],
             info['env_feedback']
         ])
-
-
-        
-

@@ -97,3 +97,29 @@ Task Success
 
 '''
 ] 
+
+scene_graph_examples = [
+'''Human Instruction: Navigate to the floorlamp and be as close as possible.
+   
+   Visual Description: I can see the floorlmap is at left side in front of me, next to the TVStand. Around me is a Cabinet at my left side.
+   
+   Scene Graph Entity in JSON: "scene_graph_entities": ["floorlmap", "TVStand", "cabinet"]
+''',
+
+'''Human Instruction: Navigate to the computer on the desk and be as close as possible.
+
+    Visual Description: At the first image, I can see that the computer is located in my left front direction, placed on a desk. In front of me, slightly to the right, there is a chair blocking my direct path. 
+                        At the second image, I can see that the computer is located in my left front direction, placed on a desk. 
+
+    Scene Graph Entity in JSON: "scene_graph_entities": ["computer", "desk", "chair"]
+''', 
+
+''' Human Instruction: Navigate to the book and be as close as possible.
+
+    Visual Description: At the first image, I cannot see the book. 
+                        At the second image, I can see the book is directly in front of me, placed on a shelf.
+
+    Scene Graph Entity in JSON: "scene_graph_entities": ["book", "shelf"]
+'''
+]
+    

@@ -60,15 +60,14 @@ class EB_NavigationEvaluator():
             logger.info(f'Current eval set: {eval_set}')
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
 
-            if eval_set == "base":
-                selected_indexes = list(range(40, 60))
-            else: 
-                selected_indexes = None
+            # if eval_set == "base":
+            #     selected_indexes = list(range(40, 60))
+            # else: 
+            #     selected_indexes = None
                 
             self.env = EBNavigationEnv(eval_set=self.eval_set, down_sample_ratio=self.config['down_sample_ratio'], 
                                    exp_name=exp_name, multiview=self.config['multiview'], boundingbox=self.config['detection_box'], 
-                                   multistep = self.config['multistep'], resolution = self.config['resolution'],
-                                   selected_indexes = selected_indexes)
+                                   multistep = self.config['multistep'], resolution = self.config['resolution'])
 
             self.planner = EBNavigationPlanner(model_name=self.model_name, model_type = self.config['model_type'], 
                                            actions = self.env.language_skill_set, system_prompt = system_prompt, 

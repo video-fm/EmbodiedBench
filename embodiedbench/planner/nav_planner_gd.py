@@ -392,7 +392,7 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
         return action, out
 
     
-    def predict_gd(self, image, classes, box_threshold=0.3, text_threshold=0.4):
+    def predict_gd(self, image, classes, box_threshold=0.5, text_threshold=0.4):
         caption = ". ".join(classes)
         processed_caption = preprocess_caption(caption)
         processed_image = self.grounding_model.preprocess_image(image_bgr=image).to(self.grounding_model.device)
@@ -479,7 +479,7 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             
             height, width = image.shape[0], image.shape[1]
-            detection_ls = self.predict_gd(image, sg_keywords, box_threshold=0.25, text_threshold=0.4)
+            detection_ls = self.predict_gd(image, sg_keywords, box_threshold=0.4, text_threshold=0.4)
             assert len(detection_ls) == 1
             detections = detection_ls[0]
             

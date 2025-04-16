@@ -87,30 +87,30 @@ class EB_NavigationEvaluator():
             episode_info = {'reward': []}
             obs = self.env.reset()
             img_path = self.env.save_image(obs)
-            current_frames = [obs['head_rgb']]
+            
             user_instruction = self.env.episode_language_instruction
             print(f"Instruction: {user_instruction}")
             self.planner.reset()
             done = False
             while not done:
                 # try:
-                    action, reasoning = self.planner.act(img_path, current_frames, user_instruction)
+                    action, reasoning = self.planner.act(img_path, user_instruction)
                     print(f"Planner Output Action: {action}")
                     reasoning = json.loads(reasoning)
                     if type(action) == list:
-                        current_frames = []
+                        
                         for i, action_single in enumerate( action[:min(self.env._max_episode_steps - self.env._current_step + 1, len(action))] ):
                             if i==0:
                                 obs, reward, done, info = self.env.step(action_single,reasoning,1)
                             else:
                                 obs, reward, done, info = self.env.step(action_single,reasoning,0)
                             
-                            current_frames.append(obs['head_rgb'])
                             print(f"Executed action: {action_single}, Task success: {info['task_success']}")
                             logger.debug(f"reward: {reward}")
                             logger.debug(f"terminate: {done}\n")
                             self.planner.update_info(info)
                             img_path = self.env.save_image(obs)
+                                                        
                             episode_info['reward'].append(reward)
 
                             if done==True:
@@ -122,7 +122,6 @@ class EB_NavigationEvaluator():
                                 break
                     else:
                         obs, reward, done, info = self.env.step(action, reasoning, 1)
-                        current_frames = [obs['head_rgb']]
                         
                         print(f"Executed action: {action}, Task success: {info['task_success']}")
                         logger.debug(f"reward: {reward}")
@@ -299,14 +298,14 @@ if __name__ == '__main__':
               'down_sample_ratio': 1, 
               'model_type': 'local', 
               'language_only': False, 
-              'eval_sets': ['base'], 
+              'eval_sets': ['base', 'common_sense', 'complex_instruction', 'visual_appearance', 'long_horizon'], 
               'chat_history': False, 
               'n_shots': 3, 
               'multiview': False, 
               'detection_box': False, 
               'multistep': True, 
               'resolution': 500, 
-              'exp_name': 'multistep_baseline_gd', 
+              'exp_name': 'multistep_baseline_gd_two_imgs', 
               'visual_icl': False, 
               'tp': 4, 
               'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',

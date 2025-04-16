@@ -16,7 +16,9 @@ from embodiedbench.evaluator.config.visual_icl_examples.eb_navigation.ebnav_visu
 from embodiedbench.planner.planner_utils import template, template_lang
 from embodiedbench.main import logger
 import matplotlib.pyplot as plt
+from torchvision import transforms
 
+to_tensor = transforms.ToTensor()
 template = template
 template_lang = template_lang
 
@@ -29,6 +31,7 @@ from groundingdino.util.inference import load_image as load_gd_image
 from groundingdino.util.utils import get_phrases_from_posmap
 import torch
 import math
+from PIL import Image
 
 def preprocess_caption(caption: str) -> str:
     result = caption.lower().strip()
@@ -72,11 +75,11 @@ def show_box(box, ax, object_id, label='hi'):
     
     x0, y0 = box[0], box[1]
     w, h = box[2] - box[0], box[3] - box[1]
-    ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor=color, facecolor=(0,0,0,0), lw=2))
+    ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor=color, facecolor=(0,0,0,0), lw=0.5))
     
     if label is not None:
-        ax.text(x0, y0 - 5, label, color='white', fontsize=10, backgroundcolor=np.array(color[:3]), alpha=color[3])
-    
+        # ax.text(x0, y0 - 5, label, color='white', fontsize=10, backgroundcolor=np.array(color[:3]), alpha=color[3])
+        ax.text(x0, y0 - 5, label, color='white', fontsize=10, alpha=color[3])
     
 def save_prompts_one_image(frame_image, boxes, points, labels, save_path):
     # Create a figure and axis
@@ -387,7 +390,7 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
         return action, out
 
     
-    def predict_gd(self, image, classes, box_threshold=0.25, text_threshold=0.3):
+    def predict_gd(self, image, classes, box_threshold=0.3, text_threshold=0.4):
         caption = ". ".join(classes)
         processed_caption = preprocess_caption(caption)
         processed_image = self.grounding_model.preprocess_image(image_bgr=image).to(self.grounding_model.device)
@@ -430,8 +433,7 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
         return all_detections
     
     
-    def act(self, observation, images, user_instruction):
-        height, width = images[0].shape[0], images[0].shape[1]
+    def act(self, observation, user_instruction):
         
         if type(observation) == dict:
             obs = observation[self.obs_key]
@@ -439,7 +441,10 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
             # assert len(observation) == 1
             obs = observation # input image path
         
+        images = [to_tensor(Image.open(image_path)) for image_path in obs]
+        height, width = images[0].shape[0], images[0].shape[1]
         total_image_len = len(obs)
+        assert total_image_len == len(images)
         
         prompt, scene_graph_prompt = self.process_prompt(user_instruction, prev_act_feedback=self.episode_act_feedback)
         
@@ -468,7 +473,7 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
         prompt = prompt + f'\n\n The current image height is {height}, width is {width}.'
 
         # detections = post_process_detections(all_dets, sg_keywords)
-        for ct, detections in enumerate(all_dets):
+        for ct, (detections, image_path) in enumerate(zip(all_dets, observation)):
             
             scene_graph_text = []
             reformated = torch.tensor([(get_valid_bbox_val(x1, width), 
@@ -477,19 +482,32 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
                         get_valid_bbox_val(y2, height))
                         for x1, y1, x2, y2 in detections.xyxy])
             
-            boxes = reformated
-            
-            image_path = observation[-1].split('/')
-            image_dir, image_name = image_path[:-1], image_path[-1]
+            image_path_ls = image_path.split('/')
+            image_dir, image_name = image_path_ls[:-1], image_path_ls[-1]
             image_name = image_name.split('.')[0]
             new_image_name = image_name + '_bbox.png'
             new_image_path = os.path.join(*image_dir, new_image_name)
             
-            save_prompts_one_image(frame_image=image, boxes=boxes, labels=sg_keywords, points=[], save_path=new_image_path)        
+            boxes = []
+            labels = []
+            
+            for ct, class_id in enumerate(detections.class_id):
+                if class_id is None:
+                    continue
+                boxes.append(reformated[ct])
+                labels.append(sg_keywords[class_id])
+            
+            if len(boxes) == 0:
+                boxes = torch.tensor([])
+            else:
+                boxes = torch.stack(boxes)
+                
+            save_prompts_one_image(frame_image=image, boxes=boxes, labels=labels, points=[], save_path=new_image_path)        
         
+            obs.append(image_path)
             obs.append(new_image_path) # update to bboxed image path
         
-            scene_graph_text += [f"{obj_name}: {obj_box}" for (obj_name, obj_box) in zip(sg_keywords, boxes)]
+            scene_graph_text += [f"{obj_name}: {obj_box}" for (obj_name, obj_box) in zip(labels, boxes)]
             prompt += f"Its scene graph at frame {ct} is:  {scene_graph_text}."
             
         if len(self.episode_messages) == 0:

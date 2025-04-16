@@ -17,6 +17,8 @@ from embodiedbench.planner.planner_utils import template, template_lang
 from embodiedbench.main import logger
 import matplotlib.pyplot as plt
 from torchvision import transforms
+import cv2
+import copy
 
 to_tensor = transforms.ToTensor()
 template = template
@@ -436,15 +438,12 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
     def act(self, observation, user_instruction):
         
         if type(observation) == dict:
-            obs = observation[self.obs_key]
+            obs = copy.deepcopy(observation[self.obs_key])
         else:
             # assert len(observation) == 1
-            obs = observation # input image path
+            obs = copy.deepcopy(observation) # input image path
         
-        images = [to_tensor(Image.open(image_path)) for image_path in obs]
-        height, width = images[0].shape[0], images[0].shape[1]
-        total_image_len = len(obs)
-        assert total_image_len == len(images)
+        
         
         prompt, scene_graph_prompt = self.process_prompt(user_instruction, prev_act_feedback=self.episode_act_feedback)
         
@@ -462,18 +461,17 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
                    "language_plan":"invalid json, random action"}'''
         
         sg_keywords = json.loads(out)['scene_graph_entities']
-        
-        all_dets = []
-       
-        
-        for ct, image in enumerate(images):
-            all_dets += self.predict_gd(image, sg_keywords, box_threshold=0.25, text_threshold=0.4)
-        
-        obs = []
-        prompt = prompt + f'\n\n The current image height is {height}, width is {width}.'
+                
+        prompt = prompt + f'\n\n The current image height is 600, width is 600.'
 
         # detections = post_process_detections(all_dets, sg_keywords)
-        for ct, (detections, image_path) in enumerate(zip(all_dets, observation)):
+        for ct, image_path in enumerate(observation):
+            
+            image = cv2.imread(image_path)
+            height, width = image.shape[0], image.shape[1]
+            detection_ls = self.predict_gd(image, sg_keywords, box_threshold=0.25, text_threshold=0.4)
+            assert len(detection_ls) == 1
+            detections = detection_ls[0]
             
             scene_graph_text = []
             reformated = torch.tensor([(get_valid_bbox_val(x1, width), 
@@ -504,12 +502,14 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
                 
             save_prompts_one_image(frame_image=image, boxes=boxes, labels=labels, points=[], save_path=new_image_path)        
         
-            obs.append(image_path)
+            if not image_path in obs:
+                obs.append(image_path)
             obs.append(new_image_path) # update to bboxed image path
         
             scene_graph_text += [f"{obj_name}: {obj_box}" for (obj_name, obj_box) in zip(labels, boxes)]
             prompt += f"Its scene graph at frame {ct} is:  {scene_graph_text}."
-            
+        
+        obs = sorted(obs)
         if len(self.episode_messages) == 0:
             self.episode_messages = self.get_message(obs, prompt)
         else:

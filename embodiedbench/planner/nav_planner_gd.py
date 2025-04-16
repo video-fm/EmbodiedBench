@@ -465,6 +465,16 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
         # detections = post_process_detections(all_dets, sg_keywords)
         for ct, image_path in enumerate(observation):
             
+            image_path_ls = image_path.split('/')
+            image_dir, image_name = image_path_ls[:-1], image_path_ls[-1]
+            image_name = image_name.split('.')[0]
+            new_image_name = image_name + '_bbox.png'
+            new_image_path = os.path.join(*image_dir, new_image_name)
+            
+            if os.path.exists(new_image_path):
+                obs.append(new_image_path)
+                continue
+            
             image = cv2.imread(image_path)
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             
@@ -480,11 +490,6 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
                         get_valid_bbox_val(y2, height))
                         for x1, y1, x2, y2 in detections.xyxy])
             
-            image_path_ls = image_path.split('/')
-            image_dir, image_name = image_path_ls[:-1], image_path_ls[-1]
-            image_name = image_name.split('.')[0]
-            new_image_name = image_name + '_bbox.png'
-            new_image_path = os.path.join(*image_dir, new_image_name)
             
             boxes = []
             labels = []

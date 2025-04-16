@@ -443,8 +443,6 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
             # assert len(observation) == 1
             obs = copy.deepcopy(observation) # input image path
         
-        
-        
         prompt, scene_graph_prompt = self.process_prompt(user_instruction, prev_act_feedback=self.episode_act_feedback)
         
         if self.model_type == 'custom':
@@ -468,6 +466,8 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
         for ct, image_path in enumerate(observation):
             
             image = cv2.imread(image_path)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            
             height, width = image.shape[0], image.shape[1]
             detection_ls = self.predict_gd(image, sg_keywords, box_threshold=0.25, text_threshold=0.4)
             assert len(detection_ls) == 1

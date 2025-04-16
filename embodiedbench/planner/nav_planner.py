@@ -41,7 +41,7 @@ class EBNavigationPlanner():
         self.model_type = model_type
         self.obs_key = obs_key
         self.system_prompt = system_prompt
-        self.n_shot = n_shot
+        self.n_shot = n_shot (y-axis, x-axis, z-axis)
         self.chat_history = chat_history # whether to includ all the chat history for prompting
         self.set_actions(actions)
         self.planner_steps = 0

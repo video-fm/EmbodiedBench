@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import os
-from transformers import AutoProcessor, AutoModelForCausalLM, GenerationConfig, pipeline, Gemma3ForConditionalGeneration
+from transformers import AutoProcessor, AutoModelForCausalLM, GenerationConfig, pipeline
 import torch
 from PIL import Image
 
@@ -36,12 +36,12 @@ class CustomModel:
                 attn_implementation="flash_attention_2"
             )
             self.generation_config = GenerationConfig.from_pretrained(model_path)
-        elif 'gemma' in model_path:
-            self.model = Gemma3ForConditionalGeneration.from_pretrained(
-                model_path, device_map="auto", torch_dtype=torch.bfloat16,
-                attn_implementation="eager"
-            )
-            self.processor = AutoProcessor.from_pretrained(model_path)
+        # elif 'gemma' in model_path:
+        #     self.model = Gemma3ForConditionalGeneration.from_pretrained(
+        #         model_path, device_map="auto", torch_dtype=torch.bfloat16,
+        #         attn_implementation="eager"
+        #     )
+        #     self.processor = AutoProcessor.from_pretrained(model_path)
 
 
     def respond(self, prompt, image_path=None):

@@ -60,9 +60,15 @@ class EB_NavigationEvaluator():
             logger.info(f'Current eval set: {eval_set}')
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
 
+            if eval_set == "base":
+                selected_indexes = list(range(40, 60))
+            else: 
+                selected_indexes = None
+                
             self.env = EBNavigationEnv(eval_set=self.eval_set, down_sample_ratio=self.config['down_sample_ratio'], 
                                    exp_name=exp_name, multiview=self.config['multiview'], boundingbox=self.config['detection_box'], 
-                                   multistep = self.config['multistep'], resolution = self.config['resolution'])
+                                   multistep = self.config['multistep'], resolution = self.config['resolution'],
+                                   selected_indexes = selected_indexes)
 
             self.planner = EBNavigationPlanner(model_name=self.model_name, model_type = self.config['model_type'], 
                                            actions = self.env.language_skill_set, system_prompt = system_prompt, 
@@ -93,7 +99,7 @@ class EB_NavigationEvaluator():
             self.planner.reset()
             done = False
             while not done:
-                # try:
+                try:
                     action, reasoning = self.planner.act(img_path, user_instruction)
                     print(f"Planner Output Action: {action}")
                     reasoning = json.loads(reasoning)
@@ -130,10 +136,10 @@ class EB_NavigationEvaluator():
                         img_path = self.env.save_image(obs)
                         episode_info['reward'].append(reward)
 
-                # except Exception as e:
-                #     sleep(1)
-                #     print(e)
-                #     print("retrying...")
+                except Exception as e:
+                    sleep(1)
+                    print(e)
+                    print("retrying...")
 
 
             # evaluation metrics
@@ -296,7 +302,7 @@ if __name__ == '__main__':
     
     config = {'model_name': 'OpenGVLab/InternVL2_5-38B', 
               'down_sample_ratio': 1, 
-              'model_type': 'local', 
+              'model_type': 'remote', 
               'language_only': False, 
               'eval_sets': ['base', 'common_sense', 'complex_instruction', 'visual_appearance', 'long_horizon'], 
               'chat_history': False, 

@@ -40,7 +40,16 @@ DISCRETE_SKILLSET = [
 
 
 class EBNavigationEnv(gym.Env):
-    def __init__(self, eval_set='base', exp_name='test_base', down_sample_ratio=1.0, fov = 100, multiview = False, boundingbox = False, multistep = False,  resolution = 500, selected_indexes =[]):
+    def __init__(self, 
+                 eval_set='base', 
+                 exp_name='test_base', 
+                 down_sample_ratio=1.0, 
+                 fov = 100, 
+                 multiview = False,
+                 boundingbox = False,
+                 multistep = False, 
+                 resolution = 500,
+                 selected_indexes =[]):
         """
         A wrapper for AI2-THOR ManipulaTHOR environment.
 

@@ -60,14 +60,15 @@ class EB_NavigationEvaluator():
             logger.info(f'Current eval set: {eval_set}')
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
 
-            # if eval_set == "base":
-            #     selected_indexes = list(range(40, 60))
+            # if eval_set == "visual_appearance":
+            #     selected_indexes = list(range(22, 60))
             # else: 
             #     selected_indexes = None
                 
             self.env = EBNavigationEnv(eval_set=self.eval_set, down_sample_ratio=self.config['down_sample_ratio'], 
                                    exp_name=exp_name, multiview=self.config['multiview'], boundingbox=self.config['detection_box'], 
-                                   multistep = self.config['multistep'], resolution = self.config['resolution'])
+                                   multistep = self.config['multistep'], resolution = self.config['resolution'],
+                                   )
 
             self.planner = EBNavigationPlanner(model_name=self.model_name, model_type = self.config['model_type'], 
                                            actions = self.env.language_skill_set, system_prompt = system_prompt, 
@@ -78,7 +79,6 @@ class EB_NavigationEvaluator():
                                            gd_checkpoint_path=self.gd_checkpoint_path, gd_config_path=self.gd_config_path)
             
             self.evaluate()
-            # self.evaluate_video()
             
             average_json_values(os.path.join(self.env.log_path, 'results'), selected_key = None)
             with open(os.path.join(self.env.log_path, 'config.txt'), 'w') as f:
@@ -140,7 +140,6 @@ class EB_NavigationEvaluator():
                     print(e)
                     print("retrying...")
 
-
             # evaluation metrics
             episode_info['instruction'] = user_instruction
             episode_info['reward'] = np.mean(episode_info['reward'])
@@ -156,87 +155,6 @@ class EB_NavigationEvaluator():
             self.save_episode_metric(episode_info)
             progress_bar.update()
 
-    def evaluate_video(self):
-        
-        progress_bar = tqdm(total=self.env.number_of_episodes, desc="Episodes")
-        while self.env._current_episode_num < self.env.number_of_episodes:
-            logger.info(f"Evaluating episode {self.env._current_episode_num} ...")
-            episode_info = {'reward': []}
-            obs = self.env.reset()
-            img_path = self.env.save_image(obs)
-            video_path = img_path[:-4] + '.mp4'
-            frames = [obs['head_rgb']]
-            
-            save_video_from_rgb_images(frames, video_path)
-            
-            user_instruction = self.env.episode_language_instruction
-            print(f"Instruction: {user_instruction}")
-            self.planner.reset()
-            done = False
-            
-            while not done:
-                # try:
-                    video_path = img_path[:-4] + '.mp4'
-                    save_video_from_rgb_images(frames, video_path)
-                    action, reasoning = self.planner.act_video(video_path, user_instruction)
-                    frames = []
-                    print(f"Planner Output Action: {action}")
-                    reasoning = json.loads(reasoning)
-                    if type(action) == list:
-                        for i, action_single in enumerate( action[:min(self.env._max_episode_steps - self.env._current_step + 1, len(action))] ):
-                            if i==0:
-                                obs, reward, done, info = self.env.step(action_single,reasoning,1)
-                            else:
-                                obs, reward, done, info = self.env.step(action_single,reasoning,0)
-                            print(f"Executed action: {action_single}, Task success: {info['task_success']}")
-                            logger.debug(f"reward: {reward}")
-                            logger.debug(f"terminate: {done}\n")
-                            self.planner.update_info(info)
-                            img_path = self.env.save_image(obs)
-                            frames.append(obs['head_rgb'])
-                            
-                            episode_info['reward'].append(reward)
-
-                            if done==True:
-                                break
-
-                            if info['last_action_success'] == 0:
-                                # stop for replanning
-                                print('invalid action, start replanning')
-                                break
-                    else:
-                        obs, reward, done, info = self.env.step(action, reasoning, 1)
-                        print(f"Executed action: {action}, Task success: {info['task_success']}")
-                        logger.debug(f"reward: {reward}")
-                        logger.debug(f"terminate: {done}\n")
-                        self.planner.update_info(info)
-                        img_path = self.env.save_image(obs)
-                        video_path = img_path[:-4] + '.mp4'
-                        frames = [obs['head_rgb']]
-                        save_video_from_rgb_images(frames, video_path)
-                        episode_info['reward'].append(reward)
-                        frames = []
-                    
-                # except Exception as e:
-                #     sleep(1)
-                #     print(e)
-                #     print("retrying...")
-
-            # evaluation metrics
-            episode_info['instruction'] = user_instruction
-            episode_info['reward'] = np.mean(episode_info['reward'])
-            episode_info['task_success'] = info['task_success']
-            # episode_info["task_progress"] = info['task_progress']
-            # episode_info['subgoal_reward'] = info['subgoal_reward']
-            episode_info['num_steps'] = info["env_step"]
-            episode_info['planner_steps'] = self.planner.planner_steps
-            episode_info['planner_output_error'] = self.planner.output_json_error
-            # episode_info["num_invalid_actions"] = info["num_invalid_actions"]
-            # episode_info["num_invalid_action_ratio"] = info["num_invalid_actions"] / info["env_step"]
-            episode_info["episode_elapsed_seconds"] = info["episode_elapsed_seconds"]
-            self.save_episode_metric(episode_info)
-            progress_bar.update()
-            
     def check_config_valid(self):
         if self.config['multiview'] + self.config['multistep'] + self.config['visual_icl'] + self.config['chat_history'] > 1:
             raise ValueError("Only one of multiview, multistep, visual_icl, chat_history can be enabled at a time.")
@@ -303,7 +221,7 @@ if __name__ == '__main__':
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 
-              'eval_sets': ['base', 'common_sense', 'complex_instruction', 'visual_appearance', 'long_horizon'], 
+              'eval_sets': ['long_horizon'], 
               'chat_history': False, 
               'n_shots': 3, 
               'multiview': False, 
@@ -318,6 +236,3 @@ if __name__ == '__main__':
     
     evaluator = EB_NavigationEvaluator(config)
     evaluator.evaluate_main()
-
-
-

@@ -66,7 +66,8 @@ class EB_AlfredEvaluator():
             model_type = self.config.get('model_type', 'remote')
             self.planner = VLMPlanner(self.model_name, model_type, self.env.language_skill_set, system_prompt, examples, n_shot=self.config['n_shots'], 
                                             obs_key='head_rgb', chat_history=self.config['chat_history'], language_only=self.config['language_only'],
-                                            use_feedback=self.config.get('env_feedback', True), multistep=self.config.get('multistep', 0), tp=self.config.get('tp', 1))
+                                            use_feedback=self.config.get('env_feedback', True), multistep=self.config.get('multistep', 0), tp=self.config.get('tp', 1),
+                                            sam2_config_path=self.sam2_config_path, sam2_checkpoint_path=self.sam2_checkpoint_path)
 
             self.evaluate()
             average_json_values(os.path.join(self.env.log_path, 'results'), output_file='summary.json')
@@ -80,6 +81,7 @@ class EB_AlfredEvaluator():
             episode_info = {'reward': [], 'num_invalid_actions': 0, 'empty_plan': 0}
             obs = self.env.reset()
             img_path = self.env.save_image(obs)
+            current_frames = [obs['head_rgb']]
             user_instruction = self.env.episode_language_instruction
             print(f"Instruction: {user_instruction}")
 
@@ -89,7 +91,7 @@ class EB_AlfredEvaluator():
             done = False
             while not done:
                 try: 
-                    action, reasoning = self.planner.act(img_path, user_instruction)
+                    action, reasoning = self.planner.act(img_path, current_frames, user_instruction)
                     print(f"Planner Output Action: {action}")
                     if action == -2: # empty plan stop here
                         episode_info['empty_plan'] = 1
@@ -126,8 +128,10 @@ class EB_AlfredEvaluator():
                     
                     # mutiple actions
                     if type(action) == list:
+                        current_frames = []
                         for action_single in action[:min(self.env._max_episode_steps - self.env._current_step, len(action))]:
                             obs, reward, done, info = self.env.step(action_single, reasoning=reasoning)
+                            current_frames.append(obs['head_rgb'])
                             action_str = action_single if type(action_single) == str else self.env.language_skill_set[action_single]
                             print(f"Executed action: {action_str}, Task success: {info['task_success']}")
                             logger.debug(f"reward: {reward}")
@@ -142,6 +146,7 @@ class EB_AlfredEvaluator():
                                 break
                     else: # single action
                         obs, reward, done, info = self.env.step(action, reasoning=reasoning)
+                        current_frames = [obs['head_rgb']]
                         action_str = action if type(action) == str else self.env.language_skill_set[action]
                         print(f"Executed action: {action_str}, Task success: {info['task_success']}")
                         logger.debug(f"reward: {reward}")

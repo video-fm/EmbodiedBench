@@ -252,7 +252,8 @@ class VLMPlanner():
         return action, out
 
 
-    def act(self, observation, user_instruction):
+    def act(self, observation, images, user_instruction):
+        height, width = images[0].shape[0], images[0].shape[1]
         if type(observation) == dict:
             obs = observation[self.obs_key]
         else:
@@ -265,6 +266,21 @@ class VLMPlanner():
 
         if self.model_type == 'custom':
             return self.act_custom(prompt, obs) 
+
+        ####################################
+        # SAM2
+        sg_message = self.get_message(obs, scene_graph_prompt)
+        try:
+            out = self.model.respond(sg_message, get_scene_graph=True)
+        except Exception as e:
+            print(e)
+            if 'qwen' in self.model_name:
+                return -2,'''{"visual_state_description":"qwen model generate empty action due to inappropriate content check", "reasoning_and_reflection":"invalid json, random action",
+                   "language_plan":"invalid json, random action"}'''
+        
+        sg_keywords = json.loads(out)['scene_graph_entities']
+        
+        ####################################
 
         if len(self.episode_messages) == 0:
              self.episode_messages = self.get_message(obs, prompt)

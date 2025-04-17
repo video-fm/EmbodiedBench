@@ -309,8 +309,8 @@ if __name__ == '__main__':
               'exp_name': 'multistep_baseline_gd', 
               'visual_icl': False, 
               'tp': 4, 
-              'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
-              'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',}
+              'gd_config_path': '/workspace/jayj/EB-LASER/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
+              'gd_checkpoint_path': '/workspace/jayj/EB-LASER/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',}
     
     evaluator = EB_NavigationEvaluator(config)
     evaluator.evaluate_main()

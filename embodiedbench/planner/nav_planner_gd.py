@@ -23,7 +23,7 @@ template_lang = template_lang
 MESSAGE_WINDOW_LEN = 5
 
 import sys
-sys.path.append("/home/jianih/research/GroundingDINO")
+sys.path.append("/workspace/jayj/EB-LASER/GroundingDINO")
 from groundingdino.util.inference import Model as gd_Model
 from groundingdino.util.inference import load_image as load_gd_image
 from groundingdino.util.utils import get_phrases_from_posmap

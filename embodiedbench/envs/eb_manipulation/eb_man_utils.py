@@ -1,9 +1,19 @@
 import os
 from typing import List
 import numpy as np
+import torch
+import torchvision
+import matplotlib.pyplot as plt
+
+import sys
+sys.path.append("/home/mkuo/research/EmbodiedBench/sam2")
+from sam2.build_sam import build_sam2
+from sam2.sam2_image_predictor import SAM2ImagePredictor
+from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 from pyrep.objects import VisionSensor
 from ultralytics import YOLO
 import cv2
+from PIL import Image
 from scipy.spatial.transform import Rotation
 
 SCENE_BOUNDS = np.array([-0.3, -0.5, 0.6, 0.7, 0.5, 1.6])
@@ -12,6 +22,17 @@ VOXEL_SIZE = 100
 CAMERAS = ['front', 'left_shoulder', 'right_shoulder', 'wrist']
 USE_GENERAL_OBJECT_NAMES = True
 object_detection_model = YOLO("yolo11n.pt")
+
+
+## SAM2 Setup
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+sam2_checkpoint = "sam2/checkpoints/sam2.1_hiera_large.pt"
+model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
+# model_cfg = "sam2.1/sam2.1_hiera_l.yaml"
+sam2_model = build_sam2(model_cfg, sam2_checkpoint, device=device)
+mask_generator = SAM2AutomaticMaskGenerator(model=sam2_model)
+predictor = SAM2ImagePredictor(sam2_model)
+print("Finished setting up SAM2")
 
 # From https://github.com/stepjam/RLBench/blob/master/rlbench/backend/utils.py
 def point_to_voxel_index(
@@ -26,7 +47,7 @@ def point_to_voxel_index(
             np.int32), dims_m_one)
 
     return voxel_indicy.reshape(point.shape)
-rr
+
 def discrete_euler_to_quaternion(discrete_euler):
     euluer = (discrete_euler * ROTATION_RESOLUTION) - 180
     return Rotation.from_euler('xyz', euluer, degrees=True).as_quat()
@@ -201,7 +222,55 @@ def increase_bbox(bbox, scale_factor=1):
 
     return [new_x1, new_y1, new_x2, new_y2]
 
-def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, camera_intrinsics_list):
+
+def extract_bboxes_from_auto_masks(masks):
+    bboxes = []
+    for mask in masks:
+        bbox = mask['bbox']
+        bboxes.append([bbox[0], bbox[1], bbox[0] + bbox[2], bbox[1] + bbox[3]])
+    return bboxes
+
+
+# def sam2_bbox(image_path, pixel_points_2D):
+#     image = Image.open(image_path)
+#     image = np.array(image.convert("RGB"))
+#     predictor.set_image(image)
+
+#     labels = np.ones((pixel_points_2D.shape[0], 1)) # Labels should be shape (num_points,)
+#     masks, scores, logits = predictor.predict(
+#         point_coords=pixel_points_2D,
+#         point_labels=labels,
+#         multimask_output=False
+#     )
+
+#     bounding_boxes = []
+#     for mask in masks:
+#         mask = mask.squeeze(0)
+#         bounding_boxes.append(mask_to_bbox(mask))
+
+#     masks_np = [m for m in masks]
+#     return bounding_boxes, masks_np
+
+def sam2_auto_bbox(image_path):
+    image = Image.open(image_path)
+    image = np.array(image.convert("RGB"))
+    predictor.set_image(image)
+
+    masks = mask_generator.generate(image)
+    bounding_boxes = extract_bboxes_from_auto_masks(masks)
+    return bounding_boxes, masks
+
+
+def mask_to_bbox(mask):
+    rows, cols = np.where(mask)
+    if rows.size == 0 or cols.size == 0:
+        return None  # No object found
+    top, left = rows.min(), cols.min()
+    bottom, right = rows.max(), cols.max()
+    return [left, top, right, bottom]  # (x_min, y_min, x_max, y_max)
+
+
+def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, camera_intrinsics_list, use_sam=False, use_masks=False):
     image_save_path_list = []
     for input_image_path, camera_extrinsics, camera_intrinsics in zip(image_path_list, camera_extrinsics_list, camera_intrinsics_list):
         T_inv = np.linalg.inv(camera_extrinsics)
@@ -209,13 +278,20 @@ def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, c
         tvec = T_inv[:3, 3]
         pixel_points_2D, _ = cv2.projectPoints(np.array(world_points), rvec, tvec, camera_intrinsics, np.zeros(4))
 
-        # get the bounding boxes using YOLO
-        results = object_detection_model.predict(source=input_image_path, conf=0.0001, line_width=1, verbose=False)
-        predicted_boxes = results[0].boxes.xyxy
-        image_bgr = cv2.imread(input_image_path, cv2.IMREAD_COLOR)
+        if use_sam:
+            # get the bounding boxes using SAM
+            # predicted_boxes, masks = sam2_bbox(input_image_path, pixel_points_2D)
+            predicted_boxes, masks = sam2_auto_bbox(input_image_path)
+            print("Using SAM to get the bounding boxes")
+        else:
+            # get the bounding boxes using YOLO
+            results = object_detection_model.predict(source=input_image_path, conf=0.0001, line_width=1, verbose=False)
+            predicted_boxes = results[0].boxes.xyxy
 
+        image_bgr = cv2.imread(input_image_path, cv2.IMREAD_COLOR)
         box_id = 0
         # find the closest bounding box and save the current index
+        object_masks = []
         text_positions = []
         for point in pixel_points_2D:
             x, y = point[0]
@@ -230,25 +306,70 @@ def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, c
                     min_idx = i
             if min_dist > 400: # if the distance is too large, skip this point
                 continue
-            increased_box = increase_bbox(predicted_boxes[min_idx], 1.2)
-            center_pixel = image_bgr[(increased_box[1] + increased_box[3]) // 2, (increased_box[0] + increased_box[2]) // 2]
-            # center_pixel = tuple(map(int, center_pixel))
-            center_pixel = (0, 0, 255)
-            cv2.rectangle(image_bgr, (int(increased_box[0]), int(increased_box[1])), (int(increased_box[2]), int(increased_box[3])), center_pixel, 1)
-            text_position = (int(increased_box[0]) + 20, int(increased_box[1]) - 10)
-            for pos in text_positions:
-                if abs(pos[0] - text_position[0]) < 10 and abs(pos[1] - text_position[1]) < 10:
-                    text_position = (int(increased_box[0]) + 10, int(increased_box[1]) - 10)
-            text_positions.append(text_position)
-            cv2.putText(image_bgr,
-                        str(box_id + 1),  # Box number starting from 1
-                        text_position,
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.4,  # Font scale
-                        center_pixel,  # Green color for the text
-                        1,
-                        cv2.LINE_AA)
-            box_id += 1
+
+            if use_masks:
+                object_masks.append(masks[min_idx]['segmentation'])
+
+            else:
+                increased_box = increase_bbox(predicted_boxes[min_idx], 1.2)
+                center_pixel = image_bgr[(increased_box[1] + increased_box[3]) // 2, (increased_box[0] + increased_box[2]) // 2]
+                # center_pixel = tuple(map(int, center_pixel))
+                center_pixel = (0, 0, 255)
+                cv2.rectangle(image_bgr, (int(increased_box[0]), int(increased_box[1])), (int(increased_box[2]), int(increased_box[3])), center_pixel, 1)
+                text_position = (int(increased_box[0]) + 20, int(increased_box[1]) - 10)
+                for pos in text_positions:
+                    if abs(pos[0] - text_position[0]) < 10 and abs(pos[1] - text_position[1]) < 10:
+                        text_position = (int(increased_box[0]) + 10, int(increased_box[1]) - 10)
+                text_positions.append(text_position)
+                cv2.putText(image_bgr,
+                            str(box_id + 1),  # Box number starting from 1
+                            text_position,
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.4,  # Font scale
+                            center_pixel,  # Green color for the text
+                            1,
+                            cv2.LINE_AA)
+                box_id += 1
+
+        if use_masks:
+            mask_id = 0
+            text_positions = []
+
+            for mask in object_masks:
+                if mask is None: continue
+                mask_uint8 = mask.astype(np.uint8)
+
+                if mask_uint8.ndim != 2 and mask_uint8.shape[0] == 1:
+                    mask_uint8 = mask_uint8.squeeze(0)
+
+
+                contours, _ = cv2.findContours(mask_uint8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+                if not contours:
+                    print("Warning: No contours found for a mask.")
+                    continue
+
+                contour_color = (0, 0, 255)
+                cv2.drawContours(image_bgr, contours, -1, contour_color, 2)
+
+                x, y, w, h = cv2.boundingRect(contours[0])
+                text_position = (x + w // 2, y - 10)
+
+                for pos in text_positions:
+                    if abs(pos[0] - text_position[0]) < 30 and abs(pos[1] - text_position[1]) < 15:
+                        text_position = (text_position[0], text_position[1] - 20)
+                text_positions.append(text_position)
+
+                cv2.putText(image_bgr,
+                            str(mask_id + 1),
+                            text_position,
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.4,
+                            contour_color,
+                            1,
+                            cv2.LINE_AA)
+                mask_id += 1
+
         base, ext = os.path.splitext(input_image_path)
         image_save_path = f"{base}_annotated{ext}"
 

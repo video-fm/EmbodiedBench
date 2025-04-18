@@ -26,7 +26,7 @@ def point_to_voxel_index(
             np.int32), dims_m_one)
 
     return voxel_indicy.reshape(point.shape)
-
+rr
 def discrete_euler_to_quaternion(discrete_euler):
     euluer = (discrete_euler * ROTATION_RESOLUTION) - 180
     return Rotation.from_euler('xyz', euluer, degrees=True).as_quat()
@@ -40,7 +40,7 @@ def get_continous_action_from_discrete(discrete_action):
     res = (bounds[3:] - bounds[:3]) / VOXEL_SIZE
     attention_coordinate = bounds[:3] + res * trans_indicies + res / 2
     quat = discrete_euler_to_quaternion(rot_and_grip_indicies)
-    
+
     continuous_action = np.concatenate([
         attention_coordinate,
         quat,
@@ -89,7 +89,7 @@ def draw_xyz_coordinate(image_path, resolution):
 
         # Save the image with the axes
         cv2.imwrite(image_path, image)
-    
+
     elif resolution == 300:
         origin = (38, 142)  # Adjust based on the table's position in the image
 
@@ -217,7 +217,7 @@ def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, c
         box_id = 0
         # find the closest bounding box and save the current index
         text_positions = []
-        for point in pixel_points_2D: 
+        for point in pixel_points_2D:
             x, y = point[0]
             min_dist = float('inf')
             min_idx = -1
@@ -240,10 +240,10 @@ def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, c
                 if abs(pos[0] - text_position[0]) < 10 and abs(pos[1] - text_position[1]) < 10:
                     text_position = (int(increased_box[0]) + 10, int(increased_box[1]) - 10)
             text_positions.append(text_position)
-            cv2.putText(image_bgr, 
+            cv2.putText(image_bgr,
                         str(box_id + 1),  # Box number starting from 1
-                        text_position, 
-                        cv2.FONT_HERSHEY_SIMPLEX, 
+                        text_position,
+                        cv2.FONT_HERSHEY_SIMPLEX,
                         0.4,  # Font scale
                         center_pixel,  # Green color for the text
                         1,
@@ -255,7 +255,7 @@ def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, c
         # save the image with the bounding boxes
         cv2.imwrite(image_save_path, image_bgr)
         image_save_path_list.append(image_save_path)
-    
+
     return image_save_path_list
 
 ####### Generate object information for the initial observation
@@ -295,7 +295,7 @@ def form_obs_for_input(
     mask_dict,
     mask_id_to_real_name,
     point_cloud_dict):
-    
+
     # convert object id to char and average and discretize point cloud per object
     uniques = np.unique(np.concatenate(list(mask_dict.values()), axis=0))
     real_name_to_avg_coord = {}
@@ -323,7 +323,7 @@ def form_obs_for_input(
             # implicit_name_to_avg_coord[f"{i}"] = value
             i += 1
         real_name_to_avg_coord = implicit_name_to_avg_coord
-    
+
     # Sort the objects based on the y-coordinate
     sorted_indices = sorted(range(len(all_avg_point_list)), key=lambda i: all_avg_point_list[i][1])
     all_avg_point_list = [all_avg_point_list[i] for i in sorted_indices]
@@ -340,16 +340,16 @@ def form_object_coord_for_input(obs, task_class, camera_types):
     mask_dict = _get_mask_dict_for_input(obs)
 
     task_handler = TASK_HANDLERS[task_class]()
-    sim_name_to_real_name = task_handler.sim_name_to_real_name 
+    sim_name_to_real_name = task_handler.sim_name_to_real_name
     mask_id_to_real_name = {mask_id: sim_name_to_real_name[name] for mask_id, name in mask_id_to_sim_name.items()
                         if name in sim_name_to_real_name}
-    avg_coord, all_avg_point_list = form_obs_for_input(mask_dict, mask_id_to_real_name, point_cloud_dict)            
+    avg_coord, all_avg_point_list = form_obs_for_input(mask_dict, mask_id_to_real_name, point_cloud_dict)
     return avg_coord, all_avg_point_list, camera_extrinsics_list, camera_intrinsics_list
 
 class base_task_handler:
     def __init__(self, sim_name_to_real_name):
         self.sim_name_to_real_name = sim_name_to_real_name
-    
+
 class pick_cube_shape(base_task_handler):
     def __init__(self):
         sim_name_to_real_name = {

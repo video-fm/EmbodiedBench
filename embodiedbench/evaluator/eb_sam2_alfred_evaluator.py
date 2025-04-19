@@ -4,11 +4,15 @@ from tqdm import tqdm
 import time
 import json
 from embodiedbench.envs.eb_alfred.EBAlfEnv import EBAlfEnv, ValidEvalSets
-from embodiedbench.planner.vlm_planner import VLMPlanner
+from embodiedbench.planner.vlm_planner_sam2 import VLMPlanner
 from embodiedbench.evaluator.summarize_result import average_json_values
 from embodiedbench.evaluator.evaluator_utils import load_saved_data, update_config_with_args
 from embodiedbench.evaluator.config.system_prompts import alfred_system_prompt
 from embodiedbench.main import logger
+
+# from embodiedbench.evaluator.config.eb_navigation_example import examples, scene_graph_examples
+import sys
+sys.path.insert(1, "/workspace/jayj/EB-LASER/sam2/sam2")
 
 example_path = os.path.join(os.path.dirname(__file__), 'config/alfred_examples.json')
 exploration_example_path = os.path.join(os.path.dirname(__file__), 'config/alfred_long_horizon_examples.json')
@@ -46,6 +50,12 @@ class EB_AlfredEvaluator():
             json.dump(episode_info, f, ensure_ascii=False)
 
     def evaluate_main(self):
+
+        ######################
+        # SAM2
+        # TODO: must define scene_graph_examples & scene_graph_prompts. tentatively set to ""
+        ######################
+        scene_graph_examples = ""
         valid_eval_sets = self.config.get('eval_sets', ValidEvalSets)
         valid_eval_sets = list(valid_eval_sets)
         if type(valid_eval_sets) == list and len(valid_eval_sets) == 0:
@@ -67,7 +77,7 @@ class EB_AlfredEvaluator():
             self.planner = VLMPlanner(self.model_name, model_type, self.env.language_skill_set, system_prompt, examples, n_shot=self.config['n_shots'], 
                                             obs_key='head_rgb', chat_history=self.config['chat_history'], language_only=self.config['language_only'],
                                             use_feedback=self.config.get('env_feedback', True), multistep=self.config.get('multistep', 0), tp=self.config.get('tp', 1),
-                                            sam2_config_path=self.sam2_config_path, sam2_checkpoint_path=self.sam2_checkpoint_path)
+                                            sam2_config_path=self.sam2_config_path, sam2_checkpoint_path=self.sam2_checkpoint_path, scene_graph_examples=scene_graph_examples)
 
             self.evaluate()
             average_json_values(os.path.join(self.env.log_path, 'results'), output_file='summary.json')
@@ -200,20 +210,21 @@ if __name__ == '__main__':
 
     config = {
         'model_name': 'gpt-4o-mini', # 'Qwen/Qwen2-VL-7B-Instruct',
-        'n_shots': 10,
+        # 'model_name': 'OpenGVLab/InternVL2_5-38B',        
+        'n_shots': 3,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'vlm_10shots_imgsize500',
-        'chat_history': 0, 
+        'exp_name': 'vlm_10shots_imgsize500-sam2-debug',
+        'chat_history': 0,
         'detection_box': 0,
         'eval_sets': ['base'], 
         'selected_indexes': [], 
-        'multistep':0, 
-        'resolution': 500, 
+        'multistep': True, 
+        'resolution': 500,
         'env_feedback': 1,
         'tp': 1,
-        'sam2_config_path': "/workspace/jayj/EB-LASER/sam2/configs/sam2.1/sam2.1_hiera_b+.yaml",
+        'sam2_config_path': "sam2.1_hiera_b+.yaml",
         'sam2_checkpoint_path': "/workspace/jayj/EB-LASER/sam2/checkpoints/sam2.1_hiera_base_plus.pt",
     }
 

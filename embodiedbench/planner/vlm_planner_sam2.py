@@ -21,13 +21,187 @@ from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 from sam2.build_sam import build_sam2_video_predictor
 import cv2
 import argparse
-###################
+import hydra
+import matplotlib.pyplot as plt
+hydra.core.global_hydra.GlobalHydra.instance().clear()
+hydra.initialize(config_path="../../../sam2/sam2/configs/sam2.1") # WHY MUST BE RELATIVE?!
 
+def show_mask(mask, ax, obj_id=None, det_class=None, random_color=False):
+    if random_color:
+        color = np.concatenate([np.random.random(3), np.array([0.8])], axis=0)
+    else:
+        cmap = plt.get_cmap("gist_rainbow")
+        cmap_idx = 0 if obj_id is None else obj_id
+        color = list(cmap((cmap_idx * 47) % 256))
+        color[3] = 0.5
+        color = np.array(color)
+        
+    mask_image = mask * color.reshape(1, 1, -1)
+
+    # draw a box around the mask with the det_class as the label
+    if not det_class is None:
+        
+        # Find the bounding box coordinates
+        y_indices, x_indices, _ = np.where(mask > 0)
+        if y_indices.size > 0 and x_indices.size > 0:
+            x_min, x_max = x_indices.min(), x_indices.max()
+            y_min, y_max = y_indices.min(), y_indices.max()
+            rect = plt.Rectangle(
+                (x_min, y_min),
+                x_max - x_min,
+                y_max - y_min,
+                linewidth=1.5,
+                edgecolor=color[:3],
+                facecolor="none",
+                alpha=color[3]
+            )
+            ax.add_patch(rect)
+            ax.text(
+                x_min,
+                y_min - 5,
+                f"{det_class}",
+                color="white",
+                fontsize=6,
+                backgroundcolor=np.array(color),
+                alpha=1
+            )
+            
+    ax.imshow(mask_image)
+
+def save_mask_one_image(frame_image, masks, save_path):
+    # Create a figure and axis
+    fig, ax = plt.subplots(1, figsize=(6, 6))
+
+    # Display the frame image
+    ax.imshow(frame_image)
+    ax.axis('off')
+
+    if type(masks) == list:
+        masks = {i: mask for i, mask in enumerate(masks)}
+        
+    # Add the bounding boxes
+    for obj_id, mask in masks.items():
+        show_mask(mask, ax, obj_id=obj_id, det_class=None, random_color=False)
+
+    # Show the plot
+    plt.savefig(save_path)
+    plt.close()
+
+
+def save_mask_contours_one_image(frame_image, masks, save_path):
+    if type(masks) == list:
+        masks = {i: mask for i, mask in enumerate(masks)}
+    contour_img = frame_image.copy()
+
+    # Loop through all masks and draw their contours
+    for obj_id, mask in masks.items():
+
+        segmentation = mask.astype(np.uint8)
+        contours, _ = cv2.findContours(segmentation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cv2.drawContours(contour_img, contours, -1, color=(0, 255, 0), thickness=2)
+
+    # Save the result
+    cv2.imwrite(save_path, cv2.cvtColor(contour_img, cv2.COLOR_RGB2BGR))
+
+
+###################
+###################
+## Grounding DINO
+
+import sys
+sys.path.append("/workspace/jayj/EB-LASER/GroundingDINO")
+from groundingdino.util.inference import Model as gd_Model
+from groundingdino.util.inference import load_image as load_gd_image
+from groundingdino.util.utils import get_phrases_from_posmap
+import torch
+import math
+
+def preprocess_caption(caption: str) -> str:
+    result = caption.lower().strip()
+    return result if result.endswith(".") else result + "."
+
+def get_valid_bbox_val(v, b):
+    return min(max(0, math.floor(v)), b)
+
+def post_process_detections(det, classes):
+    detections = det[0]
+    class_ids = [0 if class_id is None else class_id for class_id in detections.class_id]
+    det.class_names = [classes[class_id] for class_id in class_ids]
+    detections.xyxy = np.concatenate((detections.xyxy, det.xyxy), axis=0)
+    detections.class_names = detections.class_names + det.class_names
+    return detections
+
+def list_depth(lst):
+    """Calculates the depth of a nested list."""
+
+    if not (isinstance(lst, list) or isinstance(lst, torch.Tensor)):
+        return 0
+    elif (isinstance(lst, torch.Tensor) and lst.shape == torch.Size([])) or (isinstance(lst, list) and len(lst) == 0):
+        return 1
+    else:
+        return 1 + max(list_depth(item) for item in lst)
+    
+def normalize_prompt(points, labels):
+    if list_depth(points) == 3: 
+        points = torch.stack([p.unsqueeze(0) for p in points])
+        labels = torch.stack([l.unsqueeze(0) for l in labels])
+    return points, labels
+
+# modify this function to take in a bbox label and show it
+def show_box(box, ax, object_id, label='hi'):
+    if len(box) == 0:
+        return
+    
+    cmap = plt.get_cmap("gist_rainbow")
+    cmap_idx = 0 if object_id is None else object_id
+    color = list(cmap((cmap_idx * 47) % 256))
+    
+    x0, y0 = box[0], box[1]
+    w, h = box[2] - box[0], box[3] - box[1]
+    ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor=color, facecolor=(0,0,0,0), lw=2))
+    
+    if label is not None:
+        ax.text(x0, y0 - 5, label, color='white', fontsize=10, backgroundcolor=np.array(color[:3]), alpha=color[3])
+    
+    
+def save_prompts_one_image(frame_image, boxes, points, labels, save_path):
+    # Create a figure and axis
+    fig, ax = plt.subplots(1, figsize=(6, 6))
+
+    # Display the frame image
+    ax.imshow(frame_image)
+    ax.axis('off')
+
+    points, labels = normalize_prompt(points, labels)
+    if type(boxes) == torch.Tensor:
+        for object_id, (box, label) in enumerate(zip(boxes, labels)):
+            if box is not None:
+                show_box(box.cpu(), ax, object_id=object_id, label=label)
+    elif type(boxes) == dict:
+        for object_id, box in boxes.items():
+            if box is not None:
+                show_box(box.cpu(), ax, object_id=object_id)
+    elif type(boxes) == list and len(boxes) == 0:
+        pass
+    else:
+        raise Exception()
+    
+    for object_id, (point_ls, label_ls) in enumerate(zip(points, labels)):
+        if not len(point_ls) == 0:
+            show_points(point_ls.cpu(), label_ls.cpu(), ax, object_id=object_id)
+        
+    # Show the plot
+    plt.savefig(save_path)
+    plt.close()
+
+###################
 
 class VLMPlanner():
     def __init__(self, model_name, model_type, actions, system_prompt, examples, n_shot=0, obs_key='head_rgb', 
                 chat_history=False, language_only=False, use_feedback=True, multistep=0, tp=1, 
-                scene_graph_examples = '', sam2_config_path = '', sam2_checkpoint_path = '', kwargs={}):
+                scene_graph_examples = '', sam2_config_path = '', sam2_checkpoint_path = '', 
+                gd_config_path='', gd_checkpoint_path='', kwargs={}):
+
         self.model_name = model_name
         self.obs_key = obs_key
         self.system_prompt = system_prompt
@@ -43,14 +217,6 @@ class VLMPlanner():
 
         #####################
         # SAM2
-        self.scene_graph_examples = scene_graph_examples
-
-        # Prompt is tentative
-        self.scene_graph_prompt = f'''## You are a robot operating in a home. You are given an image and observe the environment for performing the given task. \
-            The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'}\
-            You are supposed to output in JSON.'''
-    
-        self.grounding_model.model = self.grounding_model.model.to("cuda:0")
         sam2 = build_sam2(sam2_config_path, sam2_checkpoint_path, device="cuda:0", apply_postprocessing=False)
         sam_target_fps = 1
         prompt_only = True
@@ -69,7 +235,22 @@ class VLMPlanner():
         )
 
         #####################
-        
+
+        #####################
+        ## Grounding DINO
+        self.scene_graph_examples = scene_graph_examples[:n_shot]
+
+        self.scene_graph_prompt = f'''## You are a robot operating in a home. You are given an image and observe the environment for performing the given task. \
+            The input given to you is {'a first person view observation'}\
+            You are supposed to output in JSON.'''
+        self.grounding_model = gd_Model(
+            model_config_path=gd_config_path, 
+            model_checkpoint_path=gd_checkpoint_path
+        )
+
+        self.grounding_model.model = self.grounding_model.model.to("cuda:0")
+        #####################
+
         self.use_feedback = use_feedback
         self.multistep = multistep
         self.planner_steps = 0
@@ -160,11 +341,14 @@ class VLMPlanner():
             if type(image) == str:
                 image_path = image 
             else:
+                # if isinstance(image, str)
                 image_path = './evaluation/tmp_{}.png'.format(len(messages)//2)
+                print("Image:", image)
                 cv2.imwrite(image_path, image)
 
             if self.multistep: # handle multiple images
-                ind = int(image_path.split('step_')[-1].strip('.png'))
+                i = image_path.split('step_')[-1].strip('.png')
+                ind = int(i) if i.isdigit() else int(i.strip('_bbox'))
                 content = [{"type": "text", "text": prompt}]
                 for i in range(max(ind - self.multistep + 1, 0), ind +1):
                     temp_path = ''.join(image_path.split('step_')[:-1])+ f'step_{str(i)}.png'
@@ -251,9 +435,62 @@ class VLMPlanner():
         self.planner_steps += 1
         return action, out
 
+    def predict_sam2(self, image, classes):
+        """
+        Dealing with a single image
+        1. Preprocess "classes" to be able to fed into SAM2 as prompt
+        2. receive the outputs from SAM2
+
+        Identify image data type
+
+        """
+        pass
+
+    def predict_gd(self, image, classes, box_threshold=0.25, text_threshold=0.3):
+        caption = ". ".join(classes)
+        processed_caption = preprocess_caption(caption)
+        processed_image = self.grounding_model.preprocess_image(image_bgr=image).to(self.grounding_model.device)
+
+        with torch.no_grad():
+            outputs = self.grounding_model.model(processed_image.unsqueeze(0), captions=processed_caption)
+
+        prediction_logits = outputs["pred_logits"].cpu().sigmoid()[0]  # (batch_size, nq, 256)
+        prediction_boxes = outputs["pred_boxes"].cpu()[0]  # (batch_size, nq, 4)
+
+        all_detections = []
+
+        tokenizer = self.grounding_model.model.tokenizer
+
+        mask = prediction_logits.max(dim=1)[0] > box_threshold
+        logits = prediction_logits[mask]  # (n, 256)
+        boxes = prediction_boxes[mask]  # (n, 4)
+
+        tokenized = tokenizer(caption)
+
+    
+        phrases = [
+            get_phrases_from_posmap(logit > text_threshold, tokenized, tokenizer).replace('.', '')
+            for logit in logits
+        ]
+
+        logits = logits.max(dim=1)[0]
+
+        source_h, source_w, _ = image.shape
+        detections = self.grounding_model.post_process_result(
+            source_h=source_h,
+            source_w=source_w,
+            boxes=boxes,
+            logits=logits
+        )
+        class_id = self.grounding_model.phrases2classes(phrases=phrases, classes=classes)
+        detections.class_id = class_id
+        all_detections.append(detections)
+
+        return all_detections
 
     def act(self, observation, images, user_instruction):
         height, width = images[0].shape[0], images[0].shape[1]
+        
         if type(observation) == dict:
             obs = observation[self.obs_key]
         else:
@@ -268,18 +505,54 @@ class VLMPlanner():
             return self.act_custom(prompt, obs) 
 
         ####################################
-        # SAM2
+        # GD + SAM2
+
         sg_message = self.get_message(obs, scene_graph_prompt)
         try:
             out = self.model.respond(sg_message, get_scene_graph=True)
         except Exception as e:
+
             print(e)
             if 'qwen' in self.model_name:
                 return -2,'''{"visual_state_description":"qwen model generate empty action due to inappropriate content check", "reasoning_and_reflection":"invalid json, random action",
                    "language_plan":"invalid json, random action"}'''
-        
-        sg_keywords = json.loads(out)['scene_graph_entities']
-        
+
+        # sg_keywords = json.loads(out)['scene_graph_entities']
+
+        obs = []
+
+        prompt = prompt + f'\n\n The current image height is {height}, width is {width}.'
+
+        for ct, image in enumerate(images):
+            ####################################
+            # Grounding DINO
+            # detections = self.predict_gd(image, sg_keywords, box_threshold=0.25, text_threshold=0.4)
+            # reformated = torch.tensor([(get_valid_bbox_val(x1, width), 
+            #     get_valid_bbox_val(y1, height),
+            #     get_valid_bbox_val(x2, width), 
+            #     get_valid_bbox_val(y2, height))
+            #     for x1, y1, x2, y2 in detections.xyxy])
+            ####################################
+
+            ####################################
+            # SAM2
+            # masks = self.mask_generator.generate(image.copy())
+            masks = [m['segmentation'].reshape(height, width, 1) for m in masks]
+            image_path = observation[-1].split('/') if isinstance(observation, list) else observation.split('/')
+
+            image_dir, image_name = image_path[:-1], image_path[-1]
+            image_name = image_name.split('.')[0]
+            new_image_name = image_name + '_bbox.png'
+            new_image_path = os.path.join(*image_dir, new_image_name)
+
+            # save_mask_one_image(frame_image=image, masks=masks, save_path=new_image_path)
+            save_mask_contours_one_image(frame_image=image, masks=masks, save_path=new_image_path)
+            obs.append(new_image_path)
+            # scene_graph_text += [f"{obj_name}: {obj_box}" for (obj_name, obj_box) in zip(sg_keywords, boxes)]
+            # prompt += f"Its scene graph at frame {ct} is:  {scene_graph_text}."
+
+        if isinstance(obs, list) and len(set(obs)) == 1:
+            obs = obs[0]
         ####################################
 
         if len(self.episode_messages) == 0:

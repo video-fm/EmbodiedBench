@@ -186,18 +186,27 @@ if __name__ == '__main__':
         parser.add_argument('--env_feedback', type=int, help='Set to True to enable environment feedback.')
         parser.add_argument('--tp', type=int, help='number of tensor parallel splits of the model parameters')
         return parser.parse_args()
-
+    os.environ["remote_url"] = "http://0.0.0.0:15236/v1"
+    # 'remote_url'] = 'http://0.0.0.0:15236/v1'
 
     config = {
-        'model_name': 'gpt-4o-mini', # 'Qwen/Qwen2-VL-7B-Instruct',
+        # 'model_name': 'gpt-4o-mini', # 'Qwen/Qwen2-VL-7B-Instruct',
+        'model_name': 'OpenGVLab/InternVL2_5-38B',        
         'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'vlm_10shots_imgsize500',
+        'exp_name': 'vlm_10shots_imgsize500-intervl',
         'chat_history': 0, 
         'detection_box': 0,
-        'eval_sets': ['base'], 
+        'eval_sets': [
+            'base',
+            # 'common_sense',
+            # 'complex_instruction',
+            # 'spatial', 
+            # 'visual_appearance',
+            # 'long_horizon'
+        ], 
         'selected_indexes': [], 
         'multistep':0, 
         'resolution': 500, 
@@ -214,3 +223,10 @@ if __name__ == '__main__':
 
 
 
+"""
+EB-ALFRED eval sets
+ValidEvalSets = [
+    'base', 'common_sense', 'complex_instruction', 'spatial', 
+    'visual_appearance', 'long_horizon'
+    ]
+"""

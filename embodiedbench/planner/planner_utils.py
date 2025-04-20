@@ -28,6 +28,7 @@ The fields in above JSON follows the purpose below:
 !!! When generating content for JSON strings, avoid using any contractions or abbreviated forms (like 's, 're, 've, 'll, 'd, n't) that use apostrophes. Instead, write out full forms (is, are, have, will, would, not) to prevent parsing errors in JSON. Please do not output any other thing more than the above-mentioned JSON, do not include ```json and ```!!!.
 '''
 
+
 template_lang_manip = '''\
 The output json format should be {'visual_state_description':str, 'reasoning_and_reflection':str, 'language_plan':str, 'executable_plan':str}
 The fields in above JSON follows the purpose below:
@@ -44,6 +45,30 @@ The fields in above JSON follows the purpose below:
 2. reasoning_and_reflection: Reason about the overall plan that needs to be taken on the target objects, and reflect on the previous actions taken if available. 
 3. language_plan: A list of natural language actions to achieve the user instruction. Each language action is started by the step number and the language action name. 
 4. executable_plan: A list of discrete actions needed to achieve the user instruction, with each discrete action being a 7-dimensional discrete action.
+5. keep your plan efficient and concise.
+!!! When generating content for JSON strings, avoid using any contractions or abbreviated forms (like 's, 're, 've, 'll, 'd, n't) that use apostrophes. Instead, write out full forms (is, are, have, will, would, not) to prevent parsing errors in JSON. Please do not output any other thing more than the above-mentioned JSON, do not include ```json and ```!!!.
+'''
+
+
+laser_template = '''
+The output json format should be {'target_object_location',  'visual_state_description':str, 'reasoning_and_reflection':str, 'language_plan':str, 'executable_plan':List[{'action_id':int, 'action_name':str}...]}
+The fields in above JSON follows the purpose below:
+1. target_object_location is for the location of the target object in the image,
+2. visual_state_description is for description of current state from the visual image, 
+3. reasoning_and_reflection is for summarizing the history of interactions and any available environmental feedback. Additionally, provide reasoning as to why the last action or plan failed and did not finish the task, 
+4. language_plan is for describing a list of actions to achieve the user instruction. Each action is started by the step number and the action name, 
+5. executable_plan is a list of actions needed to achieve the user instruction, with each action having an action ID and a name.
+6. keep your plan efficient and concise.
+!!! When generating content for JSON strings, avoid using any contractions or abbreviated forms (like 's, 're, 've, 'll, 'd, n't) that use apostrophes. Instead, write out full forms (is, are, have, will, would, not) to prevent parsing errors in JSON. Please do not output any other thing more than the above-mentioned JSON, do not include ```json and ```!!!.
+'''
+
+laser_lang_template = '''
+The output json format should be {'target_object_location',  'visual_state_description':str, 'reasoning_and_reflection':str, 'language_plan':str, 'executable_plan':List[{'action_id':int, 'action_name':str}...]}
+The fields in above JSON follows the purpose below:
+1. target_object_location is for the location of the target object in the image,
+2. reasoning_and_reflection is for summarizing the history of interactions and any available environmental feedback. Additionally, provide reasoning as to why the last action or plan failed and did not finish the task, 
+3. language_plan is for describing a list of actions to achieve the user instruction. Each action is started by the step number and the action name, 
+4. executable_plan is a list of actions needed to achieve the user instruction, with each action having an action ID and a name.
 5. keep your plan efficient and concise.
 !!! When generating content for JSON strings, avoid using any contractions or abbreviated forms (like 's, 're, 've, 'll, 'd, n't) that use apostrophes. Instead, write out full forms (is, are, have, will, would, not) to prevent parsing errors in JSON. Please do not output any other thing more than the above-mentioned JSON, do not include ```json and ```!!!.
 '''

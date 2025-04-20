@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 import json
 from embodiedbench.envs.eb_navigation.EBNavEnv import EBNavigationEnv, ValidEvalSets
-from embodiedbench.planner.nav_planner_gd import EBNavigationPlanner
+from embodiedbench.planner.nav_planner_gd_laser import EBNavigationPlanner
 from embodiedbench.evaluator.summarize_result import average_json_values
 import sys
 import warnings
@@ -12,12 +12,47 @@ import cv2
 
 from time import sleep
 
-from embodiedbench.evaluator.config.system_prompts import eb_navigation_system_prompt
-from embodiedbench.evaluator.config.eb_navigation_example import examples, scene_graph_examples
+from embodiedbench.evaluator.config.system_prompts import eb_laser_navigation_system_prompt
+from embodiedbench.evaluator.config.eb_navigation_example import laser_examples, target_examples
 from embodiedbench.main import logger
 
-system_prompt = eb_navigation_system_prompt
-examples = examples
+import os
+import torch
+import sys
+
+import numpy as np
+
+system_prompt = eb_laser_navigation_system_prompt
+examples = laser_examples
+
+def bbox_to_mask(bbox, frame_height, frame_width):
+    """
+    Converts a bounding box into a binary mask using torch tensors.
+
+    Parameters:
+    - bbox: A list or tuple of bounding box coordinates [xmin, ymin, xmax, ymax].
+    - frame_height: The height of the frame.
+    - frame_width: The width of the frame.
+
+    Returns:
+    - mask: A binary mask of shape (frame_height, frame_width) with dtype torch.bool.
+    """
+    # Create an empty mask with the same dimensions as the frame
+    mask = np.zeros((frame_height, frame_width, 1), dtype=bool)
+    
+    # Extract bounding box coordinates
+    xmin, ymin, xmax, ymax = bbox
+    
+    # Ensure coordinates are integers and within frame boundaries
+    xmin = int(max(0, xmin))
+    ymin = int(max(0, ymin))
+    xmax = int(min(frame_width - 1, xmax))
+    ymax = int(min(frame_height - 1, ymax))
+    
+    # Set the pixels inside the bounding box to True
+    mask[ymin:ymax+1, xmin:xmax+1, :] = True
+    
+    return mask
 
 class EB_NavigationEvaluator():
     def __init__(self, config):
@@ -61,7 +96,7 @@ class EB_NavigationEvaluator():
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
 
             if eval_set == "visual_appearance":
-                selected_indexes = list(range(22, 60))
+                selected_indexes = list(range(0, 60))
             else: 
                 selected_indexes = None
                 
@@ -72,7 +107,7 @@ class EB_NavigationEvaluator():
 
             self.planner = EBNavigationPlanner(model_name=self.model_name, model_type = self.config['model_type'], 
                                            actions = self.env.language_skill_set, system_prompt = system_prompt, 
-                                           examples = examples, scene_graph_examples=scene_graph_examples,
+                                           examples = examples, scene_graph_examples=target_examples,
                                            n_shot=self.config['n_shots'], obs_key='head_rgb', 
                                            chat_history=self.config['chat_history'], language_only=self.config['language_only'], 
                                            multiview=self.config['multiview'], multistep = self.config['multistep'], visual_icl = self.config['visual_icl'],
@@ -98,7 +133,7 @@ class EB_NavigationEvaluator():
             self.planner.reset()
             done = False
             while not done:
-                try:
+                # try:
                     action, reasoning = self.planner.act(img_path, user_instruction)
                     print(f"Planner Output Action: {action}")
                     reasoning = json.loads(reasoning)
@@ -135,10 +170,10 @@ class EB_NavigationEvaluator():
                         img_path = self.env.save_image(obs)
                         episode_info['reward'].append(reward)
 
-                except Exception as e:
-                    sleep(1)
-                    print(e)
-                    print("retrying...")
+                # except Exception as e:
+                #     sleep(1)
+                #     print(e)
+                #     print("retrying...")
 
             # evaluation metrics
             episode_info['instruction'] = user_instruction
@@ -221,14 +256,14 @@ if __name__ == '__main__':
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 
-              'eval_sets': ['visual_appearance', 'long_horizon'], 
+              'eval_sets': ['visual_appearance'], 
               'chat_history': False, 
               'n_shots': 3, 
               'multiview': False, 
               'detection_box': False, 
               'multistep': True, 
               'resolution': 500, 
-              'exp_name': 'multistep_baseline_gd_two_imgs', 
+              'exp_name': 'multistep_baseline_gd_laser_two_imgs', 
               'visual_icl': False, 
               'tp': 4, 
               'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',

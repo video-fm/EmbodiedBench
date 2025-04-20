@@ -82,3 +82,44 @@ vlm_sg_generation_guide={
         },
     "required": ["scene_graph_entities"],
 }
+
+vlm_target_generation_guide = {
+    "type": "object",
+    "description": "Mapping from entity index to its target scene graph components.",
+    "patternProperties": {
+        "^[0-9]+$": {
+            "type": "object",
+            "properties": {
+                "target_name": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "List of names associated with this entity."
+                },
+                "target_attribute": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "List of attributes describing the entity."
+                },
+                "target_relation": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3,
+                        "description": "A relation expressed as [subject, relation, object]."
+                    },
+                    "description": "List of relations involving the entity."
+                }
+            },
+            "required": ["target_name", "target_attribute", "target_relation"]
+        }
+    },
+    "additionalProperties": False
+}

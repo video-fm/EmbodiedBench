@@ -8,7 +8,7 @@ from openai import OpenAI
 import typing_extensions as typing
 import lmdeploy
 from lmdeploy import pipeline, GenerationConfig, PytorchEngineConfig
-from embodiedbench.planner.planner_config.generation_guide import llm_generation_guide, vlm_generation_guide, vlm_sg_generation_guide
+from embodiedbench.planner.planner_config.generation_guide import llm_generation_guide, vlm_generation_guide, vlm_sg_generation_guide, vlm_target_generation_guide
 from embodiedbench.planner.planner_config.generation_guide_manip import llm_generation_guide_manip, vlm_generation_guide_manip
 from embodiedbench.planner.planner_utils import convert_format_2claude, convert_format_2gemini, ActionPlan_1, ActionPlan, ActionPlan_lang, ActionPlan_1_manip, ActionPlan_manip, ActionPlan_lang_manip
 
@@ -91,7 +91,7 @@ class RemoteModel:
             elif "90b-vision-instruct" in self.model_name:
                 return self._call_llama90(message_history)
             elif "OpenGVLab/InternVL" in self.model_name:
-                return self._call_intern38b(message_history)
+                return self._call_intern38b(message_history, get_scene_graph)
             # elif "OpenGVLab/InternVL2_5-38B" in self.model_name:
             #     return self._call_intern38b(message_history)
             # elif "OpenGVLab/InternVL2_5-78B" in self.model_name:
@@ -303,7 +303,7 @@ class RemoteModel:
         out = out.replace('```json', '').replace('```', '')
         return out
     
-    def _call_intern38b(self, message_history):
+    def _call_intern38b(self, message_history, get_scene_graph=False):
 
         # if not self.language_only:
         #     message_history = convert_format_2gemini(message_history)
@@ -319,6 +319,7 @@ class RemoteModel:
                 response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide_manip))
             else:
                 response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide))
+
 
         response = self.model.chat.completions.create(
             model=self.model_name,

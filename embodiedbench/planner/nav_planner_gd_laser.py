@@ -208,7 +208,9 @@ class EBNavigationPlanner():
 
         self.scene_graph_prompt = f'''## You are a robot operating in a home. You are given an image and observe the environment for performing the given task. \
             The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'}\
-            Please extract the most visually identifiable features and ignore the more subtle ones. You are supposed to output in JSON.'''
+            Please extract the most visually identifiable features and ignore the more subtle ones. 
+            Please summarize the object names with a synonym if the descriptions is verbose, for example, substitute "freshly baked baguette" to "loaves", "long gaslight" to "lamp",
+            You are supposed to output in JSON.'''
             
         self.first_prompt = f'''To achieve the task, 1. Reason about the current visual state and your final goal, and 2. Reflect on the effect of previous actions. 3. Summarize how you learn from the Strategy and Examples provided \
 \nAim for about 1-2 actions in this step. !!!Notice: you cannot assess the situation until the whole plan in this planning step is finished executed, so plan accordingly.\
@@ -216,7 +218,7 @@ class EBNavigationPlanner():
 
 The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'} {'and a overhead view of the house where the silver circle represents where you locates (Notice:The part hanging on the outside is your arm, and it is on your right side)' if self.multiview else ''}. Plan accordingly based on the visual observation.
 
-You are supposed to output in JSON.{template_lang if self.language_only else template}'''
+You are supposed to output in JSON.  Note that nested quotes is not allowed. Please use single quote within double quotes properly. {template_lang if self.language_only else template}'''
 
         self.following_prompt = f'''To achieve the task, 1. Reason about the current visual state and your final goal, and 2. Reflect on the effect of previous actions. 3. Summarize how you learn from the Strategy and Examples provided \
 \nAim for about 5-6 actions in this step to be closer to the target object. !!!Notice: you cannot assess the situation until the whole plan in this planning step is finished executed, so plan accordingly.\
@@ -224,7 +226,7 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
 
 The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'} {'and a overhead view of the house where the silver circle represents where you locates (Notice:The part hanging on the outside is your arm, and it is on your right side)' if self.multiview else ''}. Plan accordingly based on the visual observation.
 
-You are supposed to output in JSON.{template_lang if self.language_only else template}'''
+You are supposed to output in JSON. Note that nested quotes is not allowed. Please use single quote within double quotes properly. {template_lang if self.language_only else template}'''
 
         
         if model_type == 'custom':
@@ -533,7 +535,7 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
         relations = list(relations)
         query_objects = related_objects + target_name + ["wall", "door", "cabinet", "stove", "table", "shadow", "other"]
                 
-        prompt = prompt + f'\n\n The current image height is 600, width is 600.'
+        prompt = prompt + f'\n\n The current image height is 500, width is 500.'
 
         # detections = post_process_detections(all_dets, sg_keywords)
 

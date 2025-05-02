@@ -51,7 +51,7 @@ The fields in above JSON follows the purpose below:
 
 
 laser_template = '''
-The output json format should be {'target_object_location',  'visual_state_description':str, 'reasoning_and_reflection':str, 'language_plan':str, 'executable_plan':List[{'action_id':int, 'action_name':str}...]}
+The output json format should be {'target_object_location': str,  'visual_state_description':str, 'reasoning_and_reflection':str, 'language_plan':str, 'executable_plan':List[{'action_id':int, 'action_name':str}...]}
 The fields in above JSON follows the purpose below:
 1. target_object_location is for the location of the target object in the image,
 2. visual_state_description is for description of current state from the visual image, 
@@ -63,7 +63,7 @@ The fields in above JSON follows the purpose below:
 '''
 
 laser_lang_template = '''
-The output json format should be {'target_object_location',  'visual_state_description':str, 'reasoning_and_reflection':str, 'language_plan':str, 'executable_plan':List[{'action_id':int, 'action_name':str}...]}
+The output json format should be {'target_object_location': str,  'visual_state_description':str, 'reasoning_and_reflection':str, 'language_plan':str, 'executable_plan':List[{'action_id':int, 'action_name':str}...]}
 The fields in above JSON follows the purpose below:
 1. target_object_location is for the location of the target object in the image,
 2. reasoning_and_reflection is for summarizing the history of interactions and any available environmental feedback. Additionally, provide reasoning as to why the last action or plan failed and did not finish the task, 

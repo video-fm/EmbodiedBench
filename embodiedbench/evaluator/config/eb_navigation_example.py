@@ -128,7 +128,7 @@ target_examples = [
    
    Visual Description: I can see the floorlamp is at left side in front of me, next to the TVStand. Around me is a Cabinet at my left side.
    
-   Target Entity in JSON: {"target_name": ["floorlamp"], "target_attribute": ["left side"], "target_relation": [("floorlamp", "next to", "TVStand")]}
+   Target Entity in JSON: {"target_name": ["floorlamp"], "target_attribute": ["left side"], "target_relation": [["floorlamp", "next to", "TVStand"]], "related_objects": ["Cabinet", "TVStand"]}
 ''',
 
 '''Human Instruction: Find the rectangular yellowish object with a soft and smooth surface.
@@ -136,7 +136,7 @@ target_examples = [
     Visual Description: At the first image, I can see that the rectangular yellowish object is  with a soft and smooth surface located in my left front direction, placed on a desk. In front of me, slightly to the right, there is a chair blocking my direct path. 
                         At the second image, I can see that the rectangular yellowish object is  with a soft and smooth surface is located in my left front direction, placed on a desk. 
 
-    Target Entity in JSON: {"target_name": ["object"], "target_attribute": ["rectangular", "yellowish", "left front"], "target_relation": [("object", "placed on", "desk")]}
+    Target Entity in JSON: {"target_name": ["object"], "target_attribute": ["rectangular", "yellowish"], "target_relation": [["object", "placed on", "desk"]], "related_objects": ["chair", "desk"]}
 ''', 
 
 ''' Human Instruction: Navigate to the book and be as close as possible.
@@ -144,15 +144,29 @@ target_examples = [
     Visual Description: At the first image, I cannot see the book. 
                         At the second image, I can see the book is directly in front of me, placed on a shelf.
 
-    Target Entity in JSON: {"target_name": ["book"], "target_attribute": [], "target_relation": [("book", "placed on", "shelf")]}
+    Target Entity in JSON: {"target_name": ["book"], "target_attribute": [], "target_relation": [["book", "placed on", "shelf"]], related_objects": ["shelf"]}
 ''', 
 ]
     
 laser_examples = [
 '''
+
 Human Instruction : Navigate to the floorlamp and be as close as possible.
 
-Candidate Target Entities location: [[0, 75, 25, 150], [300, 320, 200, 240]]
+Candidate Target Entities location: 
+image 0: [] <-- This is the current state I am in.
+
+Reasoning and reflection: I cannot see the floorlamp in my current field of view.
+So I will rotate my view ninety degrees to the right only once to find the floorlamp. \
+Executable plans: [[0, Rotate to the right by 90 degrees]]
+
+Environment Feedback: Step 1 is executed successfully;
+
+Human Instruction : Navigate to the floorlamp and be as close as possible.
+
+Candidate Target Entities location: 
+image 0: [] <-- To revert back to this state, I need to rotate 90 degrees to the left.
+image 1: [[0, 75, 25, 150], [300, 320, 200, 240]] <-- This is the current state I am in.
 
 Reasoning and reflection: I can see the floorlmap is at left side in front of me, next to the TVStand. \
 This floorlamp is corresponding to the location [0, 75, 25, 150]. \
@@ -163,7 +177,10 @@ Executable plans: [[0, Move forward by 0.25], [0, Move forward by 0.25]]
 
 Environment Feedback: Step 1 is executed successfully; Step 2 is executed successfully;
 
-Candidate Target Entities location: [[0, 95, 15, 170], [320, 320, 100, 140]]
+Candidate Target Entities location: 
+image 0: [] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 1: [[0, 75, 25, 150], [300, 320, 200, 240]] <--  As I can see the target object right now, I do not need to revert back to this state.
+image 2: [[0, 95, 15, 170], [320, 320, 100, 140]] <-- This is the current state I am in.
 
 Reasoning and reflection: I can see now I get closer to the floorlamp. 
 This floorlamp is corresponding to the location[0, 95, 15, 170]. \
@@ -173,7 +190,10 @@ Executable plans: [[0, Move forward by 0.25], [3, Move leftward by 0.25], [0, Mo
 
 Environment Feedback: Step 3 is executed successfully; Step 4 is executed successfully; Step 5 is executed successfully; Step 6 is executed successfully; Step 7 is Invalid, as a StandardIslandHeight is blocking you from moving forward.
 
-Candidate Target Entities location: [[0, 120, 10, 200], [340, 350, 120, 150]]
+Candidate Target Entities location: 
+image 0: [[0, 75, 25, 150], [300, 320, 200, 240]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 1: [[0, 95, 15, 170], [320, 320, 100, 140]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 2: [[0, 120, 10, 200], [340, 350, 120, 150]] <-- This is the current state I am in.
 
 Reasoning and reflection: I am a lot closer to the floorlamp by a series a forward and leftward movement. \
 This floorlamp is corresponding to the location [0, 120, 10, 200]. \
@@ -184,7 +204,10 @@ Executable plans: [[3, Move leftward by 0.25], [3, Move leftward by 0.25], [0, M
 
 Environment Feedback: Step 8 is executed successfully; Step 9 is executed successfully; Step 10 is executed successfully; Step 11 is executed successfully;
 
-Candidate Target Entities location: [[40, 120, 80, 300,], [380, 350, 160, 150]]
+Candidate Target Entities location: 
+image 0: [[0, 95, 15, 170], [320, 320, 100, 140]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 1: [[0, 120, 10, 200], [340, 350, 120, 150]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 2: [[40, 120, 80, 300,], [380, 350, 160, 150]] <-- This is the current state I am in.
 
 Reasoning and reflection: I can see that the floorlamp is at the right side of me, slight in the front. \
 This floorlamp is corresponding to the location [40, 120, 80, 300,]. \
@@ -195,7 +218,10 @@ Executable plans: [[2, Move rightward by 0.25], [2, Move rightward by 0.25]]]
 
 Environment Feedback: Step 12 is executed successfully; Step 13 is executed successfully. 
 
-Candidate Target Entities location: [[20, 120, 60, 300,], [360, 350, 140, 150]]
+Candidate Target Entities location: 
+image 0: [[0, 120, 10, 200], [340, 350, 120, 150]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 1: [[40, 120, 80, 300,], [380, 350, 160, 150]]  <-- As I can see the target object right now, I do not need to revert back to this state.
+image 2: [[20, 120, 60, 300,], [360, 350, 140, 150]] <-- This is the current state I am in.
 
 Reasoning and reflection: Last two action brought me closer to the floorlamp. \
 This floorlamp is corresponding to the location [20, 120, 60, 300,]. \
@@ -212,7 +238,8 @@ Task Success
 '''
 Human Instruction: Navigate to the computer on the desk and be as close as possible.
 
-Candidate Target Entities location: [[35, 75, 65, 150], [300, 75, 400, 150]]
+Candidate Target Entities location: 
+image 0: [[35, 75, 65, 150], [300, 75, 400, 150]]  <-- This is the current state I am in.
 
 Reasoning and reflection: According to your instruction, I first need to locate the target object. \
 The candidate computer is at [35, 75, 65, 150]. 
@@ -222,7 +249,9 @@ Executable plans: [[0, Move forward by 0.25], [3, Move leftward by 0.25]]
 
 Environment Feedback: Step 1 is executed successfully; Step 2 is Invalid, as a StandardHeightTable is blocking you from moving forward.
 
-Candidate Target Entities location: [[25, 45, 55, 160], [320, 55, 420, 180]]
+Candidate Target Entities location: 
+image 0: [[35, 75, 65, 150], [300, 75, 400, 150]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 1: [[25, 45, 55, 160], [320, 55, 420, 180]] <-- This is the current state I am in.
 
 Reasoning and reflection: I am now closer to the desk, and I can still see the computer on it. \
 The candidate computer is at [25, 45, 55, 160]. \
@@ -233,7 +262,10 @@ Executable plans: [[0, Move forward by 0.25], [0, Move forward by 0.25], [0, Mov
 
 Environment Feedback: Step 3 is executed successfully; Step 4 is executed successfully; Step 5 is Invalid, as a StandardHeightTable is blocking you from moving forward.
 
-Candidate Target Entities location: [[15, 45, 55, 160], [350, 45, 480, 200]]
+Candidate Target Entities location: 
+image 0: [[35, 75, 65, 150], [300, 75, 400, 150]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 1: [[25, 45, 55, 160], [320, 55, 420, 180]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 2: [[15, 45, 55, 160], [350, 45, 480, 200]] <-- This is the current state I am in.
 
 Reasoning and reflection: I can see that I am getting closer but the last forward move is blocked.
 The candidate computer is at [15, 45, 55, 160]. \
@@ -245,7 +277,10 @@ Executable plans: [[3, Move leftward by 0.25], [0, Move forward by 0.25]]
 
 Environment Feedback: Step 6 is executed successfully; Step 7 is invalid because the StandardHeight is blocking the movement.
 
-Candidate Target Entities location: [[0, 55, 35, 170], [350, 55, 450, 260]]
+Candidate Target Entities location: 
+image 1: [[25, 45, 55, 160], [320, 55, 420, 180]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 2: [[15, 45, 55, 160], [350, 45, 480, 200]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 3: [[0, 55, 35, 170], [350, 55, 450, 260]] <-- This is the current state I am in.
 
 Reasoning and reflection: I can see that the computer is still in my left front direction. \
 The candidate computer is at [0, 55, 35, 170]. \
@@ -256,7 +291,10 @@ Executable plans: [[3, Move leftward by 0.25], [3, Move leftward by 0.25], [0, M
 
 Environment Feedback: Step 8 is executed successfully; Step 9 is executed successfully; Step 10 is executed successfully.
 
-Candidate Target Entities location: [[220, 75, 300, 150]]]
+Candidate Target Entities location: 
+image 1: [[15, 45, 55, 160], [350, 45, 480, 200]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 2: [[0, 55, 35, 170], [350, 55, 450, 260]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 3: [[220, 75, 300, 150]] <-- This is the current state I am in.
 
 Reasoning and reflection: Now, I can see that the computer has shifted to my right front direction. 
 The candidate computer is at [220, 75, 300, 150]. \
@@ -273,7 +311,8 @@ Task Success
 '''
 Human Instruction: Navigate to the book and be as close as possible.
 
-Candidate Target Entities location: [].
+Candidate Target Entities location: 
+image 0: [] <-- To revert back to this state, I need to rotate 90 degrees to the left.
 
 Reasoning and reflection: At the moment, I cannot see the book in my current field of view. \
 According to the strategy you provided, I will rotate my view ninety degrees once at a time. \
@@ -282,12 +321,17 @@ Executable plans: [[4, Rotate to the right by 90 degrees]]
 
 Environment Feedback: Step 1 is executed successfully. The book is still not visible in my current field of view.
 
-Candidate Target Entities location: [].
+Candidate Target Entities location: 
+image 0: [] <-- To revert back to this state, I need to rotate 90 degrees to the left, and then rotate 90 degrees to the left.
+image 1: []<-- To revert back to this state, I need to rotate 90 degrees to the left.
 
-Reasoning and reflection: I still cannot see the book in my current field of view. Following your instruction, I will rotate ninety degrees again. As the rotation may change my view, I will not plan any additional actions until I locate the book.
+Reasoning and reflection: I still cannot see the book in my current field of view. Following your instruction, I will rotate ninety degrees only once. As the rotation may change my view, I will not plan any additional actions until I locate the book.
 Executable plans: [[4, Rotate to the right by 90 degrees]]
 
-Candidate Target Entities location: [[160, 300, 200, 350], [230, 165, 240, 170]].
+Candidate Target Entities location: 
+image 0: [] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 1: []<-- As I can see the target object right now, I do not need to revert back to this state.
+image 2: [[160, 300, 200, 350], [230, 165, 240, 170]] <-- This is the current state I am in.
 
 Environment Feedback: Step 2 is executed successfully. \
 The current candidate book is at [160, 300, 200, 350],
@@ -299,7 +343,10 @@ Executable plans: [[2, Move rightward by 0.25], [2, Move rightward by 0.25], [0,
 
 Environment Feedback: Step 3 to Step 7 are all executed successfully.
 
-Candidate Target Entities location: [[200, 300, 300, 350], [300, 105, 340, 150]].
+Candidate Target Entities location: 
+image 0: [] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 1: [[160, 300, 200, 350], [230, 165, 240, 170]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 2: [[200, 300, 300, 350], [300, 105, 340, 150]] <-- This is the current state I am in.
 
 Reasoning and reflection: I can now see that the book is directly in front of me, but I have not yet moved close enough to it.
 The current candidate book is at [200, 300, 300, 350]. \
@@ -309,7 +356,10 @@ Executable plans: [[0, Move forward by 0.25], [0, Move forward by 0.25], [0, Mov
 
 Environment Feedback: Step 8, Step 9, and Step 10 are all executed successfully.
 
-Candidate Target Entities location: [[200, 350, 300, 450], [300, 105, 340, 150]].
+Candidate Target Entities location: 
+image 0: [[160, 300, 200, 350], [230, 165, 240, 170]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 1: [[200, 300, 300, 350], [300, 105, 340, 150]] <-- As I can see the target object right now, I do not need to revert back to this state.
+image 2: [[200, 350, 300, 450], [300, 105, 340, 150]] <-- This is the current state I am in.
 
 Reasoning and reflection: I can now see that the book is directly in front of me. I am already very close to it, but the task has not success. \
 I believe I need to move on to the next candidate at [300, 105, 340, 150].

@@ -151,7 +151,7 @@ def save_prompts_one_image(frame_image, boxes, points, labels, save_path):
             show_points(point_ls.cpu(), label_ls.cpu(), ax, object_id=object_id)
         
     # Show the plot
-    plt.savefig(save_path)
+    plt.savefig(save_path, bbox_inches='tight', pad_inches=0)
     plt.close()
     
     
@@ -183,6 +183,7 @@ class EBNavigationPlanner():
         self.set_actions(actions)
         self.planner_steps = 0
         self.output_json_error = 0
+        self.processed_images = {}
 
         self.kwargs = kwargs
         self.action_key = kwargs.pop('action_key', 'action_id')
@@ -207,7 +208,7 @@ class EBNavigationPlanner():
 
         self.scene_graph_prompt = f'''## You are a robot operating in a home. You are given an image and observe the environment for performing the given task. \
             The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'}\
-            You are supposed to output in JSON.'''
+            Please extract the most visually identifiable features and ignore the more subtle ones. You are supposed to output in JSON.'''
             
         self.first_prompt = f'''To achieve the task, 1. Reason about the current visual state and your final goal, and 2. Reflect on the effect of previous actions. 3. Summarize how you learn from the Strategy and Examples provided \
 \nAim for about 1-2 actions in this step. !!!Notice: you cannot assess the situation until the whole plan in this planning step is finished executed, so plan accordingly.\
@@ -280,8 +281,10 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
 
             # This is to support the sliding window feature
             if self.n_shot >= 1:
+                scene_graph_prompt = self.scene_graph_prompt + '\n\n'.join([f'## Vision Recognition Example {i}: \n {x}' for i,x in enumerate(self.scene_graph_examples)])
                 prompt = self.system_prompt.format(len(self.actions)-1, self.available_action_str, '\n\n'.join([f'## Task Execution Example  {i}: \n {x}' for i,x in enumerate(self.examples)])) 
             else:
+                scene_graph_prompt = self.scene_graph_prompt
                 prompt = self.system_prompt.format(len(self.actions)-1, self.available_action_str, '')
 
             prompt += f'\n\n## The human instruction is: {user_instruction}.'
@@ -290,6 +293,7 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
             for i, action_feedback in enumerate(prev_act_feedback):
                 prompt += '\n Step {}, action id {}, {}, env feedback: {}'.format(i, action_feedback[0], self.actions[action_feedback[0]], action_feedback[1])
 
+            scene_graph_prompt += f'\n\n## Now the human instruction is: {user_instruction}.'
             prompt += f"\n\n{self.following_prompt}"
 
         else:
@@ -494,6 +498,7 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
             # assert len(observation) == 1
             obs = copy.deepcopy(observation) # input image path
         
+
         prompt, scene_graph_prompt = self.process_prompt(user_instruction, prev_act_feedback=self.episode_act_feedback)
         
         if self.model_type == 'custom':
@@ -512,12 +517,12 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
         latest_sg_kws = json.loads(out)
         # latest_sg_kws = sg_keywords[max(sg_keywords.keys())]
         
+        related_objects = set(latest_sg_kws['related_objects'])
         target_name = latest_sg_kws['target_name']
         target_attributes = latest_sg_kws['target_attribute']
-        target_attributes_preprocessed = [[attr, "other"] for attr in target_attributes]
+        target_attributes_preprocessed = [[attr, f"not {attr}"] for attr in target_attributes]
         
         target_relation = latest_sg_kws['target_relation']
-        related_objects = set()
         relations = set()
         for (s, r, o) in target_relation:
             related_objects.add(s)
@@ -526,12 +531,19 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
             
         related_objects = list(related_objects)
         relations = list(relations)
-        query_objects = related_objects + target_name + ["other"]
+        query_objects = related_objects + target_name + ["wall", "door", "cabinet", "stove", "table", "shadow", "other"]
                 
         prompt = prompt + f'\n\n The current image height is 600, width is 600.'
 
         # detections = post_process_detections(all_dets, sg_keywords)
-        for ct, image_path in enumerate(observation):
+
+        if isinstance(obs, str):
+            obs = [obs]
+        
+        if isinstance(observation, str):
+            observation = [observation]
+            
+        for image_id, image_path in enumerate(observation):
             
             image_path_ls = image_path.split('/')
             image_dir, image_name = image_path_ls[:-1], image_path_ls[-1]
@@ -539,15 +551,21 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
             new_image_name = image_name + '_bbox.png'
             new_image_path = os.path.join(*image_dir, new_image_name)
             
-            if os.path.exists(new_image_path):
-                obs.append(new_image_path)
-                continue
+            if image_path in self.processed_images:
+                processed_image_path = self.processed_images[image_path]
+                if not processed_image_path in obs:
+                    obs.append(processed_image_path)
+                    continue
             
             image = cv2.imread(image_path)
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             
             height, width = image.shape[0], image.shape[1]
-            detection_ls = self.predict_gd(image, query_objects, box_threshold=0.2, text_threshold=0.3)
+            
+            # visual feature: box_threshold=0.2, text_threshold=0.1
+            # detection_ls = self.predict_gd(image, query_objects, box_threshold=0.2, text_threshold=0.1)
+            detection_ls = self.predict_gd(image, target_name, box_threshold=0.1, text_threshold=0.1)
+
             assert len(detection_ls) == 1
             detections = detection_ls[0]
             
@@ -562,11 +580,14 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
             labels = []
             
             for ct, class_id in enumerate(detections.class_id):
-                if class_id is None:
+                if ct == 0 and class_id is None:
+                    class_id = 0
+                elif class_id is None:
                     continue
+                # if query_objects[class_id] in target_name:
                 boxes.append(reformated[ct])
-                labels.append(query_objects[class_id])
-            
+                labels.append(target_name[class_id])
+                
             if len(boxes) == 0:
                 boxes = torch.tensor([])
             else:
@@ -618,13 +639,7 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
                         if kw in target_attributes:
                             reformatted_unary_res[oid][kw] = unary_res[0][(fid, oid, kw)].item()
                 
-                reformatted_cate_res = {}
-                for (oid, kw) in batched_image_cate_probs[0].keys():
-                    if not oid in reformatted_cate_res:
-                        reformatted_cate_res[oid] = {}
-                    if kw in target_name:
-                        reformatted_cate_res[oid][kw] = batched_image_cate_probs[0][(oid, kw)].item()
-                        
+
                 aggr_res = {}
                 for oid in reformatted_unary_res: 
                     if not oid in aggr_res:
@@ -632,10 +647,23 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
                         for attr in reformatted_unary_res[oid]:
                             aggr_res[oid].append(reformatted_unary_res[oid][attr])
                 
-                
+                predicted_name = {}
                 for (oid, name) in batched_image_cate_probs[0]:
+                    prob = batched_image_cate_probs[0][(oid, name)].item()
+                    if not oid in predicted_name:
+                        predicted_name[oid] = []
+                    predicted_name[oid].append((prob, name))
+                        
+                for oid in predicted_name:
+                    top_prob, name = sorted(predicted_name[oid], reverse=True)[0]
+                    if not oid in aggr_res:
+                        aggr_res[oid] = []
+                    
                     if name in target_name:
-                        aggr_res[oid].append(batched_image_cate_probs[0][(oid, name)].item())
+                        aggr_res[oid].append(top_prob)
+                    else:
+                        # the top predicted name is not the target name
+                        aggr_res[oid].append(0)
 
                 avg_unary_res = {}
                 for oid in aggr_res:
@@ -652,20 +680,48 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
                 for oid in selected_objects:
                     prob_labels.append(f"{top_objects_probs[oid]:.2f}::{target_name[0]}")
                 
-                save_prompts_one_image(frame_image=image, boxes=selected_object_bboxes, labels=prob_labels, points=[], save_path=new_image_path)        
-
-                if not image_path in obs:
-                    obs.append(image_path)
-                    obs.append(new_image_path) # update to bboxed image path
+                if not len(selected_object_bboxes) == 0:
+                    save_prompts_one_image(frame_image=image, boxes=selected_object_bboxes, labels=prob_labels, points=[], save_path=new_image_path)        
+                else:
+                    new_image_path = image_path
                 
+                self.processed_images[image_path] = new_image_path
+                 
+                # save_prompts_one_image(frame_image=image, boxes=boxes, labels=["obj" for _ in boxes], points=[], save_path="full.png")        
+
+                # if not image_path in obs:
+                    
+                    # obs.append(image_path)
+                     # update to bboxed image path
             else:
                 selected_object_bboxes = []
                 prob_labels = []
-                
+                new_image_path = image_path
+            
+            if self.multiview or self.multistep:
+                obs.append(new_image_path) # update to bboxed image path
+            else:
+                obs = [new_image_path]
+            
+            success_actions = [action_id for action_id, action_response in self.episode_act_feedback if "success" in action_response]
+            matched_actions = [self.actions[action_id] for action_id in success_actions[:len(observation) - image_id - 1]]
+            
             scene_graph_text += [f"{obj_name}: {obj_box}. " for (obj_name, obj_box) in zip(prob_labels, selected_object_bboxes)]
-            prompt += f"Its scene graph at frame {ct} is:  {scene_graph_text}."
+            if len(matched_actions) > 0:
+                revert_prompt = f"You need to revert the previous action(s) {matched_actions} to this state."
+            else:
+                revert_prompt = f"This is the current state you are at"
+                
+            prompt += f"Its scene graph at frame {image_id} is:  {scene_graph_text}. " + revert_prompt
         
-        obs = sorted(obs)
+        prompt += "\n Please double confirm what is inside the scene graph bounding boxes, as these are candidate objects and there could be noises and mistakes. \n"
+        
+        obs = sorted(list(set(obs)))
+        
+        if not self.multiview and not self.multistep:
+            assert len(obs) == 1
+            obs = obs[0]
+                
         if len(self.episode_messages) == 0:
             self.episode_messages = self.get_message(obs, prompt)
         else:

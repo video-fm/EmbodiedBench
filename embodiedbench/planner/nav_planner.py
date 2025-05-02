@@ -41,7 +41,7 @@ class EBNavigationPlanner():
         self.model_type = model_type
         self.obs_key = obs_key
         self.system_prompt = system_prompt
-        self.n_shot = n_shot (y-axis, x-axis, z-axis)
+        self.n_shot = n_shot
         self.chat_history = chat_history # whether to includ all the chat history for prompting
         self.set_actions(actions)
         self.planner_steps = 0
@@ -331,56 +331,7 @@ You are supposed to output in JSON.{template_lang if self.language_only else tem
                    "language_plan":"invalid json, random action"}'''
             return action, out
 
-    def act_video(self, observation, user_instruction):
-        if type(observation) == dict:
-            obs = observation[self.obs_key]
-        else:
-            obs = observation # input image path
-        
-        prompt = self.process_prompt(user_instruction, prev_act_feedback=self.episode_act_feedback)
-        if self.model_type == 'custom':
-            return self.act_custom(prompt, obs)
-
-        if len(self.episode_messages) == 0:
-             self.episode_messages = self.get_message(obs, prompt)
-        else:
-            if self.chat_history:
-                self.episode_messages = self.get_message(obs, prompt, self.episode_messages)
-            else:
-                self.episode_messages = self.get_message(obs, prompt)
-        
-        for entry in self.episode_messages:
-            for content_item in entry["content"]:
-                if content_item["type"] == "text":
-                    text_content = content_item["text"]
-                    logger.debug(f"Model Input:\n{text_content}\n")
-
-        try:
-            out = self.model.respond(self.episode_messages)
-        except Exception as e:
-            print(e)
-            if 'qwen' in self.model_name:
-                return -2,'''{"visual_state_description":"qwen model generate empty action due to inappropriate content check", "reasoning_and_reflection":"invalid json, random action",
-                   "language_plan":"invalid json, random action"}'''
-
-        if self.chat_history:
-            self.episode_messages.append(
-                {
-                "role": "assistant",
-                "content": [{"type": "text", "text": out}],
-                }
-            )
-            
-        logger.debug(f"Model Output:\n{out}\n")
-        action, valid = self.json_to_action(out)
-        self.planner_steps += 1
-        if valid:
-            return action, out
-        else:
-            out = '''{"visual_state_description":"invalid json, random action", "reasoning_and_reflection":"invalid json, random action",
-                   "language_plan":"invalid json, random action"}'''
-            return action, out
-
+    
 
     def update_info(self, info):
         """Update episode feedback history."""

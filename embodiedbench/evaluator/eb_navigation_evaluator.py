@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 import json
 from embodiedbench.envs.eb_navigation.EBNavEnv import EBNavigationEnv, ValidEvalSets
-from embodiedbench.planner.nav_planner_ import EBNavigationPlanner
+from embodiedbench.planner.nav_planner import EBNavigationPlanner
 from embodiedbench.evaluator.summarize_result import average_json_values
 import sys
 import warnings
@@ -58,13 +58,19 @@ class EB_NavigationEvaluator():
             logger.info(f'Current eval set: {eval_set}')
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
 
+            if eval_set == "long_horizon":
+                selected_indexes = list(range(8, 60))
+            else: 
+                selected_indexes = list(range(0, 60))
+                
             self.env = EBNavigationEnv(eval_set=self.eval_set, down_sample_ratio=self.config['down_sample_ratio'], 
                                    exp_name=exp_name, multiview=self.config['multiview'], boundingbox=self.config['detection_box'], 
-                                   multistep = self.config['multistep'], resolution = self.config['resolution'])
+                                   multistep = self.config['multistep'], resolution = self.config['resolution'], 
+                                   selected_indexes=selected_indexes)
 
             self.planner = EBNavigationPlanner(model_name=self.model_name, model_type = self.config['model_type'], 
                                            actions = self.env.language_skill_set, system_prompt = system_prompt, 
-                                           examples = examples, scene_graph_examples=scene_graph_examples,
+                                           examples = examples, 
                                            n_shot=self.config['n_shots'], obs_key='head_rgb', 
                                            chat_history=self.config['chat_history'], language_only=self.config['language_only'], 
                                            multiview=self.config['multiview'], multistep = self.config['multistep'], visual_icl = self.config['visual_icl'])
@@ -286,20 +292,27 @@ if __name__ == '__main__':
     #     'visual':0 #sys.argv[11]=='1',
     # }
     
-    config = {'model_name': 'OpenGVLab/InternVL2_5-38B', 
+    config = {'model_name': 'OpenGVLab/InternVL2_5-38B-MPO', 
               'down_sample_ratio': 1, 
-              'model_type': 'local', 
+              'model_type': 'remote', 
               'language_only': False, 
-              'eval_sets': ['common_sense', 'complex_instruction', 'visual_appearance', 'long_horizon'], 
-              'chat_history': False, 
+              'eval_sets': ['long_horizon'], 
+              'chat_history': True, 
               'n_shots': 3, 
               'multiview': False, 
               'detection_box': False, 
-              'multistep': True, 
+              'multistep': False, 
               'resolution': 500, 
-              'exp_name': 'multistep_baseline_all', 
+              'exp_name': 'baseline_all', 
               'visual_icl': False, 
-              'tp': 4}
+              'tp': 4,
+              'action_num_per_plan': 5,
+              'fov': 100,
+              'sleep_time': 0,
+              'purpose': "retest",
+              'icl_abl':0, 
+              'visual':0,
+              }
     
     evaluator = EB_NavigationEvaluator(config)
     evaluator.evaluate_main()

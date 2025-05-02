@@ -95,10 +95,10 @@ class EB_NavigationEvaluator():
             logger.info(f'Current eval set: {eval_set}')
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
 
-            if eval_set == "visual_appearance":
-                selected_indexes = list(range(0, 60))
-            else: 
-                selected_indexes = None
+            # if eval_set == "long_horizon":
+            #     selected_indexes = list(range(8, 60))
+            # else: 
+            selected_indexes = list(range(0, 60))
                 
             self.env = EBNavigationEnv(eval_set=self.eval_set, down_sample_ratio=self.config['down_sample_ratio'], 
                                    exp_name=exp_name, multiview=self.config['multiview'], boundingbox=self.config['detection_box'], 
@@ -252,23 +252,48 @@ if __name__ == '__main__':
     #     'visual':0 #sys.argv[11]=='1',
     # }
     
-    config = {'model_name': 'OpenGVLab/InternVL2_5-38B', 
+    # config = {'model_name': 'OpenGVLab/InternVL2_5-38B-MPO', 
+    #           'down_sample_ratio': 1, 
+    #           'model_type': 'remote', 
+    #           'language_only': False, 
+    #         #  'eval_sets': [ 'base', 'visual_appearance', 'common_sense', 'complex_instruction', 'long_horizon'], 
+    #           'eval_sets': ['long_horizon'], 
+    #           'chat_history': False, 
+    #           'n_shots': 3, 
+    #           'multiview': False, 
+    #           'detection_box': False, 
+    #           'multistep': False, 
+    #           'resolution': 500, 
+    #           'exp_name': 'base_gd_laser_two_imgs', 
+    #           'visual_icl': False, 
+    #           'tp': 4, 
+    #           'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
+    #           'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',}
+    
+    config = {'model_name': 'OpenGVLab/InternVL2_5-38B-MPO', 
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 
-              'eval_sets': ['visual_appearance'], 
-              'chat_history': False, 
+              'eval_sets': ['base', 'visual_appearance', 'common_sense', 'complex_instruction', 'long_horizon'], 
+              'chat_history': True, 
               'n_shots': 3, 
               'multiview': False, 
               'detection_box': False, 
-              'multistep': True, 
+              'multistep': False, 
               'resolution': 500, 
-              'exp_name': 'multistep_baseline_gd_laser_two_imgs', 
+              'exp_name': 'history_gd_laser_bbox_0.1', 
               'visual_icl': False, 
-              'tp': 4, 
+              'tp': 4,
+              'action_num_per_plan': 5,
+              'fov': 100,
+              'sleep_time': 0,
+              'purpose': "retest",
+              'icl_abl':0, 
+              'visual':0,
               'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
-              'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',}
-    
+              'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',
+              }
+              
     evaluator = EB_NavigationEvaluator(config)
     evaluator.evaluate_main()
 

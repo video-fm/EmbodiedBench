@@ -13,7 +13,7 @@ from embodiedbench.planner.planner_config.generation_guide_manip import llm_gene
 from embodiedbench.planner.planner_utils import convert_format_2claude, convert_format_2gemini, ActionPlan_1, ActionPlan, ActionPlan_lang, ActionPlan_1_manip, ActionPlan_manip, ActionPlan_lang_manip
 
 temperature = 0
-max_completion_tokens = 2048
+max_completion_tokens = 8192
 remote_url = os.environ.get('remote_url')
 
 class RemoteModel:
@@ -125,15 +125,36 @@ class RemoteModel:
                         "schema": llm_generation_guide if self.language_only else vlm_generation_guide
                     }
                 }
-        response = self.model(
+        
+        
+        
+        if 'InternVL2_5' in self.model.model_name:
+            
+            response = self.model(
+            message_history,
+            gen_config=GenerationConfig(
+                temperature=temperature,
+                max_new_tokens=max_completion_tokens,
+                )
+            )
+            
+            # easy to meet json errors
+            out = response.text
+            out = out.replace("'",'"')
+            out = out.replace('\"s ', "\'s ")
+            out = out.replace('```json', '').replace('```', '')
+        else:
+            
+            response = self.model(
             message_history,
             gen_config=GenerationConfig(
                 temperature=temperature,
                 response_format=response_format,
                 max_new_tokens=max_completion_tokens,
+                )
             )
-        )
-        out = response.text
+            out = response.text
+            
         return out
 
     def _call_claude(self, message_history: list):

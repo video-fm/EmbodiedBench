@@ -96,7 +96,7 @@ class EB_NavigationEvaluator():
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
 
             if eval_set == "base":
-                selected_indexes = list(range(0, 60))
+                selected_indexes = list(range(3, 60))
             else: 
                 selected_indexes = list(range(0, 60))
                 
@@ -281,7 +281,7 @@ if __name__ == '__main__':
               'detection_box': False, 
               'multistep': False, 
               'resolution': 500, 
-              'exp_name': 'history_gd_laser_bbox_0.1_no_bbox', 
+              'exp_name': 'history_gd_laser_bbox_0.1_no_bbox_with_block', 
               'visual_icl': False, 
               'tp': 4,
               'action_num_per_plan': 5,

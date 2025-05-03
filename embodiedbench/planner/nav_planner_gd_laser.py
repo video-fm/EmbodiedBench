@@ -268,7 +268,16 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
     def process_prompt(self, user_instruction, prev_act_feedback=[]):
 
         user_instruction = user_instruction.rstrip('.')
-
+        
+        failure = False
+        blocking_feedback = ""
+        
+        if not len(prev_act_feedback) == 0:
+            last_feedback = prev_act_feedback[-1]
+            if last_feedback[0] != 0:
+                failure = True
+                blocking_feedback = last_feedback[1]
+            
         if len(prev_act_feedback) == 0:
             if self.n_shot >= 1:
                 scene_graph_prompt = self.scene_graph_prompt + '\n\n'.join([f'## Vision Recognition Example {i}: \n {x}' for i,x in enumerate(self.scene_graph_examples)])
@@ -279,11 +288,10 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
 
             prompt += f'\n\n## Now the human instruction is: {user_instruction}.'
             scene_graph_prompt += f'\n\n## Now the human instruction is: {user_instruction}.'
-
             prompt += self.first_prompt
      
         elif self.chat_history:
-
+            
             # This is to support the sliding window feature
             if self.n_shot >= 1:
                 scene_graph_prompt = self.scene_graph_prompt + '\n\n'.join([f'## Vision Recognition Example {i}: \n {x}' for i,x in enumerate(self.scene_graph_examples)])
@@ -298,6 +306,11 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             for i, action_feedback in enumerate(prev_act_feedback):
                 prompt += '\n Step {}, action id {}, {}, env feedback: {}'.format(i, action_feedback[0], self.actions[action_feedback[0]], action_feedback[1])
 
+            if failure:
+                scene_graph_prompt += f"The last action is invalid, and the feedback is: {blocking_feedback} "
+            else:
+                scene_graph_prompt += f"The last action succeeds. "
+                
             scene_graph_prompt += f'\n\n## Now the human instruction is: {user_instruction}.'
             prompt += f"\n\n{self.following_prompt}"
 
@@ -315,6 +328,11 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             for i, action_feedback in enumerate(prev_act_feedback):
                 prompt += '\n Step {}, action id {}, {}, env feedback: {}'.format(i, action_feedback[0], self.actions[action_feedback[0]], action_feedback[1])
             
+            if failure:
+                scene_graph_prompt += f"The last action is invalid, and the feedback is: {blocking_feedback} "
+            else:
+                scene_graph_prompt += f"The last action succeeds. "
+                
             scene_graph_prompt += f'\n\n## Now the human instruction is: {user_instruction}.'
             prompt += f"\n\n{self.following_prompt}"
 
@@ -526,6 +544,7 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
         target_name = latest_sg_kws['target_name']
         target_attributes = latest_sg_kws['target_attribute']
         target_attributes_preprocessed = [[attr, f"not {attr}"] for attr in target_attributes]
+        blocking_objects = latest_sg_kws['blocking_name']
         
         target_relation = latest_sg_kws['target_relation']
         relations = set()
@@ -536,8 +555,9 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             
         related_objects = list(related_objects)
         relations = list(relations)
-        query_objects = related_objects + target_name + ["wall", "door", "cabinet", "stove", "table", "shadow", "window", "mirror", "other"]
+        query_objects = blocking_objects + related_objects + target_name + ["wall", "door", "cabinet", "stove", "table", "shadow", "window", "mirror", "other"]
                 
+        gd_query_objects = blocking_objects + target_name
         prompt = prompt + f'\n\n The current image height is 500, width is 500.'
 
         # detections = post_process_detections(all_dets, sg_keywords)
@@ -569,7 +589,7 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             
             # visual feature: box_threshold=0.2, text_threshold=0.1
             # detection_ls = self.predict_gd(image, query_objects, box_threshold=0.2, text_threshold=0.1)
-            detection_ls = self.predict_gd(image, target_name, box_threshold=0.1, text_threshold=0.1)
+            detection_ls = self.predict_gd(image, gd_query_objects , box_threshold=0.1, text_threshold=0.1)
 
             assert len(detection_ls) == 1
             detections = detection_ls[0]
@@ -589,9 +609,9 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
                     class_id = 0
                 elif class_id is None:
                     continue
-                # if query_objects[class_id] in target_name:
+
                 boxes.append(reformated[ct])
-                labels.append(target_name[class_id])
+                labels.append(gd_query_objects[class_id])
                 
             if len(boxes) == 0:
                 boxes = torch.tensor([])
@@ -646,6 +666,7 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
                 
 
                 aggr_res = {}
+                aggr_block = {}
                 for oid in reformatted_unary_res: 
                     if not oid in aggr_res:
                         aggr_res[oid] = []
@@ -658,7 +679,10 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
                     if not oid in predicted_name:
                         predicted_name[oid] = []
                     predicted_name[oid].append((prob, name))
-                        
+                
+                for oid in predicted_name:
+                    predicted_name[oid] = sorted(predicted_name[oid], reverse=True)                
+                   
                 for oid in predicted_name:
                     top_prob, name = sorted(predicted_name[oid], reverse=True)[0]
                     if not oid in aggr_res:
@@ -670,6 +694,9 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
                         # the top predicted name is not the target name
                         aggr_res[oid].append(0)
 
+                    if name in blocking_objects:
+                        aggr_block[oid] = top_prob
+                        
                 avg_unary_res = {}
                 for oid in aggr_res:
                     avg_val = sum(aggr_res[oid]) / len(aggr_res[oid])
@@ -678,12 +705,22 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
                     
                 top_objects = sorted([(v, k) for k, v in avg_unary_res.items()], reverse=True)[:self.k]
                 top_objects_probs = {oid: prob for prob, oid in top_objects}
-                selected_objects = list(top_objects_probs.keys())
+                
+                top_blocking_objects = sorted([(v, k) for k, v in aggr_block.items()], reverse=True)[:self.k]
+                top_blocking_objects_probs = {oid: prob for prob, oid in top_blocking_objects}
+                selected_blocking_objects = list(top_blocking_objects_probs.keys())
+                
+                selected_objects = list(top_objects_probs.keys()) + list(top_blocking_objects_probs.keys())
                 selected_object_bboxes = boxes[selected_objects]
                 
+                # selected_blocking_object_bboxes = boxes[selected_blocking_objects]
+                
                 prob_labels = []
-                for oid in selected_objects:
+                for oid in top_objects_probs:
                     prob_labels.append(f"{top_objects_probs[oid]:.2f}::{target_name[0]}")
+                
+                for oid in top_blocking_objects_probs:
+                    prob_labels.append(f"{top_blocking_objects_probs[oid]:.2f}::{blocking_objects[0]}")
                 
                 if not len(selected_object_bboxes) == 0:
                     save_prompts_one_image(frame_image=image, boxes=selected_object_bboxes, labels=prob_labels, points=[], save_path=new_image_path)        
@@ -714,7 +751,7 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             success_actions = [action_id for action_id, action_response in self.episode_act_feedback if "success" in action_response]
             matched_actions = [self.actions[action_id] for action_id in success_actions[:len(observation) - image_id - 1]]
             
-            scene_graph_text += [f"{obj_name}: {obj_box}. " for (obj_name, obj_box) in zip(prob_labels, selected_object_bboxes)]
+            scene_graph_text += [f"{obj_name}: {obj_box}. " for (obj_name, obj_box) in zip(prob_labels, selected_object_bboxes.tolist())]
             if len(matched_actions) > 0:
                 revert_prompt = f"You need to revert the previous action(s) {matched_actions} to this state."
             else:

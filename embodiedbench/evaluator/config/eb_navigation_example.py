@@ -124,26 +124,34 @@ scene_graph_examples = [
 ]
 
 target_examples = [
-'''Human Instruction:  I need a device on my floor to illuminate my workspace. Please navigate to that object and stay near it.
+'''
+   Environmental Feedback: The last action succeeded. 
+    
+   Human Instruction:  I need a device on my floor to illuminate my workspace. Please navigate to that object and stay near it.
    
    Target Description:  A device on my floor to illuminate my workspace is a floorlamp. My target is a floorlamp.
    
    Visual Description: I can see the floorlamp is at left side in front of me, next to the TVStand. Around me is a Cabinet at my left side.
    
-   Target Entity in JSON: {"target_name": ["floorlamp"], "target_attribute": ["left side"], "target_relation": [["floorlamp", "next to", "TVStand"]], "related_objects": ["Cabinet", "TVStand"]}
+   Target Entity in JSON: {"target_name": ["floorlamp"], "blocking_name":[], "target_attribute": ["left side"], "target_relation": [["floorlamp", "next to", "TVStand"]], "related_objects": ["Cabinet", "TVStand"]}
 ''',
 
-'''Human Instruction: Find the rectangular yellowish object with a soft and smooth surface.
+''' 
+    Environmental Feedback: The last action is invalid. The feedback is: Last action MoveRight is invalid. StandardCounterHeightWidth is blocking Agent 0 from moving by (-0.2500, 0.0000, 0.0000).
+    
+    Human Instruction: Find the rectangular yellowish object with a soft and smooth surface.
 
     Target Description: My target is an object.
 
     Visual Description: At the first image, I can see that the rectangular yellowish object is  with a soft and smooth surface located in my left front direction, placed on a desk. In front of me, slightly to the right, there is a chair blocking my direct path. 
                         At the second image, I can see that the rectangular yellowish object is  with a soft and smooth surface is located in my left front direction, placed on a desk. 
 
-    Target Entity in JSON: {"target_name": ["object"], "target_attribute": ["rectangular", "yellowish"], "target_relation": [["object", "placed on", "desk"]], "related_objects": ["chair", "desk"]}
+    Target Entity in JSON: {"target_name": ["object"],  "blocking_name": ["counter"], "target_attribute": ["rectangular", "yellowish"], "target_relation": [["object", "placed on", "desk"]], "related_objects": ["chair", "desk"]}
 ''', 
 
-''' Human Instruction: Navigate to the book and be as close as possible.
+''' Environmental Feedback: The last action is invalid. The feedback is: Last action MoveAhead is invalid. OVENDOOR.002 is blocking Agent 0 from moving by (0.0000, 0.0000, -0.2500). 
+
+    Human Instruction: Navigate to the book and be as close as possible.
 
     Target Description: My target is a book.
     
@@ -151,7 +159,7 @@ target_examples = [
                         At the first image, I cannot see the book. 
                         At the second image, I can see the book is directly in front of me, placed on a shelf.
 
-    Target Entity in JSON: {"target_name": ["book"], "target_attribute": [], "target_relation": [["book", "placed on", "shelf"]], related_objects": ["shelf"]}
+    Target Entity in JSON: {"target_name": ["book"], "blocking_name": ["oven door"], "target_attribute": [], "target_relation": [["book", "placed on", "shelf"]], related_objects": ["shelf"]}
 ''', 
 ]
     

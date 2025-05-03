@@ -296,7 +296,7 @@ if __name__ == '__main__':
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 
-              'eval_sets': ['base', 'visual_appearance', 'common_sense', 'complex_instruction'], 
+              'eval_sets': ['visual_appearance', 'common_sense', 'complex_instruction'], 
               'chat_history': True, 
               'n_shots': 3, 
               'multiview': False, 

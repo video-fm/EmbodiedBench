@@ -124,7 +124,9 @@ scene_graph_examples = [
 ]
 
 target_examples = [
-'''Human Instruction: Navigate to the floorlamp and be as close as possible.
+'''Human Instruction:  I need a device on my floor to illuminate my workspace. Please navigate to that object and stay near it.
+   
+   Target Description:  A device on my floor to illuminate my workspace is a floorlamp. My target is a floorlamp.
    
    Visual Description: I can see the floorlamp is at left side in front of me, next to the TVStand. Around me is a Cabinet at my left side.
    
@@ -132,6 +134,8 @@ target_examples = [
 ''',
 
 '''Human Instruction: Find the rectangular yellowish object with a soft and smooth surface.
+
+    Target Description: My target is an object.
 
     Visual Description: At the first image, I can see that the rectangular yellowish object is  with a soft and smooth surface located in my left front direction, placed on a desk. In front of me, slightly to the right, there is a chair blocking my direct path. 
                         At the second image, I can see that the rectangular yellowish object is  with a soft and smooth surface is located in my left front direction, placed on a desk. 
@@ -141,7 +145,10 @@ target_examples = [
 
 ''' Human Instruction: Navigate to the book and be as close as possible.
 
-    Visual Description: At the first image, I cannot see the book. 
+    Target Description: My target is a book.
+    
+    Visual Description: My target is a book.
+                        At the first image, I cannot see the book. 
                         At the second image, I can see the book is directly in front of me, placed on a shelf.
 
     Target Entity in JSON: {"target_name": ["book"], "target_attribute": [], "target_relation": [["book", "placed on", "shelf"]], related_objects": ["shelf"]}

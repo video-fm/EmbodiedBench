@@ -169,6 +169,7 @@ class EBNavigationPlanner():
                  multiview = False, 
                  multistep = False, 
                  visual_icl = False, 
+                 boundingbox = False, 
                  tp=1, 
                  gd_config_path='',
                  gd_checkpoint_path='',
@@ -191,6 +192,7 @@ class EBNavigationPlanner():
         self.multiview = multiview
         self.multistep = multistep
         self.visual_icl = visual_icl
+        self.boundingbox = boundingbox
         self.aggr_thres = 0.1
         self.k = 3
 
@@ -209,7 +211,8 @@ class EBNavigationPlanner():
         self.scene_graph_prompt = f'''## You are a robot operating in a home. You are given an image and observe the environment for performing the given task. \
             The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'}\
             Please extract the most visually identifiable features and ignore the more subtle ones. 
-            Please summarize the object names with a synonym if the descriptions is verbose, for example, substitute "freshly baked baguette" to "loaves", "long gaslight" to "lamp",
+            Please deduce the object names with a synonym if the descriptions is verbose or functional. 
+            For example, substitute "freshly baked baguette" to "loaves", "portable device to access the internet" to "laptop", "light-emiting device on my desk to provide light for my work area" to "desk lamp".
             You are supposed to output in JSON.'''
             
         self.first_prompt = f'''To achieve the task, 1. Reason about the current visual state and your final goal, and 2. Reflect on the effect of previous actions. 3. Summarize how you learn from the Strategy and Examples provided \
@@ -533,7 +536,7 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             
         related_objects = list(related_objects)
         relations = list(relations)
-        query_objects = related_objects + target_name + ["wall", "door", "cabinet", "stove", "table", "shadow", "other"]
+        query_objects = related_objects + target_name + ["wall", "door", "cabinet", "stove", "table", "shadow", "window", "mirror", "other"]
                 
         prompt = prompt + f'\n\n The current image height is 500, width is 500.'
 
@@ -685,6 +688,9 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
                 if not len(selected_object_bboxes) == 0:
                     save_prompts_one_image(frame_image=image, boxes=selected_object_bboxes, labels=prob_labels, points=[], save_path=new_image_path)        
                 else:
+                    new_image_path = image_path
+                
+                if not self.boundingbox:
                     new_image_path = image_path
                 
                 self.processed_images[image_path] = new_image_path

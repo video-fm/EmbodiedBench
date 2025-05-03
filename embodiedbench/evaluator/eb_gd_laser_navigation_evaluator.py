@@ -96,7 +96,7 @@ class EB_NavigationEvaluator():
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
 
             if eval_set == "base":
-                selected_indexes = list(range(13, 60))
+                selected_indexes = list(range(0, 60))
             else: 
                 selected_indexes = list(range(0, 60))
                 
@@ -111,7 +111,7 @@ class EB_NavigationEvaluator():
                                            n_shot=self.config['n_shots'], obs_key='head_rgb', 
                                            chat_history=self.config['chat_history'], language_only=self.config['language_only'], 
                                            multiview=self.config['multiview'], multistep = self.config['multistep'], visual_icl = self.config['visual_icl'],
-                                           gd_checkpoint_path=self.gd_checkpoint_path, gd_config_path=self.gd_config_path)
+                                           boundingbox=self.config['detection_box'], gd_checkpoint_path=self.gd_checkpoint_path, gd_config_path=self.gd_config_path)
             
             self.evaluate()
             
@@ -274,14 +274,14 @@ if __name__ == '__main__':
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 
-              'eval_sets': ['common_sense', 'complex_instruction', 'long_horizon'], 
+              'eval_sets': ['base', 'common_sense', 'complex_instruction', 'long_horizon', 'visual_appearance'], 
               'chat_history': True, 
               'n_shots': 3, 
               'multiview': False, 
               'detection_box': False, 
               'multistep': False, 
               'resolution': 500, 
-              'exp_name': 'history_gd_laser_bbox_0.1', 
+              'exp_name': 'history_gd_laser_bbox_0.1_no_bbox', 
               'visual_icl': False, 
               'tp': 4,
               'action_num_per_plan': 5,

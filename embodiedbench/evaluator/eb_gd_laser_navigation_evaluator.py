@@ -13,7 +13,7 @@ import cv2
 from time import sleep
 
 from embodiedbench.evaluator.config.system_prompts import eb_laser_navigation_system_prompt
-from embodiedbench.evaluator.config.eb_navigation_example import laser_examples, target_examples
+from embodiedbench.evaluator.config.eb_navigation_example import examples, laser_sg_examples_no_revert, target_examples
 from embodiedbench.main import logger
 
 import os
@@ -23,7 +23,6 @@ import sys
 import numpy as np
 
 system_prompt = eb_laser_navigation_system_prompt
-examples = laser_examples
 
 def bbox_to_mask(bbox, frame_height, frame_width):
     """
@@ -95,23 +94,32 @@ class EB_NavigationEvaluator():
             logger.info(f'Current eval set: {eval_set}')
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
 
-            if eval_set == "base":
-                selected_indexes = list(range(3, 60))
+            if eval_set == "complex_instruction":
+                # selected_indexes = [i - 1 for i in [44, 45, 47, 49, 50, 51, 52, 54, 56, 57, 59, 33, 34, 32, 35, 37, 38, 40, 42, 43,]]
+                selected_indexes = [i - 1 for i in [51, 54, 59, 33, 35]]
+            elif eval_set == "base":
+                selected_indexes = [i - 1 for i in [51, 54, 59, 33, 35]]
             else: 
                 selected_indexes = list(range(0, 60))
                 
             self.env = EBNavigationEnv(eval_set=self.eval_set, down_sample_ratio=self.config['down_sample_ratio'], 
-                                   exp_name=exp_name, multiview=self.config['multiview'], boundingbox=self.config['detection_box'], 
+                                   exp_name=exp_name, multiview=self.config['multiview'], boundingbox=False, 
                                    multistep = self.config['multistep'], resolution = self.config['resolution'],
                                    selected_indexes=selected_indexes)
 
+            if self.config['sg_text']:
+                few_shot_examples = laser_sg_examples_no_revert
+            else:
+                few_shot_examples = examples
+                
             self.planner = EBNavigationPlanner(model_name=self.model_name, model_type = self.config['model_type'], 
                                            actions = self.env.language_skill_set, system_prompt = system_prompt, 
-                                           examples = examples, scene_graph_examples=target_examples,
+                                           examples = few_shot_examples, scene_graph_examples=target_examples,
                                            n_shot=self.config['n_shots'], obs_key='head_rgb', 
                                            chat_history=self.config['chat_history'], language_only=self.config['language_only'], 
                                            multiview=self.config['multiview'], multistep = self.config['multistep'], visual_icl = self.config['visual_icl'],
-                                           boundingbox=self.config['detection_box'], gd_checkpoint_path=self.gd_checkpoint_path, gd_config_path=self.gd_config_path)
+                                           boundingbox=self.config['detection_box'], scene_graph_text=self.config['sg_text'],
+                                           blockingobj=self.config['block_objects'], gd_checkpoint_path=self.gd_checkpoint_path, gd_config_path=self.gd_config_path)
             
             self.evaluate()
             
@@ -274,14 +282,16 @@ if __name__ == '__main__':
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 
-              'eval_sets': ['base', 'common_sense', 'complex_instruction', 'long_horizon', 'visual_appearance'], 
+              'eval_sets': ['base', 'common_sense', 'long_horizon', 'visual_appearance', 'complex_instruction'], 
               'chat_history': True, 
               'n_shots': 3, 
               'multiview': False, 
-              'detection_box': False, 
+              'detection_box': True, 
+              'sg_text': True,
+              'block_objects': False,
               'multistep': False, 
               'resolution': 500, 
-              'exp_name': 'history_gd_laser_bbox_0.1_no_bbox_with_block', 
+              'exp_name': 'history_gd_laser_bbox_0.1_with_bbox_with_text', 
               'visual_icl': False, 
               'tp': 4,
               'action_num_per_plan': 5,

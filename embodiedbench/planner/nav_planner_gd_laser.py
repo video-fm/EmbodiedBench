@@ -170,6 +170,8 @@ class EBNavigationPlanner():
                  multistep = False, 
                  visual_icl = False, 
                  boundingbox = False, 
+                 blockingobj = False,
+                 scene_graph_text = False,
                  tp=1, 
                  gd_config_path='',
                  gd_checkpoint_path='',
@@ -193,8 +195,10 @@ class EBNavigationPlanner():
         self.multistep = multistep
         self.visual_icl = visual_icl
         self.boundingbox = boundingbox
+        self.blockingobj = blockingobj
+        self.scene_graph_text = scene_graph_text
         self.aggr_thres = 0.1
-        self.k = 3
+        self.k = 1
 
         if not self.visual_icl:
             self.examples = examples[:n_shot]
@@ -544,7 +548,10 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
         target_name = latest_sg_kws['target_name']
         target_attributes = latest_sg_kws['target_attribute']
         target_attributes_preprocessed = [[attr, f"not {attr}"] for attr in target_attributes]
-        blocking_objects = latest_sg_kws['blocking_name']
+        if self.blockingobj:
+            blocking_objects = latest_sg_kws['blocking_name']
+        else:
+            blocking_objects = []
         
         target_relation = latest_sg_kws['target_relation']
         relations = set()
@@ -558,7 +565,9 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
         query_objects = blocking_objects + related_objects + target_name + ["wall", "door", "cabinet", "stove", "table", "shadow", "window", "mirror", "other"]
                 
         gd_query_objects = blocking_objects + target_name
-        prompt = prompt + f'\n\n The current image height is 500, width is 500.'
+        
+        scene_graph_prompt_prefix = "\n Scene Graph Information: The current image height is 500, width is 500. A missing scene graph means the object is not clearly identifiable from the scene. It does not necessarily means this object is not in the scene. \n"
+        scene_graph_prompt = []
 
         # detections = post_process_detections(all_dets, sg_keywords)
 
@@ -594,7 +603,6 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             assert len(detection_ls) == 1
             detections = detection_ls[0]
             
-            scene_graph_text = []
             reformated = torch.tensor([(get_valid_bbox_val(x1, width), 
                         get_valid_bbox_val(y1, height),
                         get_valid_bbox_val(x2, width), 
@@ -607,9 +615,14 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             for ct, class_id in enumerate(detections.class_id):
                 if ct == 0 and class_id is None:
                     class_id = 0
+                    
                 elif class_id is None:
                     continue
-
+                
+                x1, y1, x2, y2 = reformated[ct]
+                if x2 - x1 < 5 or y2 - y1 < 5:
+                    continue
+                
                 boxes.append(reformated[ct])
                 labels.append(gd_query_objects[class_id])
                 
@@ -717,13 +730,18 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
                 
                 prob_labels = []
                 for oid in top_objects_probs:
-                    prob_labels.append(f"{top_objects_probs[oid]:.2f}::{target_name[0]}")
-                
+                    # prob_labels.append(f"{top_objects_probs[oid]:.2f}::{target_name[0]}")
+                    prob_labels.append(target_name[0])
+
+                    # prob_labels.append("")
+                     
                 for oid in top_blocking_objects_probs:
-                    prob_labels.append(f"{top_blocking_objects_probs[oid]:.2f}::{blocking_objects[0]}")
-                
+                    # prob_labels.append(f"{top_blocking_objects_probs[oid]:.2f}::{blocking_objects[0]}")
+                    # prob_labels.append("")
+                    prob_labels.append(blocking_objects[0])
+                    
                 if not len(selected_object_bboxes) == 0:
-                    save_prompts_one_image(frame_image=image, boxes=selected_object_bboxes, labels=prob_labels, points=[], save_path=new_image_path)        
+                    save_prompts_one_image(frame_image=image, boxes=selected_object_bboxes, labels=["" for _ in selected_object_bboxes], points=[], save_path=new_image_path)        
                 else:
                     new_image_path = image_path
                 
@@ -751,16 +769,25 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             success_actions = [action_id for action_id, action_response in self.episode_act_feedback if "success" in action_response]
             matched_actions = [self.actions[action_id] for action_id in success_actions[:len(observation) - image_id - 1]]
             
-            scene_graph_text += [f"{obj_name}: {obj_box}. " for (obj_name, obj_box) in zip(prob_labels, selected_object_bboxes.tolist())]
-            if len(matched_actions) > 0:
-                revert_prompt = f"You need to revert the previous action(s) {matched_actions} to this state."
+            if type(selected_object_bboxes) == torch.Tensor:
+                bbox_list = selected_object_bboxes.tolist()
             else:
-                revert_prompt = f"This is the current state you are at"
+                bbox_list = selected_object_bboxes
+            
+            if self.scene_graph_text and len(prob_labels) > 0:
                 
-            prompt += f"Its scene graph at frame {image_id} is:  {scene_graph_text}. " + revert_prompt
+                current_scene_graph_prompt = ",".join([f"{obj_name}: {obj_box}" for (obj_name, obj_box) in zip(prob_labels, bbox_list)])
+                
+                # if len(matched_actions) > 0:
+                #     revert_prompt = f" <-- You need to revert the previous action(s) {matched_actions} to this state."
+                # else:
+                #     revert_prompt = f" <-- This is the current state you are at."
+                    
+                scene_graph_prompt.append(f"Its scene graph at frame {image_id} is: {current_scene_graph_prompt}. ")
         
-        prompt += "\n Please double confirm what is inside the scene graph bounding boxes, as these are candidate objects and there could be noises and mistakes. \n"
-        
+        if self.scene_graph_text and len(scene_graph_prompt) > 0:
+            prompt += scene_graph_prompt_prefix + "\n".join(scene_graph_prompt)
+            
         obs = sorted(list(set(obs)))
         
         if not self.multiview and not self.multistep:

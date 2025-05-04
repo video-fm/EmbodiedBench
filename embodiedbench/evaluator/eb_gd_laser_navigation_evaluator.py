@@ -94,13 +94,13 @@ class EB_NavigationEvaluator():
             logger.info(f'Current eval set: {eval_set}')
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
 
-            if eval_set == "complex_instruction":
-                # selected_indexes = [i - 1 for i in [44, 45, 47, 49, 50, 51, 52, 54, 56, 57, 59, 33, 34, 32, 35, 37, 38, 40, 42, 43,]]
-                selected_indexes = [i - 1 for i in [51, 54, 59, 33, 35]]
-            elif eval_set == "base":
-                selected_indexes = [i - 1 for i in [51, 54, 59, 33, 35]]
-            else: 
-                selected_indexes = list(range(0, 60))
+            # if eval_set == "complex_instruction":
+            #     # selected_indexes = [i - 1 for i in [44, 45, 47, 49, 50, 51, 52, 54, 56, 57, 59, 33, 34, 32, 35, 37, 38, 40, 42, 43,]]
+            #     selected_indexes = [i - 1 for i in [51, 54, 59, 33, 35]]
+            # elif eval_set == "base":
+            #     selected_indexes = [i - 1 for i in [51, 54, 59, 33, 35]]
+            # else: 
+            selected_indexes = list(range(0, 60))
                 
             self.env = EBNavigationEnv(eval_set=self.eval_set, down_sample_ratio=self.config['down_sample_ratio'], 
                                    exp_name=exp_name, multiview=self.config['multiview'], boundingbox=False, 

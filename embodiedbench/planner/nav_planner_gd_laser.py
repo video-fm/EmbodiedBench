@@ -172,6 +172,7 @@ class EBNavigationPlanner():
                  boundingbox = False, 
                  blockingobj = False,
                  scene_graph_text = False,
+                 gd_only = False,
                  tp=1, 
                  gd_config_path='',
                  gd_checkpoint_path='',
@@ -197,6 +198,7 @@ class EBNavigationPlanner():
         self.boundingbox = boundingbox
         self.blockingobj = blockingobj
         self.scene_graph_text = scene_graph_text
+        self.gd_only = gd_only
         self.aggr_thres = 0.1
         self.k = 1
 
@@ -495,7 +497,6 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
 
         tokenized = tokenizer(caption)
 
-    
         phrases = [
             get_phrases_from_posmap(logit > text_threshold, tokenized, tokenizer).replace('.', '')
             for logit in logits
@@ -631,29 +632,25 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             else:
                 boxes = torch.stack(boxes)
             
-            if not len(boxes) == 0:
-                height, width = image.shape[0], image.shape[1]
-                batched_pred_masks = [bbox_to_mask(bbox, height, width) for bbox in boxes]
-                batched_object_ids = [[0, 0, i] for i in range(len(batched_pred_masks))]
+            if self.gd_only:
+                
+                if not len(selected_object_bboxes) == 0:
+                    save_prompts_one_image(frame_image=image, boxes=selected_object_bboxes, labels=["" for _ in selected_object_bboxes], points=[], save_path=new_image_path)        
+                else:
+                    new_image_path = image_path
+                    
+                if not self.boundingbox:
+                    new_image_path = image_path
+                    
+                print("here")
+                
+            else:
+                if not len(boxes) == 0:
+                    height, width = image.shape[0], image.shape[1]
+                    batched_pred_masks = [bbox_to_mask(bbox, height, width) for bbox in boxes]
+                    batched_object_ids = [[0, 0, i] for i in range(len(batched_pred_masks))]
 
-                batched_image_cate_probs, _, _, _ = \
-                    self.predicate_model(
-                        batched_video_ids=[0],
-                        batched_videos=[image],
-                        batched_masks=batched_pred_masks,  # batched_object_ids * video_height * video_width
-                        batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
-                        batched_names=[query_objects],  # Dataset-wise categorical labels
-                        batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
-                        batched_unary_kws=[[]],  # Dataset-wise unary predicate labels
-                        batched_binary_kws=[[]],  # Dataset-wise binary predicate labels
-                        batched_obj_pairs=[],  # Ground truth binary relations
-                        batched_video_splits=[0],  # [number of videos]
-                        batched_binary_predicates=[None],  # None indicates inference time
-                    )
-                        
-                all_unary_res = []
-                for unary in target_attributes_preprocessed:
-                    _, batched_image_unary_probs, _, _ = \
+                    batched_image_cate_probs, _, _, _ = \
                         self.predicate_model(
                             batched_video_ids=[0],
                             batched_videos=[image],
@@ -661,106 +658,118 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
                             batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
                             batched_names=[query_objects],  # Dataset-wise categorical labels
                             batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
-                            batched_unary_kws=[unary],  # Dataset-wise unary predicate labels
+                            batched_unary_kws=[[]],  # Dataset-wise unary predicate labels
                             batched_binary_kws=[[]],  # Dataset-wise binary predicate labels
                             batched_obj_pairs=[],  # Ground truth binary relations
                             batched_video_splits=[0],  # [number of videos]
                             batched_binary_predicates=[None],  # None indicates inference time
                         )
-                    all_unary_res.append(batched_image_unary_probs)
-                    
-                reformatted_unary_res = {}
-                for unary_res in all_unary_res:
-                    for  (fid, oid, kw) in unary_res[0].keys():
-                        if not oid in reformatted_unary_res:
-                            reformatted_unary_res[oid] = {}
-                        if kw in target_attributes:
-                            reformatted_unary_res[oid][kw] = unary_res[0][(fid, oid, kw)].item()
-                
-
-                aggr_res = {}
-                aggr_block = {}
-                for oid in reformatted_unary_res: 
-                    if not oid in aggr_res:
-                        aggr_res[oid] = []
-                        for attr in reformatted_unary_res[oid]:
-                            aggr_res[oid].append(reformatted_unary_res[oid][attr])
-                
-                predicted_name = {}
-                for (oid, name) in batched_image_cate_probs[0]:
-                    prob = batched_image_cate_probs[0][(oid, name)].item()
-                    if not oid in predicted_name:
-                        predicted_name[oid] = []
-                    predicted_name[oid].append((prob, name))
-                
-                for oid in predicted_name:
-                    predicted_name[oid] = sorted(predicted_name[oid], reverse=True)                
-                   
-                for oid in predicted_name:
-                    top_prob, name = sorted(predicted_name[oid], reverse=True)[0]
-                    if not oid in aggr_res:
-                        aggr_res[oid] = []
-                    
-                    if name in target_name:
-                        aggr_res[oid].append(top_prob)
-                    else:
-                        # the top predicted name is not the target name
-                        aggr_res[oid].append(0)
-
-                    if name in blocking_objects:
-                        aggr_block[oid] = top_prob
+                            
+                    all_unary_res = []
+                    for unary in target_attributes_preprocessed:
+                        _, batched_image_unary_probs, _, _ = \
+                            self.predicate_model(
+                                batched_video_ids=[0],
+                                batched_videos=[image],
+                                batched_masks=batched_pred_masks,  # batched_object_ids * video_height * video_width
+                                batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
+                                batched_names=[query_objects],  # Dataset-wise categorical labels
+                                batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
+                                batched_unary_kws=[unary],  # Dataset-wise unary predicate labels
+                                batched_binary_kws=[[]],  # Dataset-wise binary predicate labels
+                                batched_obj_pairs=[],  # Ground truth binary relations
+                                batched_video_splits=[0],  # [number of videos]
+                                batched_binary_predicates=[None],  # None indicates inference time
+                            )
+                        all_unary_res.append(batched_image_unary_probs)
                         
-                avg_unary_res = {}
-                for oid in aggr_res:
-                    avg_val = sum(aggr_res[oid]) / len(aggr_res[oid])
-                    if avg_val > self.aggr_thres:
-                        avg_unary_res[oid] = avg_val
+                    reformatted_unary_res = {}
+                    for unary_res in all_unary_res:
+                        for  (fid, oid, kw) in unary_res[0].keys():
+                            if not oid in reformatted_unary_res:
+                                reformatted_unary_res[oid] = {}
+                            if kw in target_attributes:
+                                reformatted_unary_res[oid][kw] = unary_res[0][(fid, oid, kw)].item()
                     
-                top_objects = sorted([(v, k) for k, v in avg_unary_res.items()], reverse=True)[:self.k]
-                top_objects_probs = {oid: prob for prob, oid in top_objects}
-                
-                top_blocking_objects = sorted([(v, k) for k, v in aggr_block.items()], reverse=True)[:self.k]
-                top_blocking_objects_probs = {oid: prob for prob, oid in top_blocking_objects}
-                selected_blocking_objects = list(top_blocking_objects_probs.keys())
-                
-                selected_objects = list(top_objects_probs.keys()) + list(top_blocking_objects_probs.keys())
-                selected_object_bboxes = boxes[selected_objects]
-                
-                # selected_blocking_object_bboxes = boxes[selected_blocking_objects]
-                
-                prob_labels = []
-                for oid in top_objects_probs:
-                    # prob_labels.append(f"{top_objects_probs[oid]:.2f}::{target_name[0]}")
-                    prob_labels.append(target_name[0])
+                    aggr_res = {}
+                    aggr_block = {}
+                    for oid in reformatted_unary_res: 
+                        if not oid in aggr_res:
+                            aggr_res[oid] = []
+                            for attr in reformatted_unary_res[oid]:
+                                aggr_res[oid].append(reformatted_unary_res[oid][attr])
+                    
+                    predicted_name = {}
+                    for (oid, name) in batched_image_cate_probs[0]:
+                        prob = batched_image_cate_probs[0][(oid, name)].item()
+                        if not oid in predicted_name:
+                            predicted_name[oid] = []
+                        predicted_name[oid].append((prob, name))
+                    
+                    for oid in predicted_name:
+                        predicted_name[oid] = sorted(predicted_name[oid], reverse=True)                
+                    
+                    for oid in predicted_name:
+                        top_prob, name = sorted(predicted_name[oid], reverse=True)[0]
+                        if not oid in aggr_res:
+                            aggr_res[oid] = []
+                        
+                        if name in target_name:
+                            aggr_res[oid].append(top_prob)
+                        else:
+                            # the top predicted name is not the target name
+                            aggr_res[oid].append(0)
 
-                    # prob_labels.append("")
-                     
-                for oid in top_blocking_objects_probs:
-                    # prob_labels.append(f"{top_blocking_objects_probs[oid]:.2f}::{blocking_objects[0]}")
-                    # prob_labels.append("")
-                    prob_labels.append(blocking_objects[0])
+                        if name in blocking_objects:
+                            aggr_block[oid] = top_prob
+                            
+                    avg_unary_res = {}
+                    for oid in aggr_res:
+                        avg_val = sum(aggr_res[oid]) / len(aggr_res[oid])
+                        if avg_val > self.aggr_thres:
+                            avg_unary_res[oid] = avg_val
+                        
+                    top_objects = sorted([(v, k) for k, v in avg_unary_res.items()], reverse=True)[:self.k]
+                    top_objects_probs = {oid: prob for prob, oid in top_objects}
                     
-                if not len(selected_object_bboxes) == 0:
-                    save_prompts_one_image(frame_image=image, boxes=selected_object_bboxes, labels=["" for _ in selected_object_bboxes], points=[], save_path=new_image_path)        
+                    top_blocking_objects = sorted([(v, k) for k, v in aggr_block.items()], reverse=True)[:self.k]
+                    top_blocking_objects_probs = {oid: prob for prob, oid in top_blocking_objects}
+                    selected_blocking_objects = list(top_blocking_objects_probs.keys())
+                    
+                    selected_objects = list(top_objects_probs.keys()) + list(top_blocking_objects_probs.keys())
+                    selected_object_bboxes = boxes[selected_objects]
+                    
+                    # selected_blocking_object_bboxes = boxes[selected_blocking_objects]
+                    
+                    prob_labels = []
+                    for oid in top_objects_probs:
+                        # prob_labels.append(f"{top_objects_probs[oid]:.2f}::{target_name[0]}")
+                        prob_labels.append(target_name[0])
+
+                        # prob_labels.append("")
+                        
+                    for oid in top_blocking_objects_probs:
+                        # prob_labels.append(f"{top_blocking_objects_probs[oid]:.2f}::{blocking_objects[0]}")
+                        # prob_labels.append("")
+                        prob_labels.append(blocking_objects[0])
+                        
+                    if not len(selected_object_bboxes) == 0:
+                        save_prompts_one_image(frame_image=image, boxes=selected_object_bboxes, labels=["" for _ in selected_object_bboxes], points=[], save_path=new_image_path)        
+                    else:
+                        new_image_path = image_path
+                    
+                    if not self.boundingbox:
+                        new_image_path = image_path
+                    
+                    self.processed_images[image_path] = new_image_path
+                    
+                    # save_prompts_one_image(frame_image=image, boxes=boxes, labels=["obj" for _ in boxes], points=[], save_path="full.png")        
+
                 else:
+                    selected_object_bboxes = []
+                    prob_labels = []
                     new_image_path = image_path
                 
-                if not self.boundingbox:
-                    new_image_path = image_path
-                
-                self.processed_images[image_path] = new_image_path
-                 
-                # save_prompts_one_image(frame_image=image, boxes=boxes, labels=["obj" for _ in boxes], points=[], save_path="full.png")        
-
-                # if not image_path in obs:
-                    
-                    # obs.append(image_path)
-                     # update to bboxed image path
-            else:
-                selected_object_bboxes = []
-                prob_labels = []
-                new_image_path = image_path
-            
             if self.multiview or self.multistep:
                 obs.append(new_image_path) # update to bboxed image path
             else:

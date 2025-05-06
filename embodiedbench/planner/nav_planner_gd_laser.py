@@ -546,7 +546,7 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
                 continue
             
             boxes.append(reformated[ct])
-,            labels.append(classes[class_id])
+            labels.append(classes[class_id])
             
         if len(boxes) == 0:
             boxes = torch.tensor([])

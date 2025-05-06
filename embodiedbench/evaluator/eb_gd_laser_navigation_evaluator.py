@@ -279,7 +279,7 @@ if __name__ == '__main__':
     #           'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
     #           'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',}
     
-    config = {'model_name': 'gemini-1.5-pro', 
+    config = {'model_name': 'gemini-2.0-flash', 
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 

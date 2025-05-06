@@ -561,7 +561,8 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
         
         # Preprocess query attributes for the case where one object having multiple attribute
         query_attribute_ls = [[attr, f"not {attr}"] for attr in query_attributes]
-
+        prob_labels, selected_object_bboxes = [], []
+        
         if not len(boxes) == 0:
             height, width = image.shape[0], image.shape[1]
             batched_pred_masks = [bbox_to_mask(bbox, height, width) for bbox in boxes]

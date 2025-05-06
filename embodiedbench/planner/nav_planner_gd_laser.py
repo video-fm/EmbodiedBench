@@ -480,6 +480,9 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
     
     def predict_gd(self, image, classes, box_threshold=0.5, text_threshold=0.4):
         
+        if len(classes) == 0:
+            return [], []
+        
         caption = ". ".join(classes)
         processed_caption = preprocess_caption(caption)
         processed_image = self.grounding_model.preprocess_image(image_bgr=image).to(self.grounding_model.device)
@@ -514,6 +517,7 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             boxes=boxes,
             logits=logits
         )
+        
         class_id = self.grounding_model.phrases2classes(phrases=phrases, classes=classes)
         detections.class_id = class_id
         detection_ls.append(detections)
@@ -542,7 +546,7 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
                 continue
             
             boxes.append(reformated[ct])
-            labels.append(classes[class_id])
+,            labels.append(classes[class_id])
             
         if len(boxes) == 0:
             boxes = torch.tensor([])

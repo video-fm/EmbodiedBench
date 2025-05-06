@@ -292,7 +292,7 @@ if __name__ == '__main__':
               'block_objects': False,
               'multistep': False, 
               'resolution': 500, 
-              'exp_name': 'history_gd_bbox_0.1_with_bbox_with_text', 
+              'exp_name': 'refactor_check', 
               'visual_icl': False, 
               'tp': 4,
               'action_num_per_plan': 5,
@@ -301,7 +301,7 @@ if __name__ == '__main__':
               'purpose': "retest",
               'icl_abl':0, 
               'visual':0,
-              'gd_only': True,
+              'gd_only': False,
               'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
               'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',
               }

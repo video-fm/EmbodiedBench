@@ -279,7 +279,7 @@ if __name__ == '__main__':
     #           'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
     #           'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',}
     
-    config = {'model_name': 'OpenGVLab/InternVL2_5-38B-MPO', 
+    config = {'model_name': 'gemini-1.5-pro', 
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 
@@ -288,11 +288,11 @@ if __name__ == '__main__':
               'n_shots': 3, 
               'multiview': False, 
               'detection_box': True, 
-              'sg_text': False,
+              'sg_text': True,
               'block_objects': False,
               'multistep': False, 
               'resolution': 500, 
-              'exp_name': 'abl_image_only', 
+              'exp_name': 'gd_laser', 
               'visual_icl': False, 
               'tp': 4,
               'action_num_per_plan': 5,
@@ -301,7 +301,7 @@ if __name__ == '__main__':
               'purpose': "retest",
               'icl_abl':0, 
               'visual':0,
-              'gd_only': False,
+              'gd_only': False, 
               'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
               'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',
               }

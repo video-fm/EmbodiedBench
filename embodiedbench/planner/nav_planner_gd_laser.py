@@ -672,6 +672,7 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
         
         target_relations = sg_info['target_relation']
         relations = set()
+
         for (s, r, o) in target_relations:
             related_objects.add(s)
             related_objects.add(o)
@@ -835,6 +836,7 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
                 return -2,'''{"visual_state_description":"qwen model generate empty action due to inappropriate content check", "reasoning_and_reflection":"invalid json, random action",
                    "language_plan":"invalid json, random action"}'''
 
+       
         if self.chat_history:
             self.episode_messages.append(
                 {
@@ -845,13 +847,17 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             
         logger.debug(f"Model Output:\n{out}\n")
         action, valid = self.json_to_action(out)
-        self.planner_steps += 1
+        
         if valid:
-            return action, out
+            plan = json.loads(out)
+            plan['scene_graph'] = sg_info
+            out_str = json.dumps(plan)
         else:
-            out = '''{"visual_state_description":"invalid json, random action", "reasoning_and_reflection":"invalid json, random action",
+            out_str = '''{"visual_state_description":"invalid json, random action", "reasoning_and_reflection":"invalid json, random action",
                    "language_plan":"invalid json, random action"}'''
-            return action, out
+                   
+        self.planner_steps += 1
+        return action, out_str
 
     def act_video(self, observation, user_instruction):
         if type(observation) == dict:

@@ -50,29 +50,8 @@ The fields in above JSON follows the purpose below:
 '''
 
 
-# laser_template = '''
-# The output json format should be {'visual_state_description':str, 'target_object_location': str,  'reasoning_and_reflection':str, 'language_plan':str, 'executable_plan':List[{'action_id':int, 'action_name':str}...]}
-# The fields in above JSON follows the purpose below:
-# 1. visual_state_description is for description of current state from the visual image, 
-# 2. target_object_location is for the location of the target object in the image. If both the scene graph and the visual description does not contain the target object, please output: not clearly identifiable.
-# 3. reasoning_and_reflection is for summarizing the history of interactions and any available environmental feedback. Additionally, provide reasoning as to why the last action or plan failed and did not finish the task, 
-# 4. language_plan is for describing a list of actions to achieve the user instruction. Each action is started by the step number and the action name, 
-# 5. executable_plan is a list of actions needed to achieve the user instruction, with each action having an action ID and a name.
-# 6. keep your plan efficient and concise.
-# !!! When generating content for JSON strings, avoid using any contractions or abbreviated forms (like 's, 're, 've, 'll, 'd, n't) that use apostrophes. Instead, write out full forms (is, are, have, will, would, not) to prevent parsing errors in JSON. Please do not output any other thing more than the above-mentioned JSON, do not include ```json and ```!!!.
-# '''
 laser_template = template
 
-# laser_lang_template = '''
-# The output json format should be {'visual_state_description':str, 'target_object_location': str, 'reasoning_and_reflection':str, 'language_plan':str, 'executable_plan':List[{'action_id':int, 'action_name':str}...]}
-# The fields in above JSON follows the purpose below:
-# 1. target_object_location is for the location of the target object in the image, If both the scene graph and the visual description does not contain the target object, please output: not clearly identifiable.
-# 2. reasoning_and_reflection is for summarizing the history of interactions and any available environmental feedback. Additionally, provide reasoning as to why the last action or plan failed and did not finish the task, 
-# 3. language_plan is for describing a list of actions to achieve the user instruction. Each action is started by the step number and the action name, 
-# 4. executable_plan is a list of actions needed to achieve the user instruction, with each action having an action ID and a name.
-# 5. keep your plan efficient and concise.
-# !!! When generating content for JSON strings, avoid using any contractions or abbreviated forms (like 's, 're, 've, 'll, 'd, n't) that use apostrophes. Instead, write out full forms (is, are, have, will, would, not) to prevent parsing errors in JSON. Please do not output any other thing more than the above-mentioned JSON, do not include ```json and ```!!!.
-# '''
 laser_lang_template = template_lang
 
 def fix_json(json_str):
@@ -206,7 +185,13 @@ class ActionPlan(BaseModel):
     reasoning_and_reflection: str
     language_plan: str
     executable_plan: list[ExecutableAction]
-
+class TargetSG(BaseModel):
+    target_name: list[str]
+    blocking_name: list[str]
+    target_attribute: list[str]
+    target_relation: list[list[str]]
+    related_objects: list[str]
+    
 class ActionPlan_manip(BaseModel):
     visual_state_description: str
     reasoning_and_reflection: str
@@ -225,6 +210,7 @@ class ActionPlan_lang_manip(BaseModel):
     reasoning_and_reflection: str
     language_plan: str
     executable_plan: str
+
 
 # Function to encode a local image into data URL 
 def local_image_to_data_url(image_path):

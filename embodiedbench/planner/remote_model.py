@@ -10,7 +10,7 @@ import lmdeploy
 from lmdeploy import pipeline, GenerationConfig, PytorchEngineConfig
 from embodiedbench.planner.planner_config.generation_guide import llm_generation_guide, vlm_generation_guide, vlm_sg_generation_guide, vlm_target_generation_guide
 from embodiedbench.planner.planner_config.generation_guide_manip import llm_generation_guide_manip, vlm_generation_guide_manip
-from embodiedbench.planner.planner_utils import convert_format_2claude, convert_format_2gemini, ActionPlan_1, ActionPlan, ActionPlan_lang, ActionPlan_1_manip, ActionPlan_manip, ActionPlan_lang_manip
+from embodiedbench.planner.planner_utils import convert_format_2claude, convert_format_2gemini, ActionPlan_1, ActionPlan, ActionPlan_lang, ActionPlan_1_manip, ActionPlan_manip, ActionPlan_lang_manip, TargetSG
 
 temperature = 0
 max_completion_tokens = 8192
@@ -73,23 +73,23 @@ class RemoteModel:
             return self._call_local(message_history, get_scene_graph)
         else:
             if "claude" in self.model_name:
-                return self._call_claude(message_history)
+                return self._call_claude(message_history, get_scene_graph)
             elif "gemini" in self.model_name:
-                return self._call_gemini(message_history)
+                return self._call_gemini(message_history, get_scene_graph)
             elif "gpt" in self.model_name:
-                return self._call_gpt(message_history)
+                return self._call_gpt(message_history, get_scene_graph)
             elif 'qwen' in self.model_name:
-                return self._call_gpt(message_history)
+                return self._call_gpt(message_history, get_scene_graph)
             elif "Qwen2-VL-7B-Instruct" in self.model_name:
-                return self._call_qwen7b(message_history)
+                return self._call_qwen7b(message_history, get_scene_graph)
             elif "Qwen2-VL-72B-Instruct" in self.model_name:
-                return self._call_qwen72b(message_history)
+                return self._call_qwen72b(message_history, get_scene_graph)
             elif "Llama-3.2-11B-Vision-Instruct" in self.model_name:
-                return self._call_llama11b(message_history)
+                return self._call_llama11b(message_history, get_scene_graph)
             elif "meta-llama/Llama-3.2-90B-Vision-Instruct" in self.model_name:
-                return self._call_qwen72b(message_history)
+                return self._call_qwen72b(message_history, get_scene_graph)
             elif "90b-vision-instruct" in self.model_name:
-                return self._call_llama90(message_history)
+                return self._call_llama90(message_history, get_scene_graph)
             elif "OpenGVLab/InternVL" in self.model_name:
                 return self._call_intern38b(message_history, get_scene_graph)
             # elif "OpenGVLab/InternVL2_5-38B" in self.model_name:
@@ -100,6 +100,7 @@ class RemoteModel:
                 raise ValueError(f"Unsupported model name: {self.model_name}")
 
     def _call_local(self, message_history: list, get_scene_graph=False):
+        
         if self.task_type == 'manip':
             response_format = {
                 "type": "json_schema",
@@ -171,32 +172,37 @@ class RemoteModel:
 
         return response.content[0].text 
 
-    def _call_gemini(self, message_history: list):
+    def _call_gemini(self, message_history: list, get_scene_graph=False):
 
         if not self.language_only:
             message_history = convert_format_2gemini(message_history)
 
-        if self.task_type == 'manip':
-            response = self.model.beta.chat.completions.parse(
-                model=self.model_name, 
-                messages=message_history,
-                response_format= ActionPlan_lang_manip if self.language_only else ActionPlan_manip,
-                temperature=temperature,
-                max_tokens=max_completion_tokens
-            )
+        if self.task_type == 'manip': 
+            if self.language_only:
+                response_format = ActionPlan_lang_manip
+            elif not self.language_only:
+                response_format = ActionPlan_manip
         else:
-            response = self.model.beta.chat.completions.parse(
-                model=self.model_name, 
-                messages=message_history,
-                response_format= ActionPlan_lang if self.language_only else ActionPlan,
-                temperature=temperature,
-                max_tokens=max_completion_tokens
-            )
+            if get_scene_graph:
+                response_format = TargetSG
+            elif self.language_only:
+                response_format = ActionPlan
+            else:
+                response_format = ActionPlan_lang
+            
+        response = self.model.beta.chat.completions.parse(
+            model=self.model_name, 
+            messages=message_history,
+            response_format=response_format,
+            temperature=temperature,
+            max_tokens=max_completion_tokens
+        )
+
         tokens = response.usage.prompt_tokens
 
         return str(response.choices[0].message.parsed.model_dump_json())
 
-    def _call_gpt(self, message_history: list):
+    def _call_gpt(self, message_history: list, get_scene_graph=False):
 
         if not self.language_only:
             if self.task_type == 'manip':
@@ -220,7 +226,7 @@ class RemoteModel:
 
         return out
     
-    def _call_qwen7b(self, message_history: list):
+    def _call_qwen7b(self, message_history: list, get_scene_graph=False):
 
         if not self.language_only:
             message_history = convert_format_2gemini(message_history)
@@ -247,7 +253,7 @@ class RemoteModel:
         out = response.choices[0].message.content
         return out
     
-    def _call_llama90(self, message_history: list):
+    def _call_llama90(self, message_history: list, get_scene_graph=False):
         if self.task_type == "manip":
             response = self.model.chat.completions.create(
                 model="accounts/fireworks/models/llama-v3p2-90b-vision-instruct",
@@ -267,7 +273,7 @@ class RemoteModel:
             out = response.choices[0].message.content
         return out
     
-    def _call_llama11b(self, message_history):
+    def _call_llama11b(self, message_history, get_scene_graph=False):
 
         if not self.language_only:
             message_history = convert_format_2gemini(message_history)
@@ -294,7 +300,7 @@ class RemoteModel:
         return out
     
 
-    def _call_qwen72b(self, message_history):
+    def _call_qwen72b(self, message_history, get_scene_graph=False):
         if not self.language_only:
             message_history = convert_format_2gemini(message_history)
 

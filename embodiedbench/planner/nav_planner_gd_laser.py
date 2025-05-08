@@ -174,6 +174,8 @@ class EBNavigationPlanner():
                  scene_graph_text = False,
                  gd_only = False,
                  tp=1, 
+                 top_k=1,
+                 aggr_thres=0.1,
                  gd_config_path='',
                  gd_checkpoint_path='',
                  kwargs={}):
@@ -199,8 +201,8 @@ class EBNavigationPlanner():
         self.blockingobj = blockingobj
         self.scene_graph_text = scene_graph_text
         self.gd_only = gd_only
-        self.aggr_thres = 0.1
-        self.k = 1
+        self.aggr_thres = aggr_thres
+        self.k = top_k
         self.common_objects = ["wall", "door", "cabinet", "stove", "table", "shadow", "window", "mirror", "other"]
 
         if not self.visual_icl:
@@ -677,7 +679,10 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
         target_relations = sg_info['target_relation']
         relations = set()
 
-        for (s, r, o) in target_relations:
+        for rel in target_relations:
+            if not len(rel) == 3:
+                continue
+            (s, r, o) = rel
             related_objects.add(s)
             related_objects.add(o)
             relations.add(r)
@@ -754,8 +759,7 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             if self.gd_only:
                 
                 # Predict bounding box with grounding dino
-                labels, boxes = self.predict_gd(image, gd_query_objects, box_threshold=0.2, text_threshold=0.1)
-            
+                labels, boxes = self.predict_gd(image, target_names, box_threshold=0.2, text_threshold=0.1)
             
                 target_labels, target_bboxes = [], []
                 for label, box in zip(labels, boxes):

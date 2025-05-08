@@ -10,11 +10,12 @@ import lmdeploy
 from lmdeploy import pipeline, GenerationConfig, PytorchEngineConfig
 from embodiedbench.planner.planner_config.generation_guide import llm_generation_guide, vlm_generation_guide, vlm_sg_generation_guide, vlm_target_generation_guide
 from embodiedbench.planner.planner_config.generation_guide_manip import llm_generation_guide_manip, vlm_generation_guide_manip
-from embodiedbench.planner.planner_utils import convert_format_2claude, convert_format_2gemini, ActionPlan_1, ActionPlan, ActionPlan_lang, ActionPlan_1_manip, ActionPlan_manip, ActionPlan_lang_manip, TargetSG
+from embodiedbench.planner.planner_utils import convert_format_2claude, convert_format_2gemini, ActionPlan_1, ActionPlan, ActionPlan_lang, ActionPlan_1_manip, ActionPlan_manip, ActionPlan_lang_manip, TargetSG, convert_format_2gpt
 
 temperature = 0
 max_completion_tokens = 8192
 remote_url = os.environ.get('remote_url')
+client = OpenAI()
 
 class RemoteModel:
     def __init__(
@@ -158,7 +159,7 @@ class RemoteModel:
             
         return out
 
-    def _call_claude(self, message_history: list):
+    def _call_claude(self, message_history: list, get_scene_graph=False):
 
         if not self.language_only:
             message_history = convert_format_2claude(message_history)
@@ -170,6 +171,7 @@ class RemoteModel:
             messages=message_history
         )
 
+        
         return response.content[0].text 
 
     def _call_gemini(self, message_history: list, get_scene_graph=False):
@@ -205,24 +207,41 @@ class RemoteModel:
     def _call_gpt(self, message_history: list, get_scene_graph=False):
 
         if not self.language_only:
-            if self.task_type == 'manip':
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide_manip))
-            else:
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide))
+            message_history = convert_format_2gpt(message_history)
+            
+        # if self.task_type == 'manip': 
+        #     if self.language_only:
+        #         response_format = llm_generation_guide_manip
+        #     elif not self.language_only:
+        #         response_format = vlm_generation_guide_manip
+        # else:
+        #     if get_scene_graph:
+        #         response_format = vlm_target_generation_guide
+        #     elif self.language_only:
+        #         response_format = llm_generation_guide
+        #     else:
+        #         response_format = vlm_generation_guide
+        
+        if self.task_type == 'manip': 
+            if self.language_only:
+                response_format = ActionPlan_lang_manip
+            elif not self.language_only:
+                response_format = ActionPlan_manip
         else:
-            if self.task_type == 'manip':
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide_manip))
+            if get_scene_graph:
+                response_format = TargetSG
+            elif self.language_only:
+                response_format = ActionPlan_lang 
             else:
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide))
-
-        response = self.model.chat.completions.create(
+                response_format = ActionPlan
+                
+        response = client.responses.parse(
             model=self.model_name,
-            messages=message_history,
-            response_format=response_format,
+            input=message_history,
+            text_format=response_format,
             temperature=temperature,
-            max_tokens=max_completion_tokens
         )
-        out = response.choices[0].message.content
+        out = response.output_text
 
         return out
     

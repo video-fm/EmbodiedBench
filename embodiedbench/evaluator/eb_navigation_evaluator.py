@@ -59,7 +59,7 @@ class EB_NavigationEvaluator():
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
 
             if eval_set == "base":
-                selected_indexes = list(range(35, 60))
+                selected_indexes = list(range(0, 60))
             else: 
                 selected_indexes = list(range(0, 60))
                 
@@ -292,18 +292,19 @@ if __name__ == '__main__':
     #     'visual':0 #sys.argv[11]=='1',
     # }
     
-    config = {'model_name': 'OpenGVLab/InternVL2_5-38B-MPO', 
+    config = {'model_name': 'gemini-2.0-flash', 
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 
-              'eval_sets': ['visual_appearance', 'common_sense', 'complex_instruction'], 
+            #   'eval_sets': ['common_sense', 'base',  'visual_appearance', 'complex_instruction', 'long_horizon'], 
+              'eval_sets': ['complex_instruction'], 
               'chat_history': True, 
               'n_shots': 3, 
               'multiview': False, 
               'detection_box': False, 
               'multistep': False, 
               'resolution': 500, 
-              'exp_name': 'baseline_all', 
+              'exp_name': 'baseline', 
               'visual_icl': False, 
               'tp': 4,
               'action_num_per_plan': 5,

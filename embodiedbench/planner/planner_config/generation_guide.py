@@ -1,5 +1,5 @@
 vlm_generation_guide={
-    "type": "object",
+    "type": "json_object",
     'properties': {
         "visual_state_description": {
             "type": "string",
@@ -17,7 +17,7 @@ vlm_generation_guide={
             "type": "array",
             "description": "A list of actions needed to achieve the user instruction, with each action having an action ID and a name. Do not output empty list.",
             "items": {
-                "type": "object",
+                "type": "json_object",
                 "properties": {
                     "action_id": {
                         "type": "integer",
@@ -36,7 +36,7 @@ vlm_generation_guide={
 }
 
 llm_generation_guide={
-    "type": "object",
+    "type": "json_object",
     'properties': {
         "reasoning_and_reflection": {
             "type": "string",
@@ -50,7 +50,7 @@ llm_generation_guide={
             "type": "array",
             "description": "A list of actions needed to achieve the user instruction, with each action having an action ID and a name. List length should not exceed 20.",
             "items": {
-                "type": "object",
+                "type": "json_object",
                 "properties": {
                     "action_id": {
                         "type": "integer",
@@ -69,7 +69,7 @@ llm_generation_guide={
 }
 
 vlm_sg_generation_guide={
-    "type": "object",
+    "type": "json_object",
     'properties': {
         "scene_graph_entities": {
             "type": "array",
@@ -83,43 +83,101 @@ vlm_sg_generation_guide={
     "required": ["scene_graph_entities"],
 }
 
+
 vlm_target_generation_guide = {
-    "type": "object",
-    "description": "Mapping from entity index to its target scene graph components.",
-    "patternProperties": {
-        "^[0-9]+$": {
-            "type": "object",
-            "properties": {
-                "target_name": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "description": "List of names associated with this entity."
+        "type": "json_object",
+        "parameters": {
+            "target_name": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "description": "The main object(s) of interest"
                 },
-                "target_attribute": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "description": "List of attributes describing the entity."
-                },
-                "target_relation": {
-                    "type": "array",
-                    "items": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "minItems": 3,
-                        "maxItems": 3,
-                        "description": "A relation expressed as [subject, relation, object]."
-                    },
-                    "description": "List of relations involving the entity."
-                }
+                "description": "List of names representing the target entity"
             },
-            "required": ["target_name", "target_attribute", "target_relation"]
-        }
-    },
-    "additionalProperties": False
+            "blocking_name": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "description": "Names of objects that block or obscure the target"
+                },
+                "description": "List of object names that are considered blocking"
+            },
+            "target_attribute": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "description": "Attributes or spatial details about the target"
+                },
+                "description": "Attributes associated with the target entity"
+            },
+            "target_relation": {
+                "type": "array",
+                # "items": {
+                #     "type": "array",
+                #     "items": {
+                #         "type": "string"
+                #     },
+                #     "minItems": 3,
+                #     "maxItems": 3,
+                #     "description": "A relation in the form [subject, relation, object]"
+                # },
+                "items": {
+                    "type": "string",
+                    "description": "A relation in the form [subject, relation, object]"
+                },
+                "description": "Triplets describing relationships involving the target"
+            },
+            "related_objects": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "description": "Objects mentioned in relation to the target"
+                },
+                "description": "Other objects that co-occur with or are related to the target"
+            }
+        },
+    "additionalProperties": False,
+    "required": ["target_name", "blocking_name", "target_attribute", "target_relation", "related_objects"]
 }
+
+# vlm_target_generation_guide = {
+#     "type": "json_object",
+#     "description": "Mapping from entity index to its target scene graph components.",
+#     "patternProperties": {
+#         "^[0-9]+$": {
+#             "type": "json_object",
+#             "properties": {
+#                 "target_name": {
+#                     "type": "array",
+#                     "items": {
+#                         "type": "string"
+#                     },
+#                     "description": "List of names associated with this entity."
+#                 },
+#                 "target_attribute": {
+#                     "type": "array",
+#                     "items": {
+#                         "type": "string"
+#                     },
+#                     "description": "List of attributes describing the entity."
+#                 },
+#                 "target_relation": {
+#                     "type": "array",
+#                     "items": {
+#                         "type": "array",
+#                         "items": {
+#                             "type": "string"
+#                         },
+#                         "minItems": 3,
+#                         "maxItems": 3,
+#                         "description": "A relation expressed as [subject, relation, object]."
+#                     },
+#                     "description": "List of relations involving the entity."
+#                 }
+#             },
+#             "required": ["target_name", "target_attribute", "target_relation"]
+#         }
+#     },
+#     "additionalProperties": False
+# }

@@ -176,6 +176,64 @@ def convert_format_2gemini(messages):
     return new_messages
 
 
+def convert_format_2gpt(messages):
+    new_messages = []
+    
+    for message in messages:
+        if message["role"] == "user":
+
+            new_content = []
+            for item in message["content"]:
+                if item.get("type") == "image_url":
+                    
+                    new_item = {
+                        "type": "input_image",
+                        "image_url": item["image_url"]["url"]
+                    }
+                    new_content.append(new_item)
+                elif item.get("type") == "text":
+                    new_item = {
+                        "type": "input_text",
+                        "text": item['text']
+                    }
+                    new_content.append(new_item)
+                else:
+                    new_content.append(item)
+
+            new_message = message.copy()
+            new_message["content"] = new_content
+            new_messages.append(new_message)
+
+        elif message["role"] == "assistant":
+            new_content = []
+            for item in message["content"]:
+                if item.get("type") == "image_url":
+                    
+                    new_item = {
+                        "type": "input_image",
+                        "image_url": item["image_url"]["url"]
+                    }
+                    new_content.append(new_item)
+                    
+                elif item.get("type") == "text":
+                    new_item = {
+                        "type": "output_text",
+                        "text": item['text']
+                    }
+                    new_content.append(new_item)
+                else:
+                    new_content.append(item)
+
+            new_message = message.copy()
+            new_message["content"] = new_content
+            new_messages.append(new_message)
+            
+        else:
+            new_messages.append(message)
+        
+    return new_messages
+
+
 
 class ExecutableAction(typing.TypedDict): 
     action_id: int

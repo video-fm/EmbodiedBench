@@ -97,8 +97,11 @@ class EB_NavigationEvaluator():
             # if eval_set == "complex_instruction":
             #     # selected_indexes = [i - 1 for i in [44, 45, 47, 49, 50, 51, 52, 54, 56, 57, 59, 33, 34, 32, 35, 37, 38, 40, 42, 43,]]
             #     selected_indexes = [i - 1 for i in [51, 54, 59, 33, 35]]
-            if eval_set == "base":
-                selected_indexes = list(range(20, 60))
+            
+            if eval_set == "visual_appearance":
+                selected_indexes = list(range(4, 60))
+            # if eval_set == "complex_instruction":
+            #     selected_indexes = [i - 1 for i in [38, 26, 44, 35, 18, 33, 43, 23, 32, 54, 49, 9, 8, 58, 57, 30, 16, 17]]
             else: 
                 selected_indexes = list(range(0, 60))
                 
@@ -120,7 +123,10 @@ class EB_NavigationEvaluator():
                                            multiview=self.config['multiview'], multistep = self.config['multistep'], visual_icl = self.config['visual_icl'],
                                            boundingbox=self.config['detection_box'], scene_graph_text=self.config['sg_text'],
                                            gd_only=self.config['gd_only'], tp=self.config['tp'],
-                                           blockingobj=self.config['block_objects'], gd_checkpoint_path=self.gd_checkpoint_path, gd_config_path=self.gd_config_path)
+                                           blockingobj=self.config['block_objects'], 
+                                           gd_checkpoint_path=self.gd_checkpoint_path, 
+                                           gd_config_path=self.gd_config_path,
+                                           top_k=self.config['top_k'], aggr_thres=self.config['aggr_thres'])
             
             self.evaluate()
             
@@ -279,11 +285,13 @@ if __name__ == '__main__':
     #           'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
     #           'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',}
     
-    config = {'model_name': 'gemini-2.0-flash', 
+    config = {'model_name': 'gpt-4o', 
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 
-              'eval_sets': ['base', 'common_sense', 'long_horizon', 'visual_appearance', 'complex_instruction'], 
+            #   'eval_sets': ['base', 'common_sense', 'long_horizon', 'visual_appearance', 'complex_instruction'], 
+            #   'eval_sets': ['long_horizon', 'visual_appearance', 'complex_instruction', 'base', 'common_sense'], 
+              'eval_sets': ['visual_appearance', 'complex_instruction', 'common_sense'],
               'chat_history': True, 
               'n_shots': 3, 
               'multiview': False, 
@@ -301,7 +309,9 @@ if __name__ == '__main__':
               'purpose': "retest",
               'icl_abl':0, 
               'visual':0,
-              'gd_only': False, 
+              'gd_only': False,
+              'top_k': 1, 
+              'aggr_thres': 0.1,
               'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
               'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',
               }

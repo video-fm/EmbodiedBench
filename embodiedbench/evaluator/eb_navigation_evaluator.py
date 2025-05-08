@@ -292,13 +292,13 @@ if __name__ == '__main__':
     #     'visual':0 #sys.argv[11]=='1',
     # }
     
-    config = {'model_name': 'gemini-2.0-flash', 
+    config = {'model_name': 'gpt-4o', 
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 
             #   'eval_sets': ['common_sense', 'base',  'visual_appearance', 'complex_instruction', 'long_horizon'], 
-              'eval_sets': ['complex_instruction'], 
-              'chat_history': True, 
+              'eval_sets': ['visual_appearance'], 
+              'chat_history': False, 
               'n_shots': 3, 
               'multiview': False, 
               'detection_box': False, 

@@ -99,7 +99,7 @@ class EB_NavigationEvaluator():
             #     selected_indexes = [i - 1 for i in [51, 54, 59, 33, 35]]
             
             if eval_set == "visual_appearance":
-                selected_indexes = list(range(4, 60))
+                selected_indexes = list(range(0, 60))
             # if eval_set == "complex_instruction":
             #     selected_indexes = [i - 1 for i in [38, 26, 44, 35, 18, 33, 43, 23, 32, 54, 49, 9, 8, 58, 57, 30, 16, 17]]
             else: 
@@ -291,7 +291,7 @@ if __name__ == '__main__':
               'language_only': False, 
             #   'eval_sets': ['base', 'common_sense', 'long_horizon', 'visual_appearance', 'complex_instruction'], 
             #   'eval_sets': ['long_horizon', 'visual_appearance', 'complex_instruction', 'base', 'common_sense'], 
-              'eval_sets': ['visual_appearance', 'complex_instruction', 'common_sense'],
+              'eval_sets': ['visual_appearance', 'complex_instruction', 'common_sense', 'base', 'common_sense'],
               'chat_history': True, 
               'n_shots': 3, 
               'multiview': False, 
@@ -300,7 +300,7 @@ if __name__ == '__main__':
               'block_objects': False,
               'multistep': False, 
               'resolution': 500, 
-              'exp_name': 'gd_laser', 
+              'exp_name': 'gd_laser_topk_3', 
               'visual_icl': False, 
               'tp': 4,
               'action_num_per_plan': 5,
@@ -310,7 +310,7 @@ if __name__ == '__main__':
               'icl_abl':0, 
               'visual':0,
               'gd_only': False,
-              'top_k': 1, 
+              'top_k': 3, 
               'aggr_thres': 0.1,
               'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
               'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',

@@ -233,7 +233,7 @@ class RemoteModel:
             elif self.language_only:
                 response_format = ActionPlan_lang 
             else:
-                response_format = ActionPlan
+                response_format =  ActionPlan
                 
         response = client.responses.parse(
             model=self.model_name,

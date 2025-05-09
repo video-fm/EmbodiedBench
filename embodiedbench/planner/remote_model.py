@@ -188,9 +188,9 @@ class RemoteModel:
             if get_scene_graph:
                 response_format = TargetSG
             elif self.language_only:
-                response_format = ActionPlan
-            else:
                 response_format = ActionPlan_lang
+            else:
+                response_format = ActionPlan
             
         response = self.model.beta.chat.completions.parse(
             model=self.model_name, 

@@ -297,7 +297,7 @@ if __name__ == '__main__':
               'model_type': 'remote', 
               'language_only': False, 
             #   'eval_sets': ['common_sense', 'base',  'visual_appearance', 'complex_instruction', 'long_horizon'], 
-              'eval_sets': ['visual_appearance'], 
+              'eval_sets': ['long_horizon'], 
               'chat_history': False, 
               'n_shots': 3, 
               'multiview': False, 

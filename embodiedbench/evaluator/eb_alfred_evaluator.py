@@ -193,7 +193,7 @@ if __name__ == '__main__':
 
     config = {
         'model_name': 'gemini-2.0-flash',
-        'n_shots': 3,
+        'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,

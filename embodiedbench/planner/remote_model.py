@@ -10,7 +10,19 @@ import lmdeploy
 from lmdeploy import pipeline, GenerationConfig, PytorchEngineConfig
 from embodiedbench.planner.planner_config.generation_guide import llm_generation_guide, vlm_generation_guide, vlm_sg_generation_guide, vlm_target_generation_guide
 from embodiedbench.planner.planner_config.generation_guide_manip import llm_generation_guide_manip, vlm_generation_guide_manip
-from embodiedbench.planner.planner_utils import convert_format_2claude, convert_format_2gemini, ActionPlan_1, ActionPlan, ActionPlan_lang, ActionPlan_1_manip, ActionPlan_manip, ActionPlan_lang_manip, TargetSG, convert_format_2gpt
+from embodiedbench.planner.planner_utils import (
+    convert_format_2claude,
+    convert_format_2gemini,
+    ActionPlan_1,
+    ActionPlan,
+    ActionPlan_lang,
+    ActionPlan_1_manip,
+    ActionPlan_manip,
+    ActionPlan_lang_manip,
+    TargetSG,
+    convert_format_2gpt,
+    TargetEntityName,
+)
 
 temperature = 0
 max_completion_tokens = 8192
@@ -69,14 +81,14 @@ class RemoteModel:
                     raise ValueError(f"Unsupported model name: {model_name}")
 
 
-    def respond(self, message_history: list, get_scene_graph=False):
+    def respond(self, message_history: list, get_scene_graph=False, get_entity_name=False):
         if self.model_type == 'local':
             return self._call_local(message_history, get_scene_graph)
         else:
             if "claude" in self.model_name:
                 return self._call_claude(message_history, get_scene_graph)
             elif "gemini" in self.model_name:
-                return self._call_gemini(message_history, get_scene_graph)
+                return self._call_gemini(message_history, get_scene_graph=get_scene_graph, get_entity_name=get_entity_name)
             elif "gpt" in self.model_name:
                 return self._call_gpt(message_history, get_scene_graph)
             elif 'qwen' in self.model_name:
@@ -174,7 +186,7 @@ class RemoteModel:
         
         return response.content[0].text 
 
-    def _call_gemini(self, message_history: list, get_scene_graph=False):
+    def _call_gemini(self, message_history: list, get_scene_graph=False, get_entity_name=False):
 
         if not self.language_only:
             message_history = convert_format_2gemini(message_history)
@@ -189,6 +201,8 @@ class RemoteModel:
                 response_format = TargetSG
             elif self.language_only:
                 response_format = ActionPlan
+            elif get_entity_name:
+                response_format = TargetEntityName
             else:
                 response_format = ActionPlan_lang
             
@@ -380,6 +394,9 @@ class RemoteModel:
         out = out.replace("'",'"')
         out = out.replace('\"s ', "\'s ")
         out = out.replace('```json', '').replace('```', '')
+        out = out.strip()
+        if out[0] != '{' and out[-1] != '}':
+            out = "{" + out + "}"
         return out
 
 
@@ -419,4 +436,3 @@ if __name__ == "__main__":
 
     response = model.respond(messages)
     print(response)
-

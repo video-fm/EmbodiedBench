@@ -175,7 +175,6 @@ def convert_format_2gemini(messages):
         
     return new_messages
 
-
 def convert_format_2gpt(messages):
     new_messages = []
     
@@ -243,13 +242,17 @@ class ActionPlan(BaseModel):
     reasoning_and_reflection: str
     language_plan: str
     executable_plan: list[ExecutableAction]
+
 class TargetSG(BaseModel):
     target_name: list[str]
     blocking_name: list[str]
     target_attribute: list[str]
     target_relation: list[list[str]]
     related_objects: list[str]
-    
+
+class TargetEntityName(BaseModel):
+    scene_graph_entities: list[str]
+
 class ActionPlan_manip(BaseModel):
     visual_state_description: str
     reasoning_and_reflection: str

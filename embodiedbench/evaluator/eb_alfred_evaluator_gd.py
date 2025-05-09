@@ -237,7 +237,7 @@ if __name__ == '__main__':
 
     config = {
         'model_name': 'OpenGVLab/InternVL2_5-38B',  # 'Qwen/Qwen2-VL-7B-Instruct',
-        'n_shots': 3,
+        'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,

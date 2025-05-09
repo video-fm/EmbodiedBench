@@ -161,10 +161,16 @@ class VLMPlanner():
         self.kwargs = kwargs
         self.action_key = kwargs.pop('action_key', 'action_id')
         
+        # self.scene_graph_prompt = f'''## You are a robot operating in a home. You are given an image and observe the environment for performing the given task. \
+        #     The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'}\
+        #     You are supposed to output in JSON.'''
         self.scene_graph_prompt = f'''## You are a robot operating in a home. You are given an image and observe the environment for performing the given task. \
-            The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'}\
-            You are supposed to output in JSON.'''
-            
+                    The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'}\
+                    Please extract the most visually identifiable features and ignore the more subtle ones.
+                    Please deduce the object names with a synonym if the descriptions is verbose or functional.
+                    For example, substitute "freshly baked baguette" to "loaves", "portable device to access the internet" to "laptop", "light-emiting device on my desk to provide light for my work area" to "desk lamp".
+                    You are supposed to output in JSON.'''
+
         self.grounding_model = gd_Model(
             model_config_path=gd_config_path, 
             model_checkpoint_path=gd_checkpoint_path
@@ -424,7 +430,7 @@ class VLMPlanner():
         sg_message = self.get_message(obs, scene_graph_prompt)
 
         try:
-            out = self.model.respond(sg_message, get_scene_graph=True)
+            out = self.model.respond(sg_message, get_scene_graph=False, get_entity_name=True)
         except Exception as e:
             print(e)
             if 'qwen' in self.model_name:
@@ -436,76 +442,76 @@ class VLMPlanner():
 
         sg_keywords = json.loads(out)['scene_graph_entities']
         all_dets = []
+        if len(sg_keywords) > 0:
+            prompt = prompt + f'\n\n The current image height is 500, width is 500.'
 
-        prompt = prompt + f'\n\n The current image height is 600, width is 600.'
+            # detections = post_process_detections(all_dets, sg_keywords)
+            if type(obs) == str:
+                obs = [obs]
+            if type(observation) == str:
+                observation = [observation]
 
-        # detections = post_process_detections(all_dets, sg_keywords)
-        if type(obs) == str:
-            obs = [obs]
-        if type(observation) == str:
-            observation = [observation]
+            for ct, image_path in enumerate(observation):
+                image_path_ls = image_path.split('/')
+                image_dir, image_name = image_path_ls[:-1], image_path_ls[-1]
+                image_name = image_name.split('.')[0]
+                new_image_name = image_name + '_bbox.png'
+                new_image_path = os.path.join(*image_dir, new_image_name)
 
-        for ct, image_path in enumerate(observation):
-            image_path_ls = image_path.split('/')
-            image_dir, image_name = image_path_ls[:-1], image_path_ls[-1]
-            image_name = image_name.split('.')[0]
-            new_image_name = image_name + '_bbox.png'
-            new_image_path = os.path.join(*image_dir, new_image_name)
-
-            if os.path.exists(new_image_path):
-                obs.append(new_image_path)
-                continue
-
-            image = cv2.imread(image_path)
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-            height, width = image.shape[0], image.shape[1]
-            detection_ls = self.predict_gd(image, sg_keywords, box_threshold=0.4, text_threshold=0.4)
-            assert len(detection_ls) == 1
-            detections = detection_ls[0]
-
-            scene_graph_text = []
-            reformated = torch.tensor([
-                (
-                    get_valid_bbox_val(x1, width), 
-                    get_valid_bbox_val(y1, height),
-                    get_valid_bbox_val(x2, width), 
-                    get_valid_bbox_val(y2, height)
-                )
-                for x1, y1, x2, y2 in detections.xyxy
-            ])
-
-            boxes = []
-            labels = []
-
-            for ct, class_id in enumerate(detections.class_id):
-                if class_id is None:
+                if os.path.exists(new_image_path):
+                    obs.append(new_image_path)
                     continue
-                boxes.append(reformated[ct])
-                labels.append(sg_keywords[class_id])
 
-            if len(boxes) == 0:
-                boxes = torch.tensor([])
-            else:
-                boxes = torch.stack(boxes)
+                image = cv2.imread(image_path)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-            save_prompts_one_image(
-                frame_image=image,
-                boxes=boxes,
-                labels=labels,
-                points=[],
-                save_path=new_image_path
-            )
-            
-            if not image_path in obs:
-                obs.append(image_path)
+                height, width = image.shape[0], image.shape[1]
+                detection_ls = self.predict_gd(image, sg_keywords, box_threshold=0.4, text_threshold=0.4)
+                assert len(detection_ls) == 1
+                detections = detection_ls[0]
 
-            obs.append(new_image_path)  # update to bboxed image path
+                scene_graph_text = []
+                reformated = torch.tensor([
+                    (
+                        get_valid_bbox_val(x1, width), 
+                        get_valid_bbox_val(y1, height),
+                        get_valid_bbox_val(x2, width), 
+                        get_valid_bbox_val(y2, height)
+                    )
+                    for x1, y1, x2, y2 in detections.xyxy
+                ])
 
-            scene_graph_text += [f"{obj_name}: {obj_box}" for (obj_name, obj_box) in zip(labels, boxes)]
-            prompt += f"Its scene graph at frame {ct} is:  {scene_graph_text}."
-            
-        obs = sorted(obs)
+                boxes = []
+                labels = []
+
+                for ct, class_id in enumerate(detections.class_id):
+                    if class_id is None:
+                        continue
+                    boxes.append(reformated[ct])
+                    labels.append(sg_keywords[class_id])
+
+                if len(boxes) == 0:
+                    boxes = torch.tensor([])
+                else:
+                    boxes = torch.stack(boxes)
+
+                save_prompts_one_image(
+                    frame_image=image,
+                    boxes=boxes,
+                    labels=labels,
+                    points=[],
+                    save_path=new_image_path
+                )
+                
+                if not image_path in obs:
+                    obs.append(image_path)
+
+                obs.append(new_image_path)  # update to bboxed image path
+
+                scene_graph_text += [f"{obj_name}: {obj_box}" for (obj_name, obj_box) in zip(labels, boxes)]
+                prompt += f"Its scene graph at frame {ct} is:  {scene_graph_text}."
+                
+            obs = sorted(obs)
 
 
         if len(self.episode_messages) == 0:

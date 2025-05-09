@@ -1,4 +1,7 @@
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["remote_url"] = "http://0.0.0.0:15235/v1"
+os.environ["DISPLAY"] = "cherry:11.0"
 import numpy as np
 from tqdm import tqdm
 import time
@@ -189,12 +192,12 @@ if __name__ == '__main__':
 
 
     config = {
-        'model_name': 'gpt-4o-mini', # 'Qwen/Qwen2-VL-7B-Instruct',
-        'n_shots': 10,
+        'model_name': 'gemini-2.0-flash',
+        'n_shots': 3,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'vlm_10shots_imgsize500',
+        'exp_name': 'gemini_alfred_test',
         'chat_history': 0, 
         'detection_box': 0,
         'eval_sets': ['base'], 
@@ -202,7 +205,7 @@ if __name__ == '__main__':
         'multistep':0, 
         'resolution': 500, 
         'env_feedback': 1,
-        'tp': 1,
+        'tp': 4,
     }
 
     args = parse_arguments()

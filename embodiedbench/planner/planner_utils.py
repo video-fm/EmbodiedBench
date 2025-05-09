@@ -245,7 +245,7 @@ class ActionPlan(BaseModel):
     executable_plan: list[ExecutableAction]
 class TargetSG(BaseModel):
     target_name: list[str]
-    blocking_name: list[str]
+    # blocking_name: list[str]
     target_attribute: list[str]
     target_relation: list[list[str]]
     related_objects: list[str]
@@ -283,3 +283,6 @@ def local_image_to_data_url(image_path):
 
     # Construct the data URL
     return f"data:{mime_type};base64,{base64_encoded_data}"
+
+
+

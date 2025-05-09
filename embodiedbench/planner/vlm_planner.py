@@ -207,6 +207,7 @@ class VLMPlanner():
             obs = observation # input image path
         
         prompt = self.process_prompt(user_instruction, prev_act_feedback=self.episode_act_feedback)
+        # print("PROMPT IS ", prompt)
         # some models do not support json scheme, add style into prompt
         if 'claude' in self.model_name or 'InternVL' in self.model_name or 'Qwen2-VL' in self.model_name or self.model_type == 'custom':
             prompt = prompt + template_lang if self.language_only else prompt + template

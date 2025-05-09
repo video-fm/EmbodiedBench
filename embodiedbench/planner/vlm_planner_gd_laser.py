@@ -12,7 +12,7 @@ from embodiedbench.planner.planner_config.generation_guide import (
 from embodiedbench.planner.planner_utils import (
     local_image_to_data_url,
     laser_template,
-    laser_template_lang,
+    laser_lang_template,
     fix_json,
 )
 from embodiedbench.planner.remote_model import RemoteModel
@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 
 template = laser_template
 
-template_lang = laser_template_lang
+template_lang = laser_lang_template
 
 MESSAGE_WINDOW_LEN = 5
 
@@ -171,7 +171,7 @@ def save_prompts_one_image(frame_image, boxes, points, labels, save_path):
     #     if not len(point_ls) == 0:
     #         show_points(point_ls.cpu(), label_ls.cpu(), ax, object_id=object_id)
     # Show the plot
-    plt.savefig(save_path)
+    plt.savefig(save_path, bbox_inches='tight', pad_inches=0)
     plt.close()
 
 
@@ -198,7 +198,10 @@ class VLMPlanner:
         blockingobj = False,
         scene_graph_text = False,
         gd_only = False,
+        top_k=1,
+        aggr_thres=0.1,
     ):
+        self.last_visual_description = ""
         self.model_name = model_name
         self.obs_key = obs_key
         self.system_prompt = system_prompt
@@ -231,6 +234,8 @@ class VLMPlanner:
             For example, substitute "freshly baked baguette" to "loaves", "portable device to access the internet" to "laptop", "light-emiting device on my desk to provide light for my work area" to "desk lamp".
             You are supposed to output in JSON.'''
             
+        self.scene_graph_prompt_prefix = "\n Scene Graph Information: The current image height is {w}, width is {h}. A missing scene graph means the object is not clearly identifiable from the scene. It does not necessarily means this object is not in the scene. \n"
+            
 
         self.grounding_model = gd_Model(
             model_config_path=gd_config_path, model_checkpoint_path=gd_checkpoint_path
@@ -242,8 +247,8 @@ class VLMPlanner:
         self.blockingobj = blockingobj
         self.scene_graph_text = scene_graph_text
         self.gd_only = gd_only
-        self.aggr_thres = 0.1
-        self.k = 1
+        self.aggr_thres = aggr_thres
+        self.k = top_k
         
         all_model_dir = "/home/asethi04/common-data/jiani_common/llava_models"
         model_dir = os.path.join(all_model_dir, f"ensemble-02-10")
@@ -252,6 +257,8 @@ class VLMPlanner:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.predicate_model = load_model(model_dir, model_name, epoch, device)
+        
+        self.common_objects = ["toilet", "desk", "bed", "wall", "door", "cabinet", "stove", "table", "shadow", "window", "mirror", "other"]
 
     def set_actions(self, actions):
         self.actions = actions
@@ -268,13 +275,16 @@ class VLMPlanner:
         return available_action_str
 
     def process_prompt(self, user_instruction, prev_act_feedback=[]):
+        last_env_feedback = (
+            prev_act_feedback[-1][1] if len(prev_act_feedback) else "N/A"
+        )              
         user_instruction = user_instruction.rstrip(".")
         failure = False
         blocking_feedback = ""
         
         if not len(prev_act_feedback) == 0:
             last_feedback = prev_act_feedback[-1]
-            if last_feedback[0] != 0:
+            if last_feedback[0] != 133:
                 failure = True
                 blocking_feedback = last_feedback[1]
                 
@@ -383,22 +393,21 @@ class VLMPlanner:
                         self.actions[action_feedback[0]],
                         action_feedback[1],
                     )
-                    scene_graph_prompt += (
-                        f"\n\n## Now the human instruction is: {user_instruction}."
-                    )
                 else:
                     prompt += "\nStep {}, action id {}, {}".format(
                         i, action_feedback[0], self.actions[action_feedback[0]]
                     )
-                    scene_graph_prompt += (
-                        f"\n\n## Now the human instruction is: {user_instruction}."
-                    )
+                  
                     
             if failure:
                 scene_graph_prompt += f"The last action is invalid, and the feedback is: {blocking_feedback} "
             else:
                 scene_graph_prompt += f"The last action succeeds. "
                 
+            scene_graph_prompt += (
+                # f"\n\nEnvironmental Feedback: {last_env_feedback}"
+                f"\n\nLast Visual Description: {self.last_visual_description}\n"
+            )
             scene_graph_prompt += f'\n\n## Now the human instruction is: {user_instruction}.'
 
             if self.language_only:
@@ -480,6 +489,7 @@ class VLMPlanner:
 
     def reset(self):
         # at the beginning of the episode
+        self.last_visual_description = ""
         self.episode_messages = []
         self.episode_act_feedback = []
         self.planner_steps = 0
@@ -496,6 +506,7 @@ class VLMPlanner:
         return action
 
     def json_to_action(self, output_text, json_key="executable_plan"):
+        valid = True
         try:
             json_object = json.loads(output_text)
             action = [x[self.action_key] for x in json_object[json_key]]
@@ -516,12 +527,14 @@ class VLMPlanner:
             print("Failed to decode JSON:", e)
             self.output_json_error += 1
             action = -1
+            valid = False
         except Exception as e:
             # Catch-all for any other unexpected errors not handled specifically
             print("An unexpected error occurred:", e)
             self.output_json_error += 1
             action = -1
-        return action
+            valid = False
+        return action, valid
 
     def predict_gd(self, image, classes, box_threshold=0.5, text_threshold=0.4):
         caption = ". ".join(classes)
@@ -539,7 +552,7 @@ class VLMPlanner:
         )  # (batch_size, nq, 256)
 
         prediction_boxes = outputs["pred_boxes"].cpu()[0]  # (batch_size, nq, 4)
-        all_detections = []
+        detection_ls = []
         tokenizer = self.grounding_model.model.tokenizer
         mask = prediction_logits.max(dim=1)[0] > box_threshold
         logits = prediction_logits[mask]  # (n, 256)
@@ -560,8 +573,186 @@ class VLMPlanner:
             phrases=phrases, classes=classes
         )
         detections.class_id = class_id
-        all_detections.append(detections)
-        return all_detections
+        detection_ls.append(detections)
+
+        assert len(detection_ls) == 1
+        detections = detection_ls[0]
+        
+        reformated = torch.tensor([(get_valid_bbox_val(x1, source_w), 
+                    get_valid_bbox_val(y1, source_h),
+                    get_valid_bbox_val(x2, source_w), 
+                    get_valid_bbox_val(y2, source_h))
+                    for x1, y1, x2, y2 in detections.xyxy])
+        
+        boxes = []
+        labels = []
+        
+        for ct, class_id in enumerate(detections.class_id):
+            if class_id is None:
+                continue
+            if ct == 0: 
+                class_id = 0
+                
+            elif class_id is None:
+                continue
+            
+            x1, y1, x2, y2 = reformated[ct]
+            if x2 - x1 < 5 or y2 - y1 < 5:
+                continue
+            
+            boxes.append(reformated[ct])
+            labels.append(classes[class_id])
+            
+        if len(boxes) == 0:
+            boxes = torch.tensor([])
+        else:
+            boxes = torch.stack(boxes)
+                
+        return labels, boxes
+    
+    
+    def predict_laser(self, 
+                      image, 
+                      boxes, 
+                      target_names,
+                      query_names,
+                      query_attributes,
+                      ):
+        
+        # Preprocess query attributes for the case where one object having multiple attribute
+        query_attribute_ls = [[attr, f"not {attr}"] for attr in query_attributes]
+        prob_labels, selected_object_bboxes = [], []
+        
+        if not len(boxes) == 0:
+            height, width = image.shape[0], image.shape[1]
+            batched_pred_masks = [bbox_to_mask(bbox, height, width) for bbox in boxes]
+            batched_object_ids = [[0, 0, i] for i in range(len(batched_pred_masks))]
+
+            batched_image_cate_probs, _, _, _ = \
+                self.predicate_model(
+                    batched_video_ids=[0],
+                    batched_videos=[image],
+                    batched_masks=batched_pred_masks,  # batched_object_ids * video_height * video_width
+                    batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
+                    batched_names=[query_names],  # Dataset-wise categorical labels
+                    batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
+                    batched_unary_kws=[[]],  # Dataset-wise unary predicate labels
+                    batched_binary_kws=[[]],  # Dataset-wise binary predicate labels
+                    batched_obj_pairs=[],  # Ground truth binary relations
+                    batched_video_splits=[0],  # [number of videos]
+                    batched_binary_predicates=[None],  # None indicates inference time
+                )
+                    
+            all_unary_res = []
+            for unary in query_attribute_ls:
+                _, batched_image_unary_probs, _, _ = \
+                    self.predicate_model(
+                        batched_video_ids=[0],
+                        batched_videos=[image],
+                        batched_masks=batched_pred_masks,  # batched_object_ids * video_height * video_width
+                        batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
+                        batched_names=[query_names],  # Dataset-wise categorical labels
+                        batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
+                        batched_unary_kws=[unary],  # Dataset-wise unary predicate labels
+                        batched_binary_kws=[[]],  # Dataset-wise binary predicate labels
+                        batched_obj_pairs=[],  # Ground truth binary relations
+                        batched_video_splits=[0],  # [number of videos]
+                        batched_binary_predicates=[None],  # None indicates inference time
+                    )
+                all_unary_res.append(batched_image_unary_probs)
+            
+            # Combine the uanry and object name information together 
+            # Step 1: reformat the object name and attributes into better format
+            predicted_name = {}
+            for (oid, name) in batched_image_cate_probs[0]:
+                prob = batched_image_cate_probs[0][(oid, name)].item()
+                if not oid in predicted_name:
+                    predicted_name[oid] = []
+                predicted_name[oid].append((prob, name))
+            
+            for oid in predicted_name:
+                predicted_name[oid] = sorted(predicted_name[oid], reverse=True)   
+                
+            reformatted_unary_res = {}
+            for unary_res in all_unary_res:
+                for  (fid, oid, kw) in unary_res[0].keys():
+                    if not oid in reformatted_unary_res:
+                        reformatted_unary_res[oid] = {}
+                    if kw in query_attributes:
+                        reformatted_unary_res[oid][kw] = unary_res[0][(fid, oid, kw)].item()
+            
+            # Step 2: Aggregate the object name and attribute predictions together
+            aggr_res = {}            
+            
+            for oid in predicted_name:
+                top_prob, name = predicted_name[oid][0]
+                if not oid in aggr_res:
+                    aggr_res[oid] = []
+                
+                if name in target_names:
+                    aggr_res[oid].append(top_prob)
+                else:
+                    # the top predicted name is not the target name
+                    aggr_res[oid].append(0)
+                    
+            for oid in reformatted_unary_res: 
+                
+                if not oid in aggr_res:
+                    aggr_res[oid] = []
+                    
+                for attr in reformatted_unary_res[oid]:
+                    aggr_res[oid].append(reformatted_unary_res[oid][attr])
+            
+            # Thresholding
+            avg_aggr_res = {}
+            for oid in aggr_res:
+                probs = aggr_res[oid]
+                avg_val = sum(probs) / len(probs)
+                if avg_val > self.aggr_thres:
+                    avg_aggr_res[oid] = avg_val
+            
+            # Only pick the top-k object according to the setip
+            top_objects = sorted([(v, k) for k, v in avg_aggr_res.items()], reverse=True)[:self.k]
+            top_objects_probs = {oid: prob for prob, oid in top_objects}
+            
+            selected_objects = list(top_objects_probs.keys())
+            selected_object_bboxes = boxes[selected_objects]
+                                
+            prob_labels = []
+            for oid in top_objects_probs:
+                prob_labels.append(predicted_name[oid][0])
+
+        return prob_labels, selected_object_bboxes
+    
+    def get_sg_kws(self, sg_info):
+        
+        target_names = sg_info['target_name']
+        target_attributes = sg_info['target_attribute']   
+        related_objects = set(sg_info['related_objects'])
+        
+        target_relations = sg_info['target_relation']
+        relations = set()
+
+        for rel in target_relations:
+            if not len(rel) == 3:
+                continue
+            (s, r, o) = rel
+            related_objects.add(s)
+            related_objects.add(o)
+            relations.add(r)
+            
+        related_objects = list(related_objects)
+        relations = list(relations)
+        
+        if self.blockingobj:
+            blocking_objects = sg_info['blocking_name']
+            query_objects = blocking_objects + related_objects + target_names + self.common_objects 
+            gd_query_objects = blocking_objects + target_names
+        else:
+            query_objects = related_objects + target_names + self.common_objects 
+            gd_query_objects = target_names 
+            
+        return target_names, target_attributes, query_objects, gd_query_objects
 
     def act_custom(self, prompt, obs):
         assert type(obs) == str  # input image path
@@ -621,32 +812,9 @@ class VLMPlanner:
                 }""",
                 )
 
-        latest_sg_kws = json.loads(out)
-        # latest_sg_kws = sg_keywords[max(sg_keywords.keys())]
-        
-        related_objects = set(latest_sg_kws['related_objects'])
-        target_name = latest_sg_kws['target_name']
-        target_attributes = latest_sg_kws['target_attribute']
-        target_attributes_preprocessed = [[attr, f"not {attr}"] for attr in target_attributes]
-        if self.blockingobj:
-            blocking_objects = latest_sg_kws['blocking_name']
-        else:
-            blocking_objects = []
-        
-        target_relation = latest_sg_kws['target_relation']
-        relations = set()
-        for (s, r, o) in target_relation:
-            related_objects.add(s)
-            related_objects.add(o)
-            relations.add(r)
-            
-        related_objects = list(related_objects)
-        relations = list(relations)
-        query_objects = blocking_objects + related_objects + target_name + ["wall", "door", "cabinet", "stove", "table", "shadow", "window", "mirror", "other"]
-                
-        gd_query_objects = blocking_objects + target_name
-        
-        scene_graph_prompt_prefix = "\n Scene Graph Information: The current image height is 500, width is 500. A missing scene graph means the object is not clearly identifiable from the scene. It does not necessarily means this object is not in the scene. \n"
+        sg_info = json.loads(out)
+
+        target_names, target_attributes, query_objects, gd_query_objects = self.get_sg_kws(sg_info)
         scene_graph_prompt = []
 
         # detections = post_process_detections(all_dets, sg_keywords)
@@ -659,8 +827,11 @@ class VLMPlanner:
             image_path_ls = image_path.split("/")
             image_dir, image_name = image_path_ls[:-1], image_path_ls[-1]
             image_name = image_name.split(".")[0]
-            new_image_name = image_name + "_bbox.png"
-            new_image_path = os.path.join(*image_dir, new_image_name)
+            bbox_file_name = image_name + '_bbox.png'
+
+            bbox_path = os.path.join(*image_dir, bbox_file_name)
+
+            prompt_image_path = image_path
 
             if image_path in self.processed_images:
                 processed_image_path = self.processed_images[image_path]
@@ -673,212 +844,66 @@ class VLMPlanner:
 
             height, width = image.shape[0], image.shape[1]
             
-            # visual feature: box_threshold=0.2, text_threshold=0.1
-            # detection_ls = self.predict_gd(image, query_objects, box_threshold=0.2, text_threshold=0.1)
-            detection_ls = self.predict_gd(image, gd_query_objects , box_threshold=0.1, text_threshold=0.1)
-
-            assert len(detection_ls) == 1
-            detections = detection_ls[0]
-
-            scene_graph_text = []
-            reformated = torch.tensor(
-                [
-                    (
-                        get_valid_bbox_val(x1, width),
-                        get_valid_bbox_val(y1, height),
-                        get_valid_bbox_val(x2, width),
-                        get_valid_bbox_val(y2, height),
-                    )
-                    for x1, y1, x2, y2 in detections.xyxy
-                ]
-            )
-
-            boxes = []
-            labels = []
-
-            for ct, class_id in enumerate(detections.class_id):
-                if ct == 0 and class_id is None:
-                    class_id = 0
-                    
-                elif class_id is None:
-                    continue
-                
-                x1, y1, x2, y2 = reformated[ct]
-                if x2 - x1 < 5 or y2 - y1 < 5:
-                    continue
-                
-                boxes.append(reformated[ct])
-                labels.append(gd_query_objects[class_id])
-                
-            if len(boxes) == 0:
-                boxes = torch.tensor([])
-            else:
-                boxes = torch.stack(boxes)
-            
             if self.gd_only:
                 
-                if not len(selected_object_bboxes) == 0:
-                    save_prompts_one_image(frame_image=image, boxes=selected_object_bboxes, labels=["" for _ in selected_object_bboxes], points=[], save_path=new_image_path)        
-                else:
-                    new_image_path = image_path
-                    
-                if not self.boundingbox:
-                    new_image_path = image_path
-                    
-                print("here")
+                # Predict bounding box with grounding dino
+                labels, boxes = self.predict_gd(image, target_names, box_threshold=0.1, text_threshold=0.1)
+            
+                target_labels, target_bboxes = [], []
+                for label, box in zip(labels, boxes):
+                    if label in target_names:
+                        target_labels.append(label)
+                        target_bboxes.append(box)
+                        
+                if len(target_bboxes) > 0:
+                    target_bboxes = torch.stack(target_bboxes)
+            
+            else:
+                labels, boxes = self.predict_gd(image, gd_query_objects, box_threshold=0.1, text_threshold=0.1)
+
+                target_labels, target_bboxes = self.predict_laser(
+                      image=image, 
+                      boxes=boxes, 
+                      target_names=target_names,
+                      query_names=query_objects,
+                      query_attributes=target_attributes,
+                      )
+                
+            if self.boundingbox:
+                if not len(target_bboxes) == 0:
+                    save_prompts_one_image(frame_image=image, 
+                                            boxes=target_bboxes, 
+                                            labels=["" for _ in target_bboxes], 
+                                            points=[], 
+                                            save_path=bbox_path)    
+                    prompt_image_path = bbox_path  
                 
             else:
-                if not len(boxes) == 0:
-                    height, width = image.shape[0], image.shape[1]
-                    batched_pred_masks = [bbox_to_mask(bbox, height, width) for bbox in boxes]
-                    batched_object_ids = [[0, 0, i] for i in range(len(batched_pred_masks))]
-
-                    batched_image_cate_probs, _, _, _ = \
-                        self.predicate_model(
-                            batched_video_ids=[0],
-                            batched_videos=[image],
-                            batched_masks=batched_pred_masks,  # batched_object_ids * video_height * video_width
-                            batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
-                            batched_names=[query_objects],  # Dataset-wise categorical labels
-                            batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
-                            batched_unary_kws=[[]],  # Dataset-wise unary predicate labels
-                            batched_binary_kws=[[]],  # Dataset-wise binary predicate labels
-                            batched_obj_pairs=[],  # Ground truth binary relations
-                            batched_video_splits=[0],  # [number of videos]
-                            batched_binary_predicates=[None],  # None indicates inference time
-                        )
-                            
-                    all_unary_res = []
-                    for unary in target_attributes_preprocessed:
-                        _, batched_image_unary_probs, _, _ = \
-                            self.predicate_model(
-                                batched_video_ids=[0],
-                                batched_videos=[image],
-                                batched_masks=batched_pred_masks,  # batched_object_ids * video_height * video_width
-                                batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
-                                batched_names=[query_objects],  # Dataset-wise categorical labels
-                                batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
-                                batched_unary_kws=[unary],  # Dataset-wise unary predicate labels
-                                batched_binary_kws=[[]],  # Dataset-wise binary predicate labels
-                                batched_obj_pairs=[],  # Ground truth binary relations
-                                batched_video_splits=[0],  # [number of videos]
-                                batched_binary_predicates=[None],  # None indicates inference time
-                            )
-                        all_unary_res.append(batched_image_unary_probs)
-                        
-                    reformatted_unary_res = {}
-                    for unary_res in all_unary_res:
-                        for  (fid, oid, kw) in unary_res[0].keys():
-                            if not oid in reformatted_unary_res:
-                                reformatted_unary_res[oid] = {}
-                            if kw in target_attributes:
-                                reformatted_unary_res[oid][kw] = unary_res[0][(fid, oid, kw)].item()
-                    
-                    aggr_res = {}
-                    aggr_block = {}
-                    for oid in reformatted_unary_res: 
-                        if not oid in aggr_res:
-                            aggr_res[oid] = []
-                            for attr in reformatted_unary_res[oid]:
-                                aggr_res[oid].append(reformatted_unary_res[oid][attr])
-                    
-                    predicted_name = {}
-                    for (oid, name) in batched_image_cate_probs[0]:
-                        prob = batched_image_cate_probs[0][(oid, name)].item()
-                        if not oid in predicted_name:
-                            predicted_name[oid] = []
-                        predicted_name[oid].append((prob, name))
-                    
-                    for oid in predicted_name:
-                        predicted_name[oid] = sorted(predicted_name[oid], reverse=True)                
-                    
-                    for oid in predicted_name:
-                        top_prob, name = sorted(predicted_name[oid], reverse=True)[0]
-                        if not oid in aggr_res:
-                            aggr_res[oid] = []
-                        
-                        if name in target_name:
-                            aggr_res[oid].append(top_prob)
-                        else:
-                            # the top predicted name is not the target name
-                            aggr_res[oid].append(0)
-
-                        if name in blocking_objects:
-                            aggr_block[oid] = top_prob
-                            
-                    avg_unary_res = {}
-                    for oid in aggr_res:
-                        avg_val = sum(aggr_res[oid]) / len(aggr_res[oid])
-                        if avg_val > self.aggr_thres:
-                            avg_unary_res[oid] = avg_val
-                        
-                    top_objects = sorted([(v, k) for k, v in avg_unary_res.items()], reverse=True)[:self.k]
-                    top_objects_probs = {oid: prob for prob, oid in top_objects}
-                    
-                    top_blocking_objects = sorted([(v, k) for k, v in aggr_block.items()], reverse=True)[:self.k]
-                    top_blocking_objects_probs = {oid: prob for prob, oid in top_blocking_objects}
-                    selected_blocking_objects = list(top_blocking_objects_probs.keys())
-                    
-                    selected_objects = list(top_objects_probs.keys()) + list(top_blocking_objects_probs.keys())
-                    selected_object_bboxes = boxes[selected_objects]
-                    
-                    # selected_blocking_object_bboxes = boxes[selected_blocking_objects]
-                    
-                    prob_labels = []
-                    for oid in top_objects_probs:
-                        # prob_labels.append(f"{top_objects_probs[oid]:.2f}::{target_name[0]}")
-                        prob_labels.append(target_name[0])
-
-                        # prob_labels.append("")
-                        
-                    for oid in top_blocking_objects_probs:
-                        # prob_labels.append(f"{top_blocking_objects_probs[oid]:.2f}::{blocking_objects[0]}")
-                        # prob_labels.append("")
-                        prob_labels.append(blocking_objects[0])
-                        
-                    if not len(selected_object_bboxes) == 0:
-                        save_prompts_one_image(frame_image=image, boxes=selected_object_bboxes, labels=["" for _ in selected_object_bboxes], points=[], save_path=new_image_path)        
-                    else:
-                        new_image_path = image_path
-                    
-                    if not self.boundingbox:
-                        new_image_path = image_path
-                    
-                    self.processed_images[image_path] = new_image_path
-                    
-                    # save_prompts_one_image(frame_image=image, boxes=boxes, labels=["obj" for _ in boxes], points=[], save_path="full.png")        
-
-                else:
-                    selected_object_bboxes = []
-                    prob_labels = []
-                    new_image_path = image_path
-                
-            if self.multistep:
-                obs.append(new_image_path) # update to bboxed image path
+                target_bboxes = []
+                target_labels = []
+            
+            self.processed_images[image_path] = prompt_image_path
+            
+            if type(target_bboxes) == torch.Tensor:
+                bbox_list = target_bboxes.tolist()
             else:
-                obs = [new_image_path]
+                bbox_list = target_bboxes
             
-            success_actions = [action_id for action_id, action_response in self.episode_act_feedback if "success" in action_response]
-            matched_actions = [self.actions[action_id] for action_id in success_actions[:len(observation) - image_id - 1]]
-            
-            if type(selected_object_bboxes) == torch.Tensor:
-                bbox_list = selected_object_bboxes.tolist()
-            else:
-                bbox_list = selected_object_bboxes
-            
-            if self.scene_graph_text and len(prob_labels) > 0:
-                
-                current_scene_graph_prompt = ",".join([f"{obj_name}: {obj_box}" for (obj_name, obj_box) in zip(prob_labels, bbox_list)])
-                
-                # if len(matched_actions) > 0:
-                #     revert_prompt = f" <-- You need to revert the previous action(s) {matched_actions} to this state."
-                # else:
-                #     revert_prompt = f" <-- This is the current state you are at."
-                    
+            # Arrange the prompt into vlm
+            if self.scene_graph_text and len(target_labels) > 0:
+                current_scene_graph_prompt = ",".join([f"{obj_name}: {obj_box}" for (obj_name, obj_box) in zip(target_labels, bbox_list)])
                 scene_graph_prompt.append(f"Its scene graph at frame {image_id} is: {current_scene_graph_prompt}. ")
         
+        if self.multistep:
+            if not image_path == prompt_image_path:
+                obs.append(prompt_image_path) # update to bboxed image path
+        
         if self.scene_graph_text and len(scene_graph_prompt) > 0:
-            prompt += scene_graph_prompt_prefix + "\n".join(scene_graph_prompt)
+            prompt += self.scene_graph_prompt_prefix.format(w=width, h=height) + "\n".join(scene_graph_prompt)
+            
+        
+        else:
+            obs = [prompt_image_path]
             
         obs = sorted(list(set(obs)))
         
@@ -930,9 +955,24 @@ class VLMPlanner:
                     "content": [{"type": "text", "text": out}],
                 }
             )
-        action = self.json_to_action(out)
+        logger.debug(f"Model Output:\n{out}\n")
+        action, valid = self.json_to_action(out)
+        
+        
+        if valid:
+            plan = json.loads(out)
+            self.last_visual_description = plan.get(
+                    "visual_state_description", ""
+            )
+            plan['scene_graph'] = sg_info
+            out_str = json.dumps(plan)
+        else:
+            self.last_visual_description = ""
+            out_str = '''{"visual_state_description":"invalid json, random action", "reasoning_and_reflection":"invalid json, random action",
+                   "language_plan":"invalid json, random action"}'''
+                   
         self.planner_steps += 1
-        return action, out
+        return action, out_str
 
     def update_info(self, info):
         """Update episode feedback history."""

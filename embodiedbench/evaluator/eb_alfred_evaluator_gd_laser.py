@@ -1,7 +1,8 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "5"
 os.environ["remote_url"] = "http://0.0.0.0:15235/v1"
 os.environ["DISPLAY"] = "cherry:11.0"
+os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
 
 import numpy as np
 from tqdm import tqdm
@@ -46,269 +47,207 @@ scene_graph_examples = [
 
 laser_sg_examples_no_revert = [
 '''
+Human Instruction: Place two yellow bottles on top of a toilet.
 
-Human Instruction : Navigate to the floorlamp and be as close as possible.
+Candidate Target Entities location:
+image 0: [["SoapBottle", "color: yellow", "bbox: [120, 220, 160, 280]"], ["SprayBottle", "color: yellow", "bbox: [200, 250, 240, 300]"], ["Toilet", "bbox: [150, 300, 300, 400]"]]
 
-Candidate Target Entities location: 
-image 0: [] 
+Reasoning and reflection: Based on the visual description, I can see a SoapBottle and a SprayBottle that are both yellow in color. These match the target instruction to place "two yellow bottles" on a Toilet. The toilet is visible in the scene as well. To complete the task, I will pick up the yellow SoapBottle first.
 
-Reasoning and reflection: I cannot see the floorlamp in my current field of view.
-So I will rotate my view ninety degrees to the right only once to find the floorlamp. \
-Executable plans: [[0, Rotate to the right by 90 degrees]]
+Executable plans: [[76, find a SoapBottle], [126, pick up the SoapBottle]]
 
-Environment Feedback: Step 1 is executed successfully;
+Environment Feedback: Step 1 is executed successfully; Step 2 is executed successfully.
 
-Human Instruction : Navigate to the floorlamp and be as close as possible.
+Candidate Target Entities location:
+image 0: [["SprayBottle", "color: yellow", "bbox: [200, 250, 240, 300]"], ["Toilet", "bbox: [150, 300, 300, 400]"]]
 
-Candidate Target Entities location: 
-image 0: []
-image 1: [[0, 75, 25, 150], [300, 320, 200, 240]] 
+Reasoning and reflection: Now that I am holding the SoapBottle, I attempted to pick up the SprayBottle as the second yellow bottle. However, the action was invalid since I cannot hold two objects simultaneously. Therefore, I will navigate to the Toilet and place the SoapBottle down first.
 
-Reasoning and reflection: I can see the floorlmap is at left side in front of me, next to the TVStand. \
-This floorlamp is corresponding to the location [0, 75, 25, 150]. \
-There could be another floor lamp at [300, 320, 200, 240], but it is more far away from me so I will visit [0, 75, 25, 150] first. \
-Around me is a Cabinet at my left side. Following the guideline, since the floorlamp is at left side, I can approach it\
-by a series of moving forward and left/rightward. Since currently there is an obstacle at my left, I will first move forward twice.
-Executable plans: [[0, Move forward by 0.25], [0, Move forward by 0.25]]
+Executable plans: [[17, find a Toilet], [133, put down the object in hand]]
 
-Environment Feedback: Step 1 is executed successfully; Step 2 is executed successfully;
+Environment Feedback: Step 3 is executed successfully; Step 4 is executed successfully.
 
-Candidate Target Entities location: 
-image 0: [] 
-image 1: [[0, 75, 25, 150], [300, 320, 200, 240]] 
-image 2: [[0, 95, 15, 170], [320, 320, 100, 140]] 
+Candidate Target Entities location:
+image 0: [["SprayBottle", "color: yellow", "bbox: [200, 250, 240, 300]"], ["Toilet", "bbox: [150, 300, 300, 400]"]]
 
-Reasoning and reflection: I can see now I get closer to the floorlamp. 
-This floorlamp is corresponding to the location[0, 95, 15, 170]. \
-There could be another floor lamp at [300, 320, 200, 240], but it is more far away from me so I will visit [0, 95, 15, 170] first. \
-My target floorlamp is still located in front of me at the left. I will try move forward and move leftward in series.
-Executable plans: [[0, Move forward by 0.25], [3, Move leftward by 0.25], [0, Move forward by 0.25], [3, Move leftward by 0.25], [0, Move forward by 0.25]]
+Reasoning and reflection: The SoapBottle is now on the Toilet. I will proceed to pick up the SprayBottle and place it on the Toilet as well to satisfy the instruction.
 
-Environment Feedback: Step 3 is executed successfully; Step 4 is executed successfully; Step 5 is executed successfully; Step 6 is executed successfully; Step 7 is Invalid, as a StandardIslandHeight is blocking you from moving forward.
+Executable plans: [[10, find a SprayBottle], [90, pick up the SprayBottle], [17, find a Toilet], [133, put down the object in hand]]
 
-Candidate Target Entities location: 
-image 0: [[0, 75, 25, 150], [300, 320, 200, 240]] 
-image 1: [[0, 95, 15, 170], [320, 320, 100, 140]] 
-image 2: [[0, 120, 10, 200], [340, 350, 120, 150]] 
+Environment Feedback: Step 5 is executed successfully; Step 6 is executed successfully; Step 7 is executed successfully; Step 8 is executed successfully.
 
-Reasoning and reflection: I am a lot closer to the floorlamp by a series a forward and leftward movement. \
-This floorlamp is corresponding to the location [0, 120, 10, 200]. \
-There could be another floor lamp at [340, 350, 120, 150] but it is more far away from me so I will visit [0, 120, 10, 200] first. \
-It is still in front of me. However, The last action is invalid, showing that I am blocked from moving forward.\
-That means there is an obstacle in front of me and I can see it is probably a small table. Following the strategy, I can get away by first moving to the left and move forward. 
-Executable plans: [[3, Move leftward by 0.25], [3, Move leftward by 0.25], [0, Move forward by 0.25], [0, Move forward by 0.25]]
+Candidate Target Entities location:
+image 0: [["SoapBottle", "on top of Toilet"], ["SprayBottle", "on top of Toilet"], ["Toilet"]]
 
-Environment Feedback: Step 8 is executed successfully; Step 9 is executed successfully; Step 10 is executed successfully; Step 11 is executed successfully;
+Reasoning and reflection: Both yellow bottles—the SoapBottle and the SprayBottle—have been successfully placed on the Toilet. This satisfies the original instruction.
 
-Candidate Target Entities location: 
-image 0: [[0, 95, 15, 170], [320, 320, 100, 140]] 
-image 1: [[0, 120, 10, 200], [340, 350, 120, 150]] 
-image 2: [[40, 120, 80, 300,], [380, 350, 160, 150]] 
-
-Reasoning and reflection: I can see that the floorlamp is at the right side of me, slight in the front. \
-This floorlamp is corresponding to the location [40, 120, 80, 300,]. \
-There could be another floor lamp at [380, 350, 160, 150] but it is more far away from me so I will visit [40, 120, 80, 300,] first. \
-I think it in effect of consecutively moving leftward. Also, I have got away with the obstacle.\
-Now I need to move right and I will probably be close to the floorlamp.
-Executable plans: [[2, Move rightward by 0.25], [2, Move rightward by 0.25]]]
-
-Environment Feedback: Step 12 is executed successfully; Step 13 is executed successfully. 
-
-Candidate Target Entities location: 
-image 0: [[0, 120, 10, 200], [340, 350, 120, 150]]
-image 1: [[40, 120, 80, 300,], [380, 350, 160, 150]]
-image 2: [[20, 120, 60, 300,], [360, 350, 140, 150]] 
-
-Reasoning and reflection: Last two action brought me closer to the floorlamp. \
-This floorlamp is corresponding to the location [20, 120, 60, 300,]. \
-There could be another floor lamp at [360, 350, 140, 150] but it is more far away from me so I will visit [20, 120, 60, 300,] first. \
-following the strategy, I should not complete now since I can still be closer to the floorlamp by moving forward a few steps. 
-Executable plans: [[0, Move forward by 0.25], [0, Move forward by 0.25], [0, Move forward by 0.25]]
-
-Environment Feedback: Step 14 is executed successfully; Step 15 is executed successfully; Step 16 is executed successfully.
-
+Executable plans: []
 
 Task Success
 '''
 ,
-'''
-Human Instruction: Navigate to the computer on the desk and be as close as possible.
+'''Human Instruction: Hold a pillow while turning on a lamp.
 
-Candidate Target Entities location: 
-image 0: [[35, 75, 65, 150], [300, 75, 400, 150]]  
+Candidate Target Entities location:  
+image 0: [["Pillow", "color: blue", "bbox: [180, 240, 220, 300]"], ["FloorLamp", "bbox: [300, 280, 360, 400]"], ["CoffeeTable", "bbox: [150, 300, 300, 380]"], ["CreditCard", "bbox: [160, 310, 180, 320]"], ["Plate", "bbox: [210, 320, 250, 340]"], ["RemoteControl", "bbox: [180, 315, 200, 330]"]]
 
-Reasoning and reflection: According to your instruction, I first need to locate the target object. \
-The candidate computer is at [35, 75, 65, 150]. 
-There could be another computer at [300, 75, 400, 150], but it is more far away from me so I will visit [35, 75, 65, 150] first. \
-I can see that the computer is located in my left front direction, placed on a desk. Next, I analyze the obstacles around me. In front of me, slightly to the right, there is a chair blocking my direct path. To avoid it, I decide to move leftward first, followed by a forward movement to approach the desk.
-Executable plans: [[0, Move forward by 0.25], [3, Move leftward by 0.25]]
+Reasoning and reflection: I can see a Pillow on the coffee table—it is blue in color and easily reachable. The FloorLamp is visible in the background. According to the instruction, I need to be holding the pillow while I turn on the lamp. I will first pick up the pillow.
 
-Environment Feedback: Step 1 is executed successfully; Step 2 is Invalid, as a StandardHeightTable is blocking you from moving forward.
+Executable plans: [[74, find a Pillow], [124, pick up the Pillow]]
 
-Candidate Target Entities location: 
-image 0: [[35, 75, 65, 150], [300, 75, 400, 150]]
-image 1: [[25, 45, 55, 160], [320, 55, 420, 180]] 
+Environment Feedback: Step 1 is executed successfully; Step 2 is executed successfully.
 
-Reasoning and reflection: I am now closer to the desk, and I can still see the computer on it. \
-The candidate computer is at [25, 45, 55, 160]. \
-There could be another computer at [320, 55, 420, 180], but it is more far away from me so I will visit [25, 45, 55, 160] first. \
-It remains in my left front direction. My last leftward movement failed because a StandardHeightTable is blocking my path. However, following the strategy, \
-I need not address the invalid action since forward movement can still bring me closer to the target object. So I will still make forward movements for now. 
-Executable plans: [[0, Move forward by 0.25], [0, Move forward by 0.25], [0, Move forward by 0.25]]
+Candidate Target Entities location:  
+image 0: [["FloorLamp", "bbox: [300, 280, 360, 400]"], ["TVStand", "bbox: [100, 250, 200, 350]"], ["Television", "bbox: [120, 200, 180, 260]"]]
 
-Environment Feedback: Step 3 is executed successfully; Step 4 is executed successfully; Step 5 is Invalid, as a StandardHeightTable is blocking you from moving forward.
+Reasoning and reflection: I am currently holding the pillow. The FloorLamp is clearly visible in front of me. The next step is to walk to the lamp and turn it on. Since the path appears clear, I can directly interact with it.
 
-Candidate Target Entities location: 
-image 0: [[35, 75, 65, 150], [300, 75, 400, 150]] 
-image 1: [[25, 45, 55, 160], [320, 55, 420, 180]] 
-image 2: [[15, 45, 55, 160], [350, 45, 480, 200]] 
+Executable plans: [[27, find a FloorLamp], [153, turn on the FloorLamp]]
 
-Reasoning and reflection: I can see that I am getting closer but the last forward move is blocked.
-The candidate computer is at [15, 45, 55, 160]. \
-There could be another computer at [350, 45, 480, 200], but it is more far away from me so I will visit [15, 45, 55, 160] first. \
-That means there is an obstacle in front of me and I can see it is probably a small chair. \
-Following the strategy, I need to address the invalid action now since it is an obstacle blocking from moving closer in the direction of target object. The computer is at my left side in the front, \
-to bypass this obstacle, I plan to first move leftward again to create more space, then try moving forward once more to get closer to the desk and the computer.
-Executable plans: [[3, Move leftward by 0.25], [0, Move forward by 0.25]]
+Environment Feedback: Step 3 is executed successfully; Step 4 is executed successfully.
 
-Environment Feedback: Step 6 is executed successfully; Step 7 is invalid because the StandardHeight is blocking the movement.
+Candidate Target Entities location:
+image 0: [["Pillow", "in hand"], ["FloorLamp", "switched on"]]
 
-Candidate Target Entities location: 
-image 1: [[25, 45, 55, 160], [320, 55, 420, 180]]
-image 2: [[15, 45, 55, 160], [350, 45, 480, 200]]
-image 3: [[0, 55, 35, 170], [350, 55, 450, 260]] 
+Reasoning and reflection: The task required me to hold a pillow while turning on a lamp. I successfully picked up the pillow and activated the FloorLamp. All steps were executed correctly, and I am still holding the pillow.
 
-Reasoning and reflection: I can see that the computer is still in my left front direction. \
-The candidate computer is at [0, 55, 35, 170]. \
-There could be another computer at [350, 55, 450, 260], but it is more far away from me so I will visit [0, 55, 35, 170] first. \
-The chair continues to block my path. \
-However, the chair continues to block my path. From the environment feedback, I observed that while my leftward movement was successful, my forward movement was still blocked. This indicates that I didn’t move far enough left to fully bypass the obstacle. To address this, I decide to move leftward two more times to ensure a clear path, then try moving forward again.
-Executable plans: [[3, Move leftward by 0.25], [3, Move leftward by 0.25], [0, Move forward by 0.25]]
-
-Environment Feedback: Step 8 is executed successfully; Step 9 is executed successfully; Step 10 is executed successfully.
-
-Candidate Target Entities location: 
-image 1: [[15, 45, 55, 160], [350, 45, 480, 200]]
-image 2: [[0, 55, 35, 170], [350, 55, 450, 260]]
-image 3: [[220, 75, 300, 150]] 
-
-Reasoning and reflection: Now, I can see that the computer has shifted to my right front direction. 
-The candidate computer is at [220, 75, 300, 150]. \
-There are no longer any visible obstacles blocking my way. I deduce that the computer is now to my right because my previous leftward movements adjusted my position significantly to clear the earlier obstacle. Since the path is clear, I plan to approach the computer by moving forward three times and then rightward once to align myself next to it.
-Executable plans: [[0, Move forward by 0.25], [0, Move forward by 0.25], [0, Move forward by 0.25], [2, Move rightward by 0.25]]
-
-Environment Feedback: Step 11 is executed successfully; Step 12 is executed successfully; Step 13 is executed successfully; Step 14 is executed successfully.
-
+Executable plans: []
 
 Task Success
 
 '''
 ,
-'''
-Human Instruction: Navigate to the book and be as close as possible.
+'''Human Instruction: As you prepare for dinner, arrange an eating surface that will hold your food with a spoon in it on the kitchen table.
 
-Candidate Target Entities location: 
-image 0: []
+Candidate Target Entities location:  
+image 0: [["DiningTable", "bbox: [300, 200, 400, 300]"], ["Spoon", "bbox: [150, 250, 180, 270]"], ["Plate", "bbox: [220, 240, 260, 270]", "parent: CounterTop"], ["CounterTop", "bbox: [200, 220, 300, 270]"], ["Sink", "bbox: [210, 225, 250, 260]"]]
 
-Reasoning and reflection: At the moment, I cannot see the book in my current field of view. \
-According to the strategy you provided, I will rotate my view ninety degrees once at a time. \
-Since rotation changes my vision, I will not plan any other actions until the book is visible. \
-Executable plans: [[4, Rotate to the right by 90 degrees]]
+Reasoning and reflection: I need to construct an eating surface by placing a spoon into a plate and then moving that plate onto the dining table. I will begin by picking up the spoon since it is directly visible and not embedded inside another receptacle.
 
-Environment Feedback: Step 1 is executed successfully. The book is still not visible in my current field of view.
+Executable plans: [[105, pick up the Spoon]]
 
-Candidate Target Entities location: 
-image 0: [] 
-image 1: []
+Environment Feedback: Step 1 is executed successfully.
 
-Reasoning and reflection: I still cannot see the book in my current field of view. Following your instruction, I will rotate ninety degrees only once. As the rotation may change my view, I will not plan any additional actions until I locate the book.
-Executable plans: [[4, Rotate to the right by 90 degrees]]
+Candidate Target Entities location:  
+image 0: [["Plate", "bbox: [220, 240, 260, 270]", "parent: CounterTop"]]
 
-Candidate Target Entities location: 
-image 0: []
-image 1: []
-image 2: [[160, 300, 200, 350], [230, 165, 240, 170]] 
+Reasoning and reflection: I can see that the plate is on the countertop. However, I am already holding the spoon. I will attempt to pick up the plate directly and hope the action succeeds.
 
-Environment Feedback: Step 2 is executed successfully. \
-The current candidate book is at [160, 300, 200, 350],
-The could be another candidate book at [230, 165, 240, 170], but it is more far away from me so I will visit [160, 300, 200, 350] first. \
-The book is now visible directly in front of me, placed on a shelf.
+Executable plans: [[122, pick up the Plate]]
 
-Reasoning and reflection: I have located the target object. The book is directly in front of me on a shelf. Following the strategy you provided, I will stop rotating now and start planning my navigation to get close to the book. Since the book is in front of me, I will first move two steps to the right to adjust my position, and then move forward three steps to approach it.
-Executable plans: [[2, Move rightward by 0.25], [2, Move rightward by 0.25], [0, Move forward by 0.25], [0, Move forward by 0.25], [0, Move forward by 0.25]]
+Environment Feedback: Step 2 is invalid. Plate is not visible because it is in CounterTop. Go there to pick the object instead.
 
-Environment Feedback: Step 3 to Step 7 are all executed successfully.
+Candidate Target Entities location:  
+image 0: [["CounterTop", "bbox: [200, 220, 300, 270]"]]
 
-Candidate Target Entities location: 
-image 0: [] 
-image 1: [[160, 300, 200, 350], [230, 165, 240, 170]] 
-image 2: [[200, 300, 300, 350], [300, 105, 340, 150]] 
+Reasoning and reflection: The error indicates the plate cannot be picked up unless I move to the CounterTop first. I will move to the CounterTop.
 
-Reasoning and reflection: I can now see that the book is directly in front of me, but I have not yet moved close enough to it.
-The current candidate book is at [200, 300, 300, 350]. \
-There could be another candidate book at [300, 105, 340, 150], but it is more far away from me so I will visit [200, 300, 300, 350] first. \
-According to the standard, I should move closer to the book. Therefore, I decide to move forward three more times to reach the desired position.
-Executable plans: [[0, Move forward by 0.25], [0, Move forward by 0.25], [0, Move forward by 0.25]]
+Executable plans: [[39, find a CounterTop]]
 
-Environment Feedback: Step 8, Step 9, and Step 10 are all executed successfully.
+Environment Feedback: Step 3 is executed successfully.
 
-Candidate Target Entities location: 
-image 0: [[160, 300, 200, 350], [230, 165, 240, 170]]
-image 1: [[200, 300, 300, 350], [300, 105, 340, 150]]
-image 2: [[200, 350, 300, 450], [300, 105, 340, 150]] 
+Candidate Target Entities location:  
+image 0: [["Plate", "bbox: [220, 240, 260, 270]"], ["Spoon", "in hand"]]
 
-Reasoning and reflection: I can now see that the book is directly in front of me. I am already very close to it, but the task has not success. \
-I believe I need to move on to the next candidate at [300, 105, 340, 150].
-According to the standard, I should move closer to the book. Therefore, I decide to move forward three more times to reach the desired position.
-Executable plans: [[0, Move forward by 0.25], [0, Move forward by 0.25], [0, Move forward by 0.25]]
+Reasoning and reflection: I am now at the CounterTop. However, I cannot pick up the plate while holding the spoon. I will put the spoon down first.
 
-Environment Feedback: Step 11, Step 12, and Step 13 are all executed successfully.
+Executable plans: [[133, put down the object in hand]]
+
+Environment Feedback: Step 4 is executed successfully.
+
+Candidate Target Entities location:  
+image 0: [["Plate", "bbox: [220, 240, 260, 270]"]]
+
+Reasoning and reflection: With my hand now free, I can attempt to pick up the plate.
+
+Executable plans: [[122, pick up the Plate]]
+
+Environment Feedback: Step 5 is executed successfully.
+
+Candidate Target Entities location:  
+image 0: [["DiningTable", "bbox: [300, 200, 400, 300]"], ["Plate", "in hand"]]
+
+Reasoning and reflection: I now need to place the plate on the dining table to complete the eating surface setup.
+
+Executable plans: [[18, find a DiningTable], [133, put down the object in hand]]
+
+Environment Feedback: Step 6 is executed successfully; Step 7 is executed successfully.
+
+Candidate Target Entities location:  
+image 0: [["Spoon", "bbox: [150, 250, 180, 270]"], ["Plate", "on DiningTable"]]
+
+Reasoning and reflection: The plate has been placed on the dining table. I now need to re-locate and pick up the spoon again so I can place it into the plate.
+
+Executable plans: [[19, find a Spoon], [105, pick up the Spoon]]
+
+Environment Feedback: Step 8 is executed successfully; Step 9 is executed successfully.
+
+Candidate Target Entities location:  
+image 0: [["Spoon", "in hand"], ["Plate", "on DiningTable"]]
+
+Reasoning and reflection: I am now holding the spoon. The plate is on the dining table. I will now place the spoon into the plate to complete the task.
+
+Executable plans: [[18, find a DiningTable], [133, put down the object in hand]]
+
+Environment Feedback: Step 10 is executed successfully; Step 11 is executed successfully.
+
+Candidate Target Entities location:  
+image 0: [["Spoon", "in Plate", "on DiningTable"]]
+
+Reasoning and reflection: The spoon has been placed inside the plate, which is on the dining table, successfully setting up the eating surface for dinner.
+
+Executable plans: []
 
 Task Success
-
 
 '''
 ] 
 
 
-
+#common sense, base, and ...
 target_examples = [
 '''
    Environmental Feedback: The last action succeeded. 
     
-   Human Instruction:  I need a device on my floor to illuminate my workspace. Please navigate to that object and stay near it.
+   Human Instruction:  Place two yellow bottles on top of a toilet
+      
+   Last Visual Description: I am in a bathroom. I can see a toilet in front of me. I need to find two yellow bottles (SoapBottles) and place them on the toilet..
    
-   Target Description:  A device on my floor to illuminate my workspace is a floorlamp. My target is a floorlamp.
-   
-   Visual Description: I can see the floorlamp is at left side in front of me, next to the TVStand. Around me is a Cabinet at my left side.
-   
-   Target Entity in JSON: {"target_name": ["floorlamp"], "blocking_name":[], "target_attribute": ["left side"], "target_relation": [["floorlamp", "next to", "TVStand"]], "related_objects": ["Cabinet", "TVStand"]}
+   Target Entities in JSON: {"target_name": ["SoapBottle", "Toilet"], "target_attribute": ["in front"], "target_relation": [["SoapBottles", "on top", "Toilet"]], "related_objects": ['Toilet', 'ToiletPaper', 'ToiletPaperRoll', 'ToiletPaperHanger', 'Plunger', 'HandTowel', 'HandTowelHolder', 'SoapBar', 'SoapBottle', 'Sink', 'SinkBasin', 'Towel', 'TowelHolder', 'Mirror', 'ShowerDoor', 'ShowerGlass', 'Bathtub', 'BathtubBasin']
+}
 ''',
 
 ''' 
-    Environmental Feedback: The last action is invalid. The feedback is: Last action MoveRight is invalid. StandardCounterHeightWidth is blocking Agent 0 from moving by (-0.2500, 0.0000, 0.0000).
-    
-    Human Instruction: Find the rectangular yellowish object with a soft and smooth surface.
+    Environmental Feedback: Last action is invalid. Ladle is not visible because it is in DiningTable. Go there to pick the object instead.
 
-    Target Description: My target is an object.
+    Human Instruction: Rinse off a ladle and move it to the table.
 
-    Visual Description: At the first image, I can see that the rectangular yellowish object is  with a soft and smooth surface located in my left front direction, placed on a desk. In front of me, slightly to the right, there is a chair blocking my direct path. 
-                        At the second image, I can see that the rectangular yellowish object is  with a soft and smooth surface is located in my left front direction, placed on a desk. 
+    Last Visual Description: I am in a room with a garbage can and a fridge. The floor is tiled. There is a door in the background.
 
-    Target Entity in JSON: {"target_name": ["object"],  "blocking_name": ["counter"], "target_attribute": ["rectangular", "yellowish"], "target_relation": [["object", "placed on", "desk"]], "related_objects": ["chair", "desk"]}
+    Target Entities in JSON: {
+    "target_name": ["Ladle", "Sink", "DiningTable"],
+    "target_attribute": ["tiled floor", "in the background"],
+    "target_relation": [["Ladle", "in", "DiningTable"], ["Ladle", "rinsed in", "Sink"], ["Ladle", "moved to", "DiningTable"]],
+    "related_objects": [
+        "GarbageCan", "Fridge", "Ladle", "Sink", "SinkBasin", "DiningTable", "Cup", "Plate", "Chair", "CounterTop", "Cabinet"
+    ]
+    }
 ''', 
 
-''' Environmental Feedback: The last action is invalid. The feedback is: Last action MoveAhead is invalid. OVENDOOR.002 is blocking Agent 0 from moving by (0.0000, 0.0000, -0.2500). 
+''' 
+Environmental Feedback: Last action executed successfully.
 
-    Human Instruction: Navigate to the book and be as close as possible.
+Human Instruction: Rinse off something for serving soup and move it to the table.
 
-    Target Description: My target is a book.
-    
-    Visual Description: My target is a book.
-                        At the first image, I cannot see the book. 
-                        At the second image, I can see the book is directly in front of me, placed on a shelf.
+Last Visual Description: I can see a bread, an egg, a ladle and a dining table.
 
-    Target Entity in JSON: {"target_name": ["book"], "blocking_name": ["oven door"], "target_attribute": [], "target_relation": [["book", "placed on", "shelf"]], related_objects": ["shelf"]}
+Target Entities in JSON: {
+  "target_name": ["Ladle", "Sink", "DiningTable"],
+  "target_attribute": [],
+  "target_relation": [["Ladle", "rinsed in", "Sink"], ["Ladle", "moved to", "DiningTable"]],
+  "related_objects": [
+    "Ladle", "DiningTable", "Bread", "Egg", "Sink", "SinkBasin", "Cup", "Plate", "Chair", "CounterTop", "Cabinet"
+  ]
 ''', 
 ]
 
@@ -395,7 +334,7 @@ class EB_AlfredEvaluator():
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
             self.env = EBAlfEnv(eval_set=self.eval_set, down_sample_ratio=self.config['down_sample_ratio'], 
                                           exp_name=exp_name, selected_indexes=self.config.get('selected_indexes', []), 
-                                          detection_box=self.config.get('detection_box', False),
+                                          detection_box=False,
                                           resolution=self.config.get('resolution', 500), 
                                           )
             
@@ -411,7 +350,8 @@ class EB_AlfredEvaluator():
                                             boundingbox=self.config['detection_box'], scene_graph_text=self.config['sg_text'],
                                             gd_only=self.config['gd_only'], tp=self.config['tp'],
                                             blockingobj=self.config['block_objects'],
-                                            gd_checkpoint_path=self.gd_checkpoint_path, gd_config_path=self.gd_config_path)
+                                            gd_checkpoint_path=self.gd_checkpoint_path, gd_config_path=self.gd_config_path,
+                                            top_k=self.config['top_k'], aggr_thres=self.config['aggr_thres'])
 
             self.evaluate()
             average_json_values(os.path.join(self.env.log_path, 'results'), output_file='summary.json')
@@ -548,16 +488,17 @@ if __name__ == '__main__':
 
     config = {
         'model_name': 'gemini-2.0-flash',  # 'Qwen/Qwen2-VL-7B-Instruct',
-        'n_shots': 10,
+        'n_shots': 3,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'history_laser_bbox_0.1_with_bbox_with_text',
+        'exp_name': 'laser_alfred_try1',
         'chat_history': 0, 
         'detection_box': True,
         'multiview': False, 
-        'eval_sets': ['base', 'spatial', 'visual_appearance', 'common_sense', 'complex_instruction', 'long_horizon'], 
-        'selected_indexes': [], 
+        # 'eval_sets': ['base', 'spatial', 'visual_appearance', 'common_sense', 'complex_instruction', 'long_horizon'], 
+        'eval_sets': ['long_horizon'],
+        'selected_indexes': list(range(6,50)), 
         'multistep':0, 
         'block_objects': False,
         'sg_text': True,
@@ -571,6 +512,8 @@ if __name__ == '__main__':
         'icl_abl':0, 
         'visual':0,
         'gd_only': False,
+        'top_k': 1, 
+        'aggr_thres': 0.3,
         'gd_config_path': '/home/asethi04/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
         'gd_checkpoint_path': '/home/asethi04/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth'
     }

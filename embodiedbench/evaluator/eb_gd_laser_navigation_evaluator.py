@@ -285,13 +285,13 @@ if __name__ == '__main__':
     #           'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
     #           'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',}
     
-    config = {'model_name': 'gpt-4o', 
+    config = {'model_name': 'Qwen/Qwen2.5-VL-72B-Instruct', 
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 
             #   'eval_sets': ['base', 'common_sense', 'long_horizon', 'visual_appearance', 'complex_instruction'], 
             #   'eval_sets': ['long_horizon', 'visual_appearance', 'complex_instruction', 'base', 'common_sense'], 
-              'eval_sets': ['long_horizon'],
+              'eval_sets': ['visual_appearance'],
               'chat_history': True, 
               'n_shots': 3, 
               'multiview': False, 

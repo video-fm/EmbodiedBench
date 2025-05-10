@@ -83,7 +83,7 @@ class RemoteModel:
                 return self._call_gpt(message_history, get_scene_graph)
             elif "Qwen2-VL-7B-Instruct" in self.model_name:
                 return self._call_qwen7b(message_history, get_scene_graph)
-            elif "Qwen2-VL-72B-Instruct" in self.model_name:
+            elif "Qwen2-VL-72B-Instruct" in self.model_name or "Qwen2.5-VL-72B-Instruct" in self.model_name:
                 return self._call_qwen72b(message_history, get_scene_graph)
             elif "Llama-3.2-11B-Vision-Instruct" in self.model_name:
                 return self._call_llama11b(message_history, get_scene_graph)
@@ -334,10 +334,11 @@ class RemoteModel:
             else:
                 response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide))
         
+        # vlm_target_generation_guide
         response = self.model.chat.completions.create(
             model=self.model_name,
             messages=message_history,
-            response_format=response_format,
+            # response_format=response_format,
             temperature=temperature,
             max_tokens=max_completion_tokens
         )

@@ -257,12 +257,12 @@ class VLMPlanner:
         epoch = 0
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # self.predicate_model = load_model(model_dir, model_name, epoch, device)
-        clip_model_name = "openai/clip-vit-base-patch16"
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.predicate_model = PredicateModel_v3(hidden_dim = 128, num_top_pairs=1, device=device, model_name=clip_model_name).to(device)
+        self.predicate_model = load_model(model_dir, model_name, epoch, device)
+        # clip_model_name = "openai/clip-vit-base-patch16"
+        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # self.predicate_model = PredicateModel_v3(hidden_dim = 128, num_top_pairs=1, device=device, model_name=clip_model_name).to(device)
         
-        self.common_objects = ["toilet", "desk", "bed", "wall", "door", "cabinet", "stove", "table", "counter", "window", "mirror", "other"]
+        # self.common_objects = ["toilet", "desk", "bed", "wall", "door", "cabinet", "stove", "table", "counter", "window", "mirror", "other"]
 
     def set_actions(self, actions):
         self.actions = actions

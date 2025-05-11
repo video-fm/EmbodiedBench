@@ -323,16 +323,19 @@ class RemoteModel:
         if not self.language_only:
             message_history = convert_format_2gemini(message_history)
 
-        if not self.language_only:
-            if self.task_type == 'manip':
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide_manip))
-            else:
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide))
-        else:
-            if self.task_type == 'manip':
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide_manip))
-            else:
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide))
+        # if get_scene_graph:
+        #     response_format = None
+            
+        # elif not self.language_only:
+        #     if self.task_type == 'manip':
+        #         response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide_manip))
+        #     else:
+        #         response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide))
+        # else:
+        #     if self.task_type == 'manip':
+        #         response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide_manip))
+        #     else:
+        #         response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide))
         
         # vlm_target_generation_guide
         response = self.model.chat.completions.create(
@@ -348,6 +351,7 @@ class RemoteModel:
         out = out.replace("'",'"')
         out = out.replace('\"s ', "\'s ")
         out = out.replace('```json', '').replace('```', '')
+        out = out.replace('\"[', '[').replace("]\"", "]")
         return out
     
     def _call_intern38b(self, message_history, get_scene_graph=False):

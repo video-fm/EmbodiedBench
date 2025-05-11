@@ -28,11 +28,7 @@ from groundingdino.util.utils import get_phrases_from_posmap
 import torch
 import math
  
-model_lib_path = "/home/asethi04/LASER/LASER-unified/src/models"
 
-sys.path.append(model_lib_path)
-
-from llava_clip_model_v3 import PredicateModel as PredicateModel_v3
 
 def preprocess_caption(caption: str) -> str:
 
@@ -84,12 +80,6 @@ def normalize_prompt(points, labels):
     return points, labels
 
 
-def load_model(model_dir, model_name, epoch, device):
-    model_name = model_name + f".{epoch}.model"
-    predicate_model = torch.load(
-        os.path.join(model_dir, model_name), map_location=device, weights_only=False
-    )
-    return predicate_model
 
 # modify this function to take in a bbox label and show it
 
@@ -107,32 +97,7 @@ def show_box(box, ax, object_id, label='hi'):
     if label is not None:
         ax.text(x0, y0 - 5, label, color='white', fontsize=10, alpha=color[3])
 
-
-
-def bbox_to_mask(bbox, frame_height, frame_width):
-    """
-    Converts a bounding box into a binary mask using torch tensors.
-    Parameters:
-    - bbox: A list or tuple of bounding box coordinates [xmin, ymin, xmax, ymax].
-    - frame_height: The height of the frame.
-    - frame_width: The width of the frame.
-    Returns:
-    - mask: A binary mask of shape (frame_height, frame_width) with dtype torch.bool.
-    """
-    # Create an empty mask with the same dimensions as the frame
-    mask = np.zeros((frame_height, frame_width, 1), dtype=bool)
-    # Extract bounding box coordinates
-    xmin, ymin, xmax, ymax = bbox
-    # Ensure coordinates are integers and within frame boundaries
-    xmin = int(max(0, xmin))
-    ymin = int(max(0, ymin))
-    xmax = int(min(frame_width - 1, xmax))
-    ymax = int(min(frame_height - 1, ymax))
-
-    # Set the pixels inside the bounding box to True
-    mask[ymin : ymax + 1, xmin : xmax + 1, :] = True
-
-    return mask
+    
 
     
 
@@ -210,17 +175,8 @@ class VLMPlanner():
             model_config_path=gd_config_path, 
             model_checkpoint_path=gd_checkpoint_path
         )
-                
-        all_model_dir = "/home/asethi04/common-data/jiani_common/llava_models"
-        model_dir = os.path.join(all_model_dir, f"ensemble-02-10")
-        model_name = "ensemble-2025-02-10-14-57-22"
-        epoch = 0
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-        self.predicate_model = load_model(model_dir, model_name, epoch, device)
-        # clip_model_name = "openai/clip-vit-base-patch16"
-        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # self.predicate_model = PredicateModel_v3(hidden_dim = 128, num_top_pairs=1, device=device, model_name=clip_model_name).to(device)
+        
+        self.grounding_model.model = self.grounding_model.model.to("cuda:0")
 
         
     
@@ -433,59 +389,6 @@ class VLMPlanner():
         all_detections.append(detections)
         return all_detections
     
-    
-    def predict_laser(
-        self,
-        image: np.ndarray,
-        boxes: torch.Tensor,          # N × 4  (xyxy, already on CPU)
-        sg_keywords: list[str],       # every class name that may appear
-    ):
-        """
-        Given an image + N bounding–boxes and a *flat* list of candidate class
-        names (sg_keywords), return the single most–likely label from sg_keywords
-        for **each** box in the original order.
-
-        Returns
-        -------
-        prob_labels : list[str]       # length == len(boxes)
-        selected_object_bboxes : torch.Tensor  # exactly the same 'boxes' tensor
-        """
-        if len(boxes) == 0:
-            return [], boxes                   # nothing to do
-
-        # build binary masks for LASER
-        h, w = image.shape[:2]
-        pred_masks      = [bbox_to_mask(b, h, w) for b in boxes]
-        object_ids      = [[0, 0, i] for i in range(len(pred_masks))]
-
-        # ---------- run LASER (object-name head only) ---------------------------
-        cate_probs, _, _, _ = self.predicate_model(
-            batched_video_ids=[0],
-            batched_videos=[image],
-            batched_masks=pred_masks,
-            batched_bboxes=boxes,
-            batched_names=[sg_keywords],       # candidate labels
-            batched_object_ids=object_ids,
-            batched_unary_kws=[[]],            # no attributes
-            batched_binary_kws=[[]],
-            batched_obj_pairs=[],
-            batched_video_splits=[0],
-            batched_binary_predicates=[None],
-        )
-
-        # ---------- pick best label per object ---------------------------------
-        labels = []
-        for oid in range(len(boxes)):
-            best_label   = None
-            best_prob    = -1.0
-            for kw in sg_keywords:
-                p = cate_probs[0].get((oid, kw), 0.0)
-                if p > best_prob:
-                    best_prob, best_label = p, kw
-            labels.append(best_label or "unknown")
-
-        return labels, boxes
-    
         
     def act_custom(self, prompt, obs):
         assert type(obs) == str # input image path
@@ -591,14 +494,6 @@ class VLMPlanner():
                     boxes = torch.tensor([])
                 else:
                     boxes = torch.stack(boxes)
-                    
-                if len(boxes) != 0:
-                    target_labels, target_bboxes = self.predict_laser(
-                        image=image,
-                        boxes=boxes,
-                        sg_keywords=sg_keywords,    # list of candidate class names
-                    )
-                labels = target_labels
 
                 save_prompts_one_image(
                     frame_image=image,

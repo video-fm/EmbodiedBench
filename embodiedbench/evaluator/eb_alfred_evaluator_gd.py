@@ -42,15 +42,7 @@ scene_graph_examples = [
                         At the second image, I can see the book is directly in front of me, placed on a shelf.
 
     Scene Graph Entity in JSON: "scene_graph_entities": ["book", "shelf"]
-''',
-# '''
-#    Human instruction: Place two yellow bottles on top of a toilet.
-   
-#    Last Visual Description: I am in a bathroom. I can see a toilet in front of me. I need to find two yellow bottles and place them on the toilet.
-      
-#    Scene Graph Entity in JSON: "scene_graph_entities": ["toilet", "bottle"]
-# }
-# '''
+'''
 ]
 
 exploration_example_path = os.path.join(os.path.dirname(__file__), 'config/alfred_long_horizon_examples.json')
@@ -231,7 +223,7 @@ if __name__ == '__main__':
     import argparse
     def parse_arguments():
         parser = argparse.ArgumentParser(description='Change configuration parameters.')
-        parser.add_argument('--model_name', default='gemini-2.0-flash', type=str, help='Name of the model.')
+        parser.add_argument('--model_name', default='OpenGVLab/InternVL2_5-38B', type=str, help='Name of the model.')
         parser.add_argument('--n_shots', type=int, help='Number of examples')
         parser.add_argument('--down_sample_ratio', type=float, help='Down sample ratio.')
         parser.add_argument('--model_type', default='remote', type=str, help='Type of the model.')
@@ -253,10 +245,10 @@ if __name__ == '__main__':
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'gd',
+        'exp_name': 'multistep_gd',
         'chat_history': 0, 
         'detection_box': 0,
-        'eval_sets': ['visual_appearance'], 
+        'eval_sets': ['common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'], 
         'selected_indexes': [], 
         'multistep':0, 
         'resolution': 500, 

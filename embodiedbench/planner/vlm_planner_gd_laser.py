@@ -202,6 +202,7 @@ class VLMPlanner:
         aggr_thres=0.1,
     ):
         self.last_visual_description = ""
+        self.last_reasoning = ""
         self.model_name = model_name
         self.obs_key = obs_key
         self.system_prompt = system_prompt
@@ -256,9 +257,12 @@ class VLMPlanner:
         epoch = 0
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        self.predicate_model = load_model(model_dir, model_name, epoch, device)
+        # self.predicate_model = load_model(model_dir, model_name, epoch, device)
+        clip_model_name = "openai/clip-vit-base-patch16"
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.predicate_model = PredicateModel_v3(hidden_dim = 128, num_top_pairs=1, device=device, model_name=clip_model_name).to(device)
         
-        self.common_objects = ["toilet", "desk", "bed", "wall", "door", "cabinet", "stove", "table", "shadow", "window", "mirror", "other"]
+        self.common_objects = ["toilet", "desk", "bed", "wall", "door", "cabinet", "stove", "table", "counter", "window", "mirror", "other"]
 
     def set_actions(self, actions):
         self.actions = actions
@@ -408,6 +412,11 @@ class VLMPlanner:
                 # f"\n\nEnvironmental Feedback: {last_env_feedback}"
                 f"\n\nLast Visual Description: {self.last_visual_description}\n"
             )
+            
+            scene_graph_prompt += (
+                # f"\n\nEnvironmental Feedback: {last_env_feedback}"
+                f"\n\nReasoning and Reflection: {self.last_reasoning}\n"
+            )
             scene_graph_prompt += f'\n\n## Now the human instruction is: {user_instruction}.'
 
             if self.language_only:
@@ -490,6 +499,7 @@ class VLMPlanner:
     def reset(self):
         # at the beginning of the episode
         self.last_visual_description = ""
+        self.last_reasoning = ""
         self.episode_messages = []
         self.episode_act_feedback = []
         self.planner_steps = 0
@@ -695,34 +705,44 @@ class VLMPlanner:
                     # the top predicted name is not the target name
                     aggr_res[oid].append(0)
                     
-            for oid in reformatted_unary_res: 
-                
-                if not oid in aggr_res:
-                    aggr_res[oid] = []
-                    
-                for attr in reformatted_unary_res[oid]:
-                    aggr_res[oid].append(reformatted_unary_res[oid][attr])
             
-            # Thresholding
-            avg_aggr_res = {}
-            for oid in aggr_res:
-                probs = aggr_res[oid]
-                avg_val = sum(probs) / len(probs)
-                if avg_val > self.aggr_thres:
-                    avg_aggr_res[oid] = avg_val
-            
-            # Only pick the top-k object according to the setip
-            top_objects = sorted([(v, k) for k, v in avg_aggr_res.items()], reverse=True)[:self.k]
-            top_objects_probs = {oid: prob for prob, oid in top_objects}
-            
-            selected_objects = list(top_objects_probs.keys())
-            selected_object_bboxes = boxes[selected_objects]
-                                
-            prob_labels = []
-            for oid in top_objects_probs:
-                prob_labels.append(predicted_name[oid][0])
+            kept_objects   = []          # will hold (oid, top_name_prob)
+            attr_hit_miss  = {}          # oid -> list[(p_attr, label)]  # one item per attribute
 
-        return prob_labels, selected_object_bboxes
+            for oid, name_info in predicted_name.items():
+                # ---------- gate on the OBJECT NAME ----------
+                name_prob, name_label = name_info[0]       # most confident name
+                if name_prob <= self.aggr_thres or name_label not in target_names:           # discard if below threshold
+                    continue
+
+                # ---------- collect attribute labels ----------
+                per_attr_labels = []
+                for attr in query_attributes:
+                    # probability that *this* object has *this* attribute
+                    p_attr = reformatted_unary_res.get(oid, {}).get(attr, 0.0)
+
+                    # choose the textual label based on threshold hit / miss
+                    attr_label = attr if p_attr > self.aggr_thres else f"not {attr}"
+
+                    per_attr_labels.append((p_attr, attr_label))
+
+                kept_objects.append((oid, name_prob, name_label))
+                attr_hit_miss[oid] = per_attr_labels
+
+            # ---------- pick top-k objects by name confidence -------------
+            kept_objects = sorted(kept_objects, key=lambda x: x[1], reverse=True)[: self.k]
+            selected_oids = [oid for (oid, _, _) in kept_objects]
+
+            label_strings = []                   # will become `prob_labels`
+            for oid, name_prob, name_label in kept_objects:
+                parts = [name_label]                       # first: object class
+                parts.extend(lab for _, lab in attr_hit_miss[oid])   # then attr labels
+                label_strings.append(", ".join(parts))      # -> "toilet yellow not clean"
+
+            prob_labels = label_strings                    # <-- list[str]
+            selected_object_bboxes = boxes[selected_oids]
+
+            return prob_labels, selected_object_bboxes
     
     def get_sg_kws(self, sg_info):
         
@@ -847,7 +867,7 @@ class VLMPlanner:
             if self.gd_only:
                 
                 # Predict bounding box with grounding dino
-                labels, boxes = self.predict_gd(image, target_names, box_threshold=0.1, text_threshold=0.1)
+                labels, boxes = self.predict_gd(image, target_names, box_threshold=0.4, text_threshold=0.4)
             
                 target_labels, target_bboxes = [], []
                 for label, box in zip(labels, boxes):
@@ -860,23 +880,26 @@ class VLMPlanner:
             
             else:
                 labels, boxes = self.predict_gd(image, gd_query_objects, box_threshold=0.1, text_threshold=0.1)
-
-                target_labels, target_bboxes = self.predict_laser(
-                      image=image, 
-                      boxes=boxes, 
-                      target_names=target_names,
-                      query_names=query_objects,
-                      query_attributes=target_attributes,
-                      )
+                if len(boxes) != 0:
+                    target_labels, target_bboxes = self.predict_laser(
+                        image=image, 
+                        boxes=boxes, 
+                        target_names=target_names,
+                        query_names=list(set(query_objects)),
+                        query_attributes=target_attributes,
+                    )
+                else:
+                    target_labels = []
+                    boxes = []
                 
-            if self.boundingbox:
-                if not len(target_bboxes) == 0:
-                    save_prompts_one_image(frame_image=image, 
-                                            boxes=target_bboxes, 
-                                            labels=["" for _ in target_bboxes], 
-                                            points=[], 
-                                            save_path=bbox_path)    
-                    prompt_image_path = bbox_path  
+            # if self.boundingbox:
+            if not len(target_bboxes) == 0:
+                save_prompts_one_image(frame_image=image, 
+                                        boxes=target_bboxes, 
+                                        labels=["" for label in target_labels], 
+                                        points=[], 
+                                        save_path=bbox_path)    
+                prompt_image_path = bbox_path  
                 
             else:
                 target_bboxes = []
@@ -899,7 +922,19 @@ class VLMPlanner:
                 obs.append(prompt_image_path) # update to bboxed image path
         
         if self.scene_graph_text and len(scene_graph_prompt) > 0:
-            prompt += self.scene_graph_prompt_prefix.format(w=width, h=height) + "\n".join(scene_graph_prompt)
+            sg_block = (
+                self.scene_graph_prompt_prefix.format(w=width, h=height) +
+                "\n".join(scene_graph_prompt) +
+                "\n"                       # keep a newline before the next sentence
+            )
+
+            marker = "You need to describe current visual state"
+            try:
+                insert_idx = prompt.index(marker)      # first char of the marker
+                prompt = prompt[:insert_idx] + sg_block + prompt[insert_idx:]
+            except ValueError:
+                # marker not found – fallback: append at the end
+                prompt += sg_block
             
         
         else:
@@ -961,13 +996,18 @@ class VLMPlanner:
         
         if valid:
             plan = json.loads(out)
+            self.last_reasoning = plan.get(
+                    "reasoning_and_reflection", ""
+            )
             self.last_visual_description = plan.get(
                     "visual_state_description", ""
             )
+            
             plan['scene_graph'] = sg_info
             out_str = json.dumps(plan)
         else:
             self.last_visual_description = ""
+            self.last_reasoning = ""
             out_str = '''{"visual_state_description":"invalid json, random action", "reasoning_and_reflection":"invalid json, random action",
                    "language_plan":"invalid json, random action"}'''
                    

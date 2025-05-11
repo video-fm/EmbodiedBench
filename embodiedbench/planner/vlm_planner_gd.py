@@ -28,7 +28,11 @@ from groundingdino.util.utils import get_phrases_from_posmap
 import torch
 import math
  
+model_lib_path = "/home/asethi04/LASER/LASER-unified/src/models"
 
+sys.path.append(model_lib_path)
+
+from llava_clip_model_v3 import PredicateModel as PredicateModel_v3
 
 def preprocess_caption(caption: str) -> str:
 
@@ -80,6 +84,12 @@ def normalize_prompt(points, labels):
     return points, labels
 
 
+def load_model(model_dir, model_name, epoch, device):
+    model_name = model_name + f".{epoch}.model"
+    predicate_model = torch.load(
+        os.path.join(model_dir, model_name), map_location=device, weights_only=False
+    )
+    return predicate_model
 
 # modify this function to take in a bbox label and show it
 
@@ -97,7 +107,32 @@ def show_box(box, ax, object_id, label='hi'):
     if label is not None:
         ax.text(x0, y0 - 5, label, color='white', fontsize=10, alpha=color[3])
 
-    
+
+
+def bbox_to_mask(bbox, frame_height, frame_width):
+    """
+    Converts a bounding box into a binary mask using torch tensors.
+    Parameters:
+    - bbox: A list or tuple of bounding box coordinates [xmin, ymin, xmax, ymax].
+    - frame_height: The height of the frame.
+    - frame_width: The width of the frame.
+    Returns:
+    - mask: A binary mask of shape (frame_height, frame_width) with dtype torch.bool.
+    """
+    # Create an empty mask with the same dimensions as the frame
+    mask = np.zeros((frame_height, frame_width, 1), dtype=bool)
+    # Extract bounding box coordinates
+    xmin, ymin, xmax, ymax = bbox
+    # Ensure coordinates are integers and within frame boundaries
+    xmin = int(max(0, xmin))
+    ymin = int(max(0, ymin))
+    xmax = int(min(frame_width - 1, xmax))
+    ymax = int(min(frame_height - 1, ymax))
+
+    # Set the pixels inside the bounding box to True
+    mask[ymin : ymax + 1, xmin : xmax + 1, :] = True
+
+    return mask
 
     
 
@@ -161,16 +196,31 @@ class VLMPlanner():
         self.kwargs = kwargs
         self.action_key = kwargs.pop('action_key', 'action_id')
         
+        # self.scene_graph_prompt = f'''## You are a robot operating in a home. You are given an image and observe the environment for performing the given task. \
+        #     The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'}\
+        #     You are supposed to output in JSON.'''
         self.scene_graph_prompt = f'''## You are a robot operating in a home. You are given an image and observe the environment for performing the given task. \
-            The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'}\
-            You are supposed to output in JSON.'''
-            
+                    The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'}\
+                    Please extract the most visually identifiable features and ignore the more subtle ones.
+                    Please deduce the object names with a synonym if the descriptions is verbose or functional.
+                    For example, substitute "freshly baked baguette" to "loaves", "portable device to access the internet" to "laptop", "light-emiting device on my desk to provide light for my work area" to "desk lamp".
+                    You are supposed to output in JSON.'''
+
         self.grounding_model = gd_Model(
             model_config_path=gd_config_path, 
             model_checkpoint_path=gd_checkpoint_path
         )
-        
-        self.grounding_model.model = self.grounding_model.model.to("cuda:0")
+                
+        all_model_dir = "/home/asethi04/common-data/jiani_common/llava_models"
+        model_dir = os.path.join(all_model_dir, f"ensemble-02-10")
+        model_name = "ensemble-2025-02-10-14-57-22"
+        epoch = 0
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        self.predicate_model = load_model(model_dir, model_name, epoch, device)
+        # clip_model_name = "openai/clip-vit-base-patch16"
+        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # self.predicate_model = PredicateModel_v3(hidden_dim = 128, num_top_pairs=1, device=device, model_name=clip_model_name).to(device)
 
         
     
@@ -383,6 +433,59 @@ class VLMPlanner():
         all_detections.append(detections)
         return all_detections
     
+    
+    def predict_laser(
+        self,
+        image: np.ndarray,
+        boxes: torch.Tensor,          # N × 4  (xyxy, already on CPU)
+        sg_keywords: list[str],       # every class name that may appear
+    ):
+        """
+        Given an image + N bounding–boxes and a *flat* list of candidate class
+        names (sg_keywords), return the single most–likely label from sg_keywords
+        for **each** box in the original order.
+
+        Returns
+        -------
+        prob_labels : list[str]       # length == len(boxes)
+        selected_object_bboxes : torch.Tensor  # exactly the same 'boxes' tensor
+        """
+        if len(boxes) == 0:
+            return [], boxes                   # nothing to do
+
+        # build binary masks for LASER
+        h, w = image.shape[:2]
+        pred_masks      = [bbox_to_mask(b, h, w) for b in boxes]
+        object_ids      = [[0, 0, i] for i in range(len(pred_masks))]
+
+        # ---------- run LASER (object-name head only) ---------------------------
+        cate_probs, _, _, _ = self.predicate_model(
+            batched_video_ids=[0],
+            batched_videos=[image],
+            batched_masks=pred_masks,
+            batched_bboxes=boxes,
+            batched_names=[sg_keywords],       # candidate labels
+            batched_object_ids=object_ids,
+            batched_unary_kws=[[]],            # no attributes
+            batched_binary_kws=[[]],
+            batched_obj_pairs=[],
+            batched_video_splits=[0],
+            batched_binary_predicates=[None],
+        )
+
+        # ---------- pick best label per object ---------------------------------
+        labels = []
+        for oid in range(len(boxes)):
+            best_label   = None
+            best_prob    = -1.0
+            for kw in sg_keywords:
+                p = cate_probs[0].get((oid, kw), 0.0)
+                if p > best_prob:
+                    best_prob, best_label = p, kw
+            labels.append(best_label or "unknown")
+
+        return labels, boxes
+    
         
     def act_custom(self, prompt, obs):
         assert type(obs) == str # input image path
@@ -424,7 +527,7 @@ class VLMPlanner():
         sg_message = self.get_message(obs, scene_graph_prompt)
 
         try:
-            out = self.model.respond(sg_message, get_scene_graph=True)
+            out = self.model.respond(sg_message, get_scene_graph=False, get_entity_name=True)
         except Exception as e:
             print(e)
             if 'qwen' in self.model_name:
@@ -436,76 +539,84 @@ class VLMPlanner():
 
         sg_keywords = json.loads(out)['scene_graph_entities']
         all_dets = []
+        if len(sg_keywords) > 0:
+            prompt = prompt + f'\n\n The current image height is 500, width is 500.'
 
-        prompt = prompt + f'\n\n The current image height is 600, width is 600.'
+            # detections = post_process_detections(all_dets, sg_keywords)
+            if type(obs) == str:
+                obs = [obs]
+            if type(observation) == str:
+                observation = [observation]
 
-        # detections = post_process_detections(all_dets, sg_keywords)
-        if type(obs) == str:
-            obs = [obs]
-        if type(observation) == str:
-            observation = [observation]
+            for ct, image_path in enumerate(observation):
+                image_path_ls = image_path.split('/')
+                image_dir, image_name = image_path_ls[:-1], image_path_ls[-1]
+                image_name = image_name.split('.')[0]
+                new_image_name = image_name + '_bbox.png'
+                new_image_path = os.path.join(*image_dir, new_image_name)
 
-        for ct, image_path in enumerate(observation):
-            image_path_ls = image_path.split('/')
-            image_dir, image_name = image_path_ls[:-1], image_path_ls[-1]
-            image_name = image_name.split('.')[0]
-            new_image_name = image_name + '_bbox.png'
-            new_image_path = os.path.join(*image_dir, new_image_name)
-
-            if os.path.exists(new_image_path):
-                obs.append(new_image_path)
-                continue
-
-            image = cv2.imread(image_path)
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-            height, width = image.shape[0], image.shape[1]
-            detection_ls = self.predict_gd(image, sg_keywords, box_threshold=0.4, text_threshold=0.4)
-            assert len(detection_ls) == 1
-            detections = detection_ls[0]
-
-            scene_graph_text = []
-            reformated = torch.tensor([
-                (
-                    get_valid_bbox_val(x1, width), 
-                    get_valid_bbox_val(y1, height),
-                    get_valid_bbox_val(x2, width), 
-                    get_valid_bbox_val(y2, height)
-                )
-                for x1, y1, x2, y2 in detections.xyxy
-            ])
-
-            boxes = []
-            labels = []
-
-            for ct, class_id in enumerate(detections.class_id):
-                if class_id is None:
+                if os.path.exists(new_image_path):
+                    obs.append(new_image_path)
                     continue
-                boxes.append(reformated[ct])
-                labels.append(sg_keywords[class_id])
 
-            if len(boxes) == 0:
-                boxes = torch.tensor([])
-            else:
-                boxes = torch.stack(boxes)
+                image = cv2.imread(image_path)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-            save_prompts_one_image(
-                frame_image=image,
-                boxes=boxes,
-                labels=labels,
-                points=[],
-                save_path=new_image_path
-            )
-            
-            if not image_path in obs:
-                obs.append(image_path)
+                height, width = image.shape[0], image.shape[1]
+                detection_ls = self.predict_gd(image, sg_keywords, box_threshold=0.4, text_threshold=0.4)
+                assert len(detection_ls) == 1
+                detections = detection_ls[0]
 
-            obs.append(new_image_path)  # update to bboxed image path
+                scene_graph_text = []
+                reformated = torch.tensor([
+                    (
+                        get_valid_bbox_val(x1, width), 
+                        get_valid_bbox_val(y1, height),
+                        get_valid_bbox_val(x2, width), 
+                        get_valid_bbox_val(y2, height)
+                    )
+                    for x1, y1, x2, y2 in detections.xyxy
+                ])
 
-            scene_graph_text += [f"{obj_name}: {obj_box}" for (obj_name, obj_box) in zip(labels, boxes)]
-            prompt += f"Its scene graph at frame {ct} is:  {scene_graph_text}."
-            
-        obs = sorted(obs)
+                boxes = []
+                labels = []
+
+                for ct, class_id in enumerate(detections.class_id):
+                    if class_id is None:
+                        continue
+                    boxes.append(reformated[ct])
+                    labels.append(sg_keywords[class_id])
+
+                if len(boxes) == 0:
+                    boxes = torch.tensor([])
+                else:
+                    boxes = torch.stack(boxes)
+                    
+                if len(boxes) != 0:
+                    target_labels, target_bboxes = self.predict_laser(
+                        image=image,
+                        boxes=boxes,
+                        sg_keywords=sg_keywords,    # list of candidate class names
+                    )
+                labels = target_labels
+
+                save_prompts_one_image(
+                    frame_image=image,
+                    boxes=boxes,
+                    labels=labels,
+                    points=[],
+                    save_path=new_image_path
+                )
+                
+                if not image_path in obs:
+                    obs.append(image_path)
+
+                obs.append(new_image_path)  # update to bboxed image path
+
+                scene_graph_text += [f"{obj_name}: {obj_box}" for (obj_name, obj_box) in zip(labels, boxes)]
+                prompt += f"Its scene graph at frame {ct} is:  {scene_graph_text}."
+                
+            obs = sorted(obs)
 
 
         if len(self.episode_messages) == 0:

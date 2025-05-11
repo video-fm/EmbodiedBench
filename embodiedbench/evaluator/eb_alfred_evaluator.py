@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 os.environ["remote_url"] = "http://0.0.0.0:15235/v1"
 os.environ["DISPLAY"] = "cherry:12.0"
 os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
@@ -201,11 +201,11 @@ if __name__ == '__main__':
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'gemini_alfred_test_visual',
+        'exp_name': 'gemini_alfred_test_visual_BASE',
         'chat_history': 0, 
         'detection_box': 0,
         'eval_sets': ['visual_appearance'], 
-        'selected_indexes': [2], 
+        'selected_indexes': [], 
         'multistep':0, 
         'resolution': 500, 
         'env_feedback': 1,
@@ -221,3 +221,4 @@ if __name__ == '__main__':
 
 
 
+ 

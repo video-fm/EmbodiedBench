@@ -1,7 +1,11 @@
 import os
-os.environ["OPENAI_API_KEY"] = "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"
-# os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3,4"
-# os.environ["remote_url"] = "http://0.0.0.0:23456/v1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["remote_url"] = "http://0.0.0.0:15235/v1"
+os.environ["DISPLAY"] = "cherry:12.0"
+os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
+home_dir = "/home/asethi04/embody/EmbodiedBench"
+existing_path = os.environ.get("PYTHONPATH", "")
+os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 import numpy as np
 from tqdm import tqdm
 import time
@@ -38,7 +42,15 @@ scene_graph_examples = [
                         At the second image, I can see the book is directly in front of me, placed on a shelf.
 
     Scene Graph Entity in JSON: "scene_graph_entities": ["book", "shelf"]
-'''
+''',
+# '''
+#    Human instruction: Place two yellow bottles on top of a toilet.
+   
+#    Last Visual Description: I am in a bathroom. I can see a toilet in front of me. I need to find two yellow bottles and place them on the toilet.
+      
+#    Scene Graph Entity in JSON: "scene_graph_entities": ["toilet", "bottle"]
+# }
+# '''
 ]
 
 exploration_example_path = os.path.join(os.path.dirname(__file__), 'config/alfred_long_horizon_examples.json')
@@ -219,7 +231,7 @@ if __name__ == '__main__':
     import argparse
     def parse_arguments():
         parser = argparse.ArgumentParser(description='Change configuration parameters.')
-        parser.add_argument('--model_name', default='OpenGVLab/InternVL2_5-38B', type=str, help='Name of the model.')
+        parser.add_argument('--model_name', default='gemini-2.0-flash', type=str, help='Name of the model.')
         parser.add_argument('--n_shots', type=int, help='Number of examples')
         parser.add_argument('--down_sample_ratio', type=float, help='Down sample ratio.')
         parser.add_argument('--model_type', default='remote', type=str, help='Type of the model.')
@@ -236,15 +248,15 @@ if __name__ == '__main__':
 
 
     config = {
-        'model_name': 'OpenGVLab/InternVL2_5-38B',  # 'Qwen/Qwen2-VL-7B-Instruct',
-        'n_shots': 3,
+        'model_name': 'gemini-2.0-flash',  # 'Qwen/Qwen2-VL-7B-Instruct',
+        'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'multistep_gd',
-        'chat_history': 1, 
+        'exp_name': 'gd',
+        'chat_history': 0, 
         'detection_box': 0,
-        'eval_sets': ['common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'], 
+        'eval_sets': ['visual_appearance'], 
         'selected_indexes': [], 
         'multistep':0, 
         'resolution': 500, 

@@ -100,7 +100,7 @@ class EB_NavigationEvaluator():
             
             if eval_set == "visual_appearance":
                 # selected_indexes = list(range(27, 60))
-                selected_indexes = [i - 1 for i in [37, 35, 27, 24, 14, 12, 5]] + list(range(41, 60))
+                selected_indexes = list(range(58, 60))
             # if eval_set == "complex_instruction":
             #     selected_indexes = [i - 1 for i in [38, 26, 44, 35, 18, 33, 43, 23, 32, 54, 49, 9, 8, 58, 57, 30, 16, 17]]
             else: 
@@ -139,6 +139,7 @@ class EB_NavigationEvaluator():
         
         progress_bar = tqdm(total=self.env.number_of_episodes, desc="Episodes")
         while self.env._current_episode_num < self.env.number_of_episodes:
+            
             logger.info(f"Evaluating episode {self.env._current_episode_num} ...")
             episode_info = {'reward': []}
             obs = self.env.reset()
@@ -148,6 +149,8 @@ class EB_NavigationEvaluator():
             print(f"Instruction: {user_instruction}")
             self.planner.reset()
             done = False
+            test_ct = 0
+            
             while not done:
                 try:
                     action, reasoning = self.planner.act(img_path, user_instruction)
@@ -187,6 +190,14 @@ class EB_NavigationEvaluator():
                         episode_info['reward'].append(reward)
 
                 except Exception as e:
+                    test_ct += 1
+                    if test_ct > self.config['max_test_ct']:
+                        if not 'info' in locals():
+                            info['task_success'] = False
+                            info["env_step"] = 20
+                            info["episode_elapsed_seconds"] = 1000
+                        break
+                    
                     sleep(1)
                     print(e)
                     print("retrying...")
@@ -314,6 +325,7 @@ if __name__ == '__main__':
               'gd_only': False,
               'top_k': 3, 
               'aggr_thres': 0.1,
+              'max_test_ct': 5,
               'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
               'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',
               }

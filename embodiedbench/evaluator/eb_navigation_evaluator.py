@@ -27,10 +27,9 @@ class EB_NavigationEvaluator():
         self.eval_set = None
         self.config = config
 
-        # print("Config: ")
-        # print(self.config)
-        # print("end config")
-        
+        print("Config: ")
+        print(self.config)
+        print("end config")
         
         self.env = None
         self.planner = None
@@ -51,6 +50,7 @@ class EB_NavigationEvaluator():
         if type(self.eval_sets) == list and len(self.eval_sets) == 0:
             self.eval_sets = ValidEvalSets
             
+        
         for eval_set in self.eval_sets:
             if self.env is not None:
                 self.env.close()
@@ -94,6 +94,8 @@ class EB_NavigationEvaluator():
             print(f"Instruction: {user_instruction}")
             self.planner.reset()
             done = False
+            test_ct = 0
+            
             while not done:
                 try:
                     action, reasoning = self.planner.act(img_path, user_instruction)
@@ -129,6 +131,9 @@ class EB_NavigationEvaluator():
                         episode_info['reward'].append(reward)
 
                 except Exception as e:
+                    test_ct += 1
+                    if test_ct > self.config["max_test_ct"]:
+                        break
                     sleep(1)
                     print(e)
                     print("retrying...")
@@ -313,6 +318,7 @@ if __name__ == '__main__':
               'purpose': "retest",
               'icl_abl':0, 
               'visual':0,
+              'max_test_ct': 5
               }
     
     evaluator = EB_NavigationEvaluator(config)

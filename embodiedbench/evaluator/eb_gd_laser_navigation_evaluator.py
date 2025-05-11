@@ -100,7 +100,7 @@ class EB_NavigationEvaluator():
             
             if eval_set == "visual_appearance":
                 # selected_indexes = list(range(27, 60))
-                selected_indexes = list(range(58, 60))
+                selected_indexes = list(range(59, 60))
             # if eval_set == "complex_instruction":
             #     selected_indexes = [i - 1 for i in [38, 26, 44, 35, 18, 33, 43, 23, 32, 54, 49, 9, 8, 58, 57, 30, 16, 17]]
             else: 
@@ -193,6 +193,7 @@ class EB_NavigationEvaluator():
                     test_ct += 1
                     if test_ct > self.config['max_test_ct']:
                         if not 'info' in locals():
+                            info = {}
                             info['task_success'] = False
                             info["env_step"] = 20
                             info["episode_elapsed_seconds"] = 1000
@@ -303,7 +304,7 @@ if __name__ == '__main__':
               'language_only': False, 
             #   'eval_sets': ['base', 'common_sense', 'long_horizon', 'visual_appearance', 'complex_instruction'], 
             #   'eval_sets': ['long_horizon', 'visual_appearance', 'complex_instruction', 'base', 'common_sense'], 
-              'eval_sets': ['visual_appearance', 'long_horizon', 'complex_instruction', 'base', 'common_sense', ],
+              'eval_sets': ['complex_instruction', 'base', 'common_sense', ],
               
               'chat_history': True, 
               'n_shots': 3, 

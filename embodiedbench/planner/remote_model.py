@@ -28,7 +28,22 @@ temperature = 0
 max_completion_tokens = 8192
 remote_url = os.environ.get('remote_url')
 client = OpenAI()
+import re
 
+def extract_json_from_string(text):
+    """
+    Extract the first JSON object from a string and parse it into a Python dictionary.
+    Handles newlines, extra text before or after, and escapes.
+    """
+    # Try to find the first JSON-like block using regex
+    match = re.search(r'\{[\s\S]*?\}', text)
+    if match:
+        json_str = match.group(0)
+    else:
+        raise ValueError("No JSON object found in the string.")
+
+    return json_str
+    
 class RemoteModel:
     def __init__(
         self,
@@ -157,6 +172,7 @@ class RemoteModel:
             out = out.replace("'",'"')
             out = out.replace('\"s ', "\'s ")
             out = out.replace('```json', '').replace('```', '')
+            
         else:
             
             response = self.model(
@@ -366,6 +382,10 @@ class RemoteModel:
         out = out.replace('\"s ', "\'s ")
         out = out.replace('```json', '').replace('```', '')
         out = out.replace('\"[', '[').replace("]\"", "]")
+        
+        if get_scene_graph:
+            out = extract_json_from_string(out)
+        
         return out
     
     def _call_intern38b(self, message_history, get_scene_graph=False):

@@ -1,0 +1,3123 @@
+FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
+Found path: /home/asethi04/.ai2thor/releases/thor-201909061227-Linux64/thor-201909061227-Linux64
+Mono path[0] = '/home/asethi04/.ai2thor/releases/thor-201909061227-Linux64/thor-201909061227-Linux64_Data/Managed'
+Mono config path = '/home/asethi04/.ai2thor/releases/thor-201909061227-Linux64/thor-201909061227-Linux64_Data/Mono/etc'
+Preloaded 'ScreenSelector.so'
+Display 0 'VGA-1': 1024x768 (primary device).
+Logging to /home/asethi04/.config/unity3d/Allen Institute for Artificial Intelligence/AI2-Thor/Player.log
+UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3609.)
+FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+['visual_appearance']
+ThorEnv started.
+final text_encoder_type: bert-base-uncased
+Episodes:   0%|          | 0/50 [00:00<?, ?it/s]FutureWarning: The `device` argument is deprecated and will be removed in v5 of Transformers.
+UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+Episodes:   2%|▏         | 1/50 [01:23<1:08:20, 83.68s/it]Episodes:   4%|▍         | 2/50 [06:31<2:52:20, 215.43s/it]WARNING:root:PutObject action failed: No valid positions to place object found, trying again...
+Resetting ThorEnv
+Instruction: Place two yellow bottles on top of a toilet
+Planner Output Action: [76, 126, 17, 133, 168, 126, 17, 133]
+object navigation (SoapBottle|-01.56|+00.82|-00.17)
+Executed action: find a SoapBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Toilet)
+Executed action: find a Toilet, Task success: 0.0
+Last action success: 1.0
+put SoapBottle|-01.56|+00.82|-00.17 on Toilet|+00.00|00.00|-03.44
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (SoapBottle|+00.84|+00.82|-00.62)
+Executed action: find a SoapBottle_2, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Toilet)
+Executed action: find a Toilet, Task success: 0.0
+Last action success: 1.0
+put SoapBottle|+00.84|+00.82|-00.62 on Toilet|+00.00|00.00|-03.44
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+empty plan, stop here
+Planner Output Action: -2
+Resetting ThorEnv
+Instruction: Put two yellow bottles on top of the toilet
+Planner Output Action: [76, 126, 17, 133, 76, 126, 17, 133]
+object navigation (SoapBottle|-01.56|+00.82|-00.17)
+Executed action: find a SoapBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Toilet)
+Executed action: find a Toilet, Task success: 0.0
+Last action success: 1.0
+put SoapBottle|-01.56|+00.82|-00.17 on Toilet|+00.00|00.00|-03.44
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (SoapBottle|-01.56|+00.82|-00.17)
+Executed action: find a SoapBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [162, 76, 126, 17, 133]
+object navigation (Shelf|+00.81|+00.81|-00.61)
+Executed action: find a Shelf_2, Task success: 0.0
+Last action success: 1.0
+object navigation (SoapBottle|-01.56|+00.82|-00.17)
+Executed action: find a SoapBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [76, 126, 17, 133]
+object navigation (SoapBottle|-01.56|+00.82|-00.17)
+Executed action: find a SoapBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [76, 126, 17, 133]
+object navigation (SoapBottle|-01.56|+00.82|-00.17)
+Executed action: find a SoapBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Error code: 503 - [{'error': {'code': 503, 'message': 'The model is overloaded. Please try again later.', 'status': 'UNAVAILABLE'}}]
+local variable 'out' referenced before assignment
+Planner Output Action: [162, 76, 126, 17, 133]
+object navigation (Shelf|+00.81|+00.81|-00.61)
+Executed action: find a Shelf_2, Task success: 0.0
+Last action success: 1.0
+object navigation (SoapBottle|-01.56|+00.82|-00.17)
+Executed action: find a SoapBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [76, 126, 17, 133]
+object navigation (SoapBottle|-01.56|+00.82|-00.17)
+Executed action: find a SoapBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [76, 126, 17, 133]
+object navigation (SoapBottle|-01.56|+00.82|-00.17)
+Executed action: find a SoapBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [76, 126, 17, 133]
+object navigation (SoapBottle|-01.56|+00.82|-00.17)
+Executed action: find a SoapBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [73, 123, 17, 133]
+object navigation (Peppershaker)
+Executed action: find a PepperShaker, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [168, 126, 17, 133, 168, 126, 17, 133]
+object navigation (SoapBottle|+00.84|+00.82|-00.62)
+Executed action: find a SoapBottle_2, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Toilet)
+Executed action: find a Toilet, Task success: 0.0
+Last action success: 1.0
+put SoapBottle|+00.84|+00.82|-00.62 on Toilet|+00.00|00.00|-03.44
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (SoapBottle|+00.84|+00.82|-00.62)
+Executed action: find a SoapBottle_2, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Toilet)
+Executed action: find a Toilet, Task success: 0.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: get two silver bottles with brown pumps, put them in dresser drawer
+Planner Output Action: [76, 126, 175, 126, 37, 51, 147, 133, 148]
+object navigation (SoapBottle|-00.15|+01.17|-03.50)
+Executed action: find a SoapBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (SoapBottle|-00.15|+01.16|-03.20)
+Executed action: find a SoapBottle_2, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [37, 147, 133, 175, 126, 37, 147, 133]
+object navigation (Dresser)
+Executed action: find a Dresser, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Drawer, Task success: 0.0
+Last action success: 1.0
+put SoapBottle|-00.15|+01.17|-03.50 on Dresser|-00.21|+00.81|-03.40
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (SoapBottle|-00.15|+01.16|-03.20)
+Executed action: find a SoapBottle_2, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Dresser)
+Executed action: find a Dresser, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Drawer, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133]
+put SoapBottle|-00.15|+01.17|-03.50 on Dresser|-00.21|+00.81|-03.40
+put SoapBottle|-00.15|+01.17|-03.50 on Dresser|-00.21|+00.81|-03.40
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [175, 126, 37, 147, 133]
+object navigation (SoapBottle|-00.15|+01.16|-03.20)
+Executed action: find a SoapBottle_2, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Dresser)
+Executed action: find a Dresser, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Drawer, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [175, 126, 37, 147, 133, 148]
+Episodes:   6%|▌         | 3/50 [11:14<3:13:09, 246.57s/it]WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+object navigation (SoapBottle|-00.15|+01.16|-03.20)
+Executed action: find a SoapBottle_2, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [175, 126, 37, 133, 176, 126, 37, 133]
+object navigation (SoapBottle|-00.15|+01.16|-03.20)
+Executed action: find a SoapBottle_2, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Dresser)
+Executed action: find a Dresser, Task success: 0.0
+Last action success: 1.0
+put SoapBottle|-00.15|+01.16|-03.20 on Dresser|-00.21|+00.81|-03.40
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (SoapBottle|-02.84|+00.99|-02.13)
+Executed action: find a SoapBottle_3, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Dresser)
+Executed action: find a Dresser, Task success: 0.0
+Last action success: 1.0
+put SoapBottle|-02.84|+00.99|-02.13 on Dresser|-00.21|+00.81|-03.40
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [175, 126, 37, 147, 133, 176, 126, 37, 133]
+object navigation (SoapBottle|-00.15|+01.16|-03.20)
+Executed action: find a SoapBottle_2, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Dresser)
+Executed action: find a Dresser, Task success: 0.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put away spatula in the bowl to a black table
+Planner Output Action: [30, 120, 16, 133, 101, 30, 120, 18, 133]
+object navigation (Spatula|-00.08|+00.96|-01.54)
+Executed action: find a Spatula, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Spatula, Task success: 0.0
+Last action success: 1.0
+object navigation (Bowl|-00.17|+01.57|-01.99)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.57|+00.89|-00.20
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [16, 101, 133, 30, 120, 16, 133, 49, 133]
+object navigation (Bowl|-00.17|+01.57|-01.99)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Bowl, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [16, 133, 49, 133]
+object navigation (Bowl|-00.17|+01.57|-01.99)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.57|+00.89|-00.20
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [16, 133, 18, 133]
+object navigation (Bowl|-00.17|+01.57|-01.99)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.57|+00.89|-00.20
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [16, 101, 133, 120, 16, 133, 49, 101, 49, 133]
+object navigation (Bowl|-00.17|+01.57|-01.99)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Bowl, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [16, 101, 30, 120, 133, 49, 133]
+object navigation (Bowl|-00.17|+01.57|-01.99)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Bowl, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 133]
+object navigation (DiningTable|-03.03|+00.00|-00.44)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [30, 120, 16, 133, 49, 133]
+object navigation (Spatula|-00.08|+00.96|-01.54)
+Executed action: find a Spatula, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Spatula, Task success: 0.0
+Last action success: 1.0
+object navigation (Bowl|-00.17|+01.57|-01.99)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-00.17|+01.57|-01.99
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.41|+00.76|-02.90
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+Episodes:   8%|▊         | 4/50 [20:00<4:33:20, 356.53s/it]Episodes:  10%|█         | 5/50 [20:58<3:06:54, 249.20s/it]Episodes:  12%|█▏        | 6/50 [22:27<2:22:40, 194.55s/it]Episodes:  14%|█▍        | 7/50 [27:08<2:39:38, 222.76s/it]Episodes:  16%|█▌        | 8/50 [32:04<2:52:22, 246.26s/it]put Spatula|-00.08|+00.96|-01.54 on Bowl|-03.57|+00.89|-00.20
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [16, 133, 49, 133]
+object navigation (Bowl|-00.17|+01.57|-01.99)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [16, 101, 30, 120, 133, 18, 133]
+object navigation (Bowl|-00.17|+01.57|-01.99)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Bowl, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put the green spray bottles on the toilet
+Planner Output Action: [10, 90, 17, 133]
+object navigation (SprayBottle|-02.20|+00.04|+04.95)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Toilet)
+Executed action: find a Toilet, Task success: 0.0
+Last action success: 1.0
+put SprayBottle|-02.20|+00.04|+04.95 on Toilet|-00.52|00.00|+03.22
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+empty plan, stop here
+Planner Output Action: -2
+Resetting ThorEnv
+Instruction: Turn on a green lamp with a credit card.
+Planner Output Action: [27, 153]
+object navigation (Floorlamp)
+Executed action: find a FloorLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the FloorLamp, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [56]
+object navigation (CreditCard|-01.86|+01.63|-01.55)
+Executed action: find a CreditCard, Task success: 0.0
+Last action success: 1.0
+empty plan, stop here
+Planner Output Action: -2
+Resetting ThorEnv
+Instruction: Turn on the desk lamp while holding a yellow vessel
+Planner Output Action: [71, 119, 63, 151]
+object navigation (Cup)
+Executed action: find a Cup, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [14, 97, 63, 151]
+object navigation (Mug|-01.52|+00.60|-00.68)
+Executed action: find a Mug, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 1.0
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [73, 123, 63, 151]
+object navigation (Peppershaker)
+Executed action: find a PepperShaker, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [151]
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [151]
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [63, 151]
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [151]
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [63, 151]
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [151]
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [63, 151]
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [123, 63, 151]
+Executed action: pick up the PepperShaker, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: grab the yellow stand on the table, turn on the lamp
+Planner Output Action: [61, 103, 63, 151]
+object navigation (Box)
+Executed action: find a Box, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Box, Task success: 0.0
+Last action success: 1.0
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [49, 103]
+object navigation (Desk)
+Executed action: find a Desk, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Box, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [134, 63, 151]
+Executed action: drop the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [19, 105, 63, 151]
+object navigation (Spoon)
+Executed action: find a Spoon, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [63, 151]
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [25, 111, 63, 151]
+object navigation (Cloth)
+Executed action: find a Cloth, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 1.0
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [63, 151]
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [63, 151]
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [63, 111, 63, 151]
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [134, 63, 151]
+Executed action: drop the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [123, 63, 151]
+Executed action: pick up the PepperShaker, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Episodes:  18%|█▊        | 9/50 [34:14<2:23:19, 209.73s/it]Episodes:  20%|██        | 10/50 [34:59<1:45:52, 158.82s/it]Episodes:  22%|██▏       | 11/50 [35:43<1:20:34, 123.96s/it]WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+Episodes:  24%|██▍       | 12/50 [42:52<2:17:14, 216.70s/it]Instruction: To pick up a yellow object, as well as turn on a lamp.
+An unexpected error occurred: Error code: 503 - [{'error': {'code': 503, 'message': 'The model is overloaded. Please try again later.', 'status': 'UNAVAILABLE'}}]
+Planner Output Action: [61, 103, 27, 153]
+object navigation (Box)
+Executed action: find a Box, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Box, Task success: 0.0
+Last action success: 1.0
+object navigation (Floorlamp)
+Executed action: find a FloorLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [63, 151]
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 0.0
+Last action success: 1.0
+empty plan, stop here
+Planner Output Action: -2
+Resetting ThorEnv
+Instruction: Move two tissue boxes from the green cabinet counter top to the toilet
+Planner Output Action: [20, 106, 17, 133, 20, 106, 17, 133]
+object navigation (TissueBox|-01.59|+00.81|+00.29)
+Executed action: find a TissueBox, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the TissueBox, Task success: 0.0
+Last action success: 1.0
+object navigation (Toilet)
+Executed action: find a Toilet, Task success: 0.0
+Last action success: 1.0
+put TissueBox|-01.85|+00.81|+00.42 on Toilet|-01.84|+00.00|+02.50
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (TissueBox|-01.59|+00.81|+00.29)
+Executed action: find a TissueBox, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the TissueBox, Task success: 0.0
+Last action success: 1.0
+object navigation (Toilet)
+Executed action: find a Toilet, Task success: 0.0
+Last action success: 1.0
+put TissueBox|-01.59|+00.81|+00.29 on Toilet|-01.84|+00.00|+02.50
+Executed action: put down the object in hand, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Pick up a brown bowl to look at under a lit lamp.
+Planner Output Action: [16, 101, 63, 151]
+object navigation (Bowl)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Bowl, Task success: 0.0
+Last action success: 1.0
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put a knife in a blue container onto the black table in the corner.
+Planner Output Action: [34, 127, 61, 141, 133, 142, 103, 49, 133]
+object navigation (Knife|-04.06|+00.72|-00.25)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 1.0
+object navigation (Box)
+Executed action: find a Box, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [61, 133, 49, 133]
+object navigation (Box)
+Executed action: find a Box, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [61, 133, 103, 49, 133]
+object navigation (Box)
+Executed action: find a Box, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [61, 133, 49, 133]
+object navigation (Box)
+Executed action: find a Box, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [16, 133, 127, 16, 133, 59, 101, 133]
+object navigation (Bowl|-00.43|+00.08|-02.74)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [16, 133, 18, 133]
+object navigation (Bowl|-00.43|+00.08|-02.74)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-00.43|+00.08|-02.74
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+put Knife|-04.06|+00.72|-00.25 on Bowl|-03.20|+00.76|-03.12
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [16, 101, 133, 127, 16, 133, 18, 133]
+object navigation (Bowl|-00.43|+00.08|-02.74)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Bowl, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [16, 101, 133, 127, 133, 101, 18, 133]
+object navigation (Bowl|-00.43|+00.08|-02.74)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Bowl, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [16, 101, 133, 49, 133]
+object navigation (Bowl|-00.43|+00.08|-02.74)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Bowl, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [72, 121, 133, 127, 72, 133, 18, 133]
+object navigation (Saltshaker)
+Executed action: find a SaltShaker, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SaltShaker, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put a mug with a pen in it on a white dresser.
+Planner Output Action: [14, 97, 47, 83, 133, 97, 37, 133]
+object navigation (Mug)
+Executed action: find a Mug, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 1.0
+object navigation (Pen|-00.60|+01.12|-02.73)
+Executed action: find a Pen, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pen, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 47, 83, 14, 97, 133, 37, 133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Pen|-00.60|+01.12|-02.73)
+Executed action: find a Pen, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pen, Task success: 0.0
+Episodes:  26%|██▌       | 13/50 [46:45<2:16:40, 221.62s/it]WARNING:root:PutObject action failed: Target openable Receptacle is CLOSED, can't place if target is not open!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: Target openable Receptacle is CLOSED, can't place if target is not open!, trying again...
+WARNING:root:PutObject action failed: Target openable Receptacle is CLOSED, can't place if target is not open!, trying again...
+WARNING:root:PutObject action failed: Target openable Receptacle is CLOSED, can't place if target is not open!, trying again...
+WARNING:root:PutObject action failed: Target openable Receptacle is CLOSED, can't place if target is not open!, trying again...
+WARNING:root:PutObject action failed: Target openable Receptacle is CLOSED, can't place if target is not open!, trying again...
+WARNING:root:PutObject action failed: Target openable Receptacle is CLOSED, can't place if target is not open!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: Target openable Receptacle is CLOSED, can't place if target is not open!, trying again...
+WARNING:root:PutObject action failed: Target openable Receptacle is CLOSED, can't place if target is not open!, trying again...
+WARNING:root:PutObject action failed: Target openable Receptacle is CLOSED, can't place if target is not open!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: Target openable Receptacle is CLOSED, can't place if target is not open!, trying again...
+Episodes:  28%|██▊       | 14/50 [50:29<2:13:25, 222.38s/it]Episodes:  30%|███       | 15/50 [51:39<1:42:49, 176.28s/it]WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+Last action success: 1.0
+object navigation (Mug)
+Executed action: find a Mug, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 14, 97, 47, 83, 133, 37, 133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Mug)
+Executed action: find a Mug, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 1.0
+object navigation (Pen|-00.60|+01.12|-02.73)
+Executed action: find a Pen, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pen, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 47, 83, 14, 97, 133, 37, 133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Pen|-00.60|+01.12|-02.73)
+Executed action: find a Pen, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pen, Task success: 0.0
+Last action success: 1.0
+object navigation (Mug)
+Executed action: find a Mug, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 47, 83, 14, 97, 37, 133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Pen|-00.60|+01.12|-02.73)
+Executed action: find a Pen, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pen, Task success: 0.0
+Last action success: 1.0
+object navigation (Mug)
+Executed action: find a Mug, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [47, 83, 14, 97, 133, 37, 133]
+object navigation (Pen|-00.60|+01.12|-02.73)
+Executed action: find a Pen, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pen, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [47, 83, 14, 133, 37, 97, 37, 133]
+object navigation (Pen|-00.60|+01.12|-02.73)
+Executed action: find a Pen, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pen, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [14, 97, 133, 47, 83, 14, 97, 133, 47, 83, 14, 97, 37, 133]
+object navigation (Mug)
+Executed action: find a Mug, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: get spray from white drawer to a cabinet.
+Planner Output Action: [10, 90, 48, 133]
+object navigation (Spraybottle)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Cabinet|-01.61|+00.31|+02.49)
+Executed action: find a Cabinet, Task success: 0.0
+Last action success: 1.0
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+02.49
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+02.49
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+02.49
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+02.49
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+02.49
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+02.49
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+02.49
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+03.75
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+03.75
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+03.75
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+03.75
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+03.75
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+03.75
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+03.11
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [48, 145, 133, 146]
+object navigation (Cabinet|-01.61|+00.31|+02.49)
+Executed action: find a Cabinet, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Cabinet, Task success: 0.0
+Last action success: 1.0
+put SprayBottle|+00.50|+01.16|+03.73 on Cabinet|-01.61|+00.31|+02.49
+Executed action: put down the object in hand, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Move the pot with the green sponge inside from the refrigerator to the sink.
+Planner Output Action: [78, 139, 46, 82, 140, 79, 133]
+object navigation (Fridge)
+Executed action: find a Fridge, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Fridge, Task success: 0.0
+Last action success: 1.0
+object navigation (Pot|-02.03|+01.31|+00.93)
+Executed action: find a Pot, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pot, Task success: 0.0
+Last action success: 1.0
+Executed action: close the Fridge, Task success: 0.0
+Last action success: 1.0
+object navigation (Sink)
+Executed action: find a Sink, Task success: 0.0
+Last action success: 1.0
+put Pot|-02.04|+00.54|+00.92 on Sink|-01.90|+00.97|-01.50|SinkBasin
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+empty plan, stop here
+Planner Output Action: -2
+Resetting ThorEnv
+Instruction: Place the glass bowl with the pencil inside of it on the white dresser.
+Planner Output Action: [66, 114, 16, 101, 133, 37, 133]
+object navigation (Pencil|+02.61|+00.75|-01.62)
+Executed action: find a Pencil, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pencil, Task success: 0.0
+Last action success: 1.0
+object navigation (Bowl|+02.40|+00.75|-01.47)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Bowl, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 16, 101, 66, 114, 133, 37, 133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Bowl|+02.40|+00.75|-01.47)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Bowl, Task success: 0.0
+Last action success: 1.0
+object navigation (Pencil|+02.61|+00.75|-01.62)
+Executed action: find a Pencil, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pencil, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [66, 114, 133, 37, 133]
+object navigation (Pencil|+02.61|+00.75|-01.62)
+Executed action: find a Pencil, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pencil, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [66, 133, 66, 114, 16, 101, 37, 133]
+object navigation (Pencil|+02.61|+00.75|-01.62)
+Executed action: find a Pencil, Task success: 0.0
+Last action success: 1.0
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+Episodes:  32%|███▏      | 16/50 [58:45<2:22:26, 251.37s/it]WARNING:root:PutObject action failed: No valid positions to place object found, trying again...
+WARNING:root:PutObject action failed: No valid positions to place object found, trying again...
+WARNING:root:PutObject action failed: No valid positions to place object found, trying again...
+Episodes:  34%|███▍      | 17/50 [1:00:28<1:53:51, 207.02s/it]put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [66, 114, 16, 133, 37, 16, 101, 37, 133]
+object navigation (Pencil|+02.61|+00.75|-01.62)
+Executed action: find a Pencil, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pencil, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 66, 114, 16, 101, 133, 37, 133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Pencil|+02.61|+00.75|-01.62)
+Executed action: find a Pencil, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pencil, Task success: 0.0
+Last action success: 1.0
+object navigation (Bowl|+02.40|+00.75|-01.47)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Bowl, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 16, 101, 66, 114, 37, 133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Bowl|+02.40|+00.75|-01.47)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Bowl, Task success: 0.0
+Last action success: 1.0
+object navigation (Pencil|+02.61|+00.75|-01.62)
+Executed action: find a Pencil, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pencil, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [66, 133, 16, 101, 66, 114, 16, 133, 37, 133]
+object navigation (Pencil|+02.61|+00.75|-01.62)
+Executed action: find a Pencil, Task success: 0.0
+Last action success: 1.0
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.61|+00.75|-01.62
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+put Bowl|+02.40|+00.75|-01.47 on Pencil|+02.50|+00.75|-01.66
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [16, 101, 66, 114, 133, 37, 133]
+object navigation (Bowl|+02.40|+00.75|-01.47)
+Executed action: find a Bowl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Bowl, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [66, 114, 16, 133, 16, 101, 37, 133]
+object navigation (Pencil|+02.61|+00.75|-01.62)
+Executed action: find a Pencil, Task success: 0.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put the yellow and blue jars on the black desk.
+Planner Output Action: [61, 103, 49, 133]
+object navigation (Box|-02.01|+00.95|-02.20)
+Executed action: find a Box, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Box, Task success: 0.0
+Last action success: 1.0
+object navigation (Desk)
+Executed action: find a Desk, Task success: 0.0
+Last action success: 1.0
+put Box|-02.01|+00.95|-02.20 on Desk|-00.25|+00.00|+01.41
+put Box|-02.01|+00.95|-02.20 on Desk|-00.25|+00.00|+01.41
+put Box|-02.01|+00.95|-02.20 on Desk|-00.25|+00.00|+01.41
+put Box|-02.01|+00.95|-02.20 on Desk|-00.25|+00.00|+01.41
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [42, 132, 49, 133, 192, 132, 49, 133]
+object navigation (Vase|-00.71|+00.70|+06.04)
+Executed action: find a Vase, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Vase, Task success: 0.0
+Last action success: 1.0
+object navigation (Desk)
+Executed action: find a Desk, Task success: 0.0
+Last action success: 1.0
+put Vase|-00.71|+00.70|+06.04 on Desk|-00.25|+00.00|+01.41
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Vase|-04.24|+00.79|+01.18)
+Executed action: find a Vase_2, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Vase, Task success: 0.0
+Last action success: 1.0
+object navigation (Desk)
+Executed action: find a Desk, Task success: 0.0
+Last action success: 1.0
+put Vase|-04.24|+00.79|+01.18 on Desk|-00.25|+00.00|+01.41
+Executed action: put down the object in hand, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put all the vases on the black desk.
+Planner Output Action: [42, 132, 49, 133, 42, 132, 49, 133]
+object navigation (Vase|-00.71|+00.70|+06.04)
+Executed action: find a Vase, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Vase, Task success: 0.0
+Last action success: 1.0
+object navigation (Desk)
+Executed action: find a Desk, Task success: 0.0
+Last action success: 1.0
+put Vase|-00.71|+00.70|+06.04 on Desk|-00.25|+00.00|+01.41
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Vase|-00.71|+00.70|+06.04)
+Executed action: find a Vase, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Vase, Task success: 0.0
+Last action success: 1.0
+object navigation (Desk)
+Executed action: find a Desk, Task success: 0.0
+Last action success: 1.0
+put Vase|-00.71|+00.70|+06.04 on Desk|-00.25|+00.00|+01.41
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [42, 132, 49, 133]
+object navigation (Vase|-00.71|+00.70|+06.04)
+Executed action: find a Vase, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Vase, Task success: 0.0
+Last action success: 1.0
+object navigation (Desk)
+Executed action: find a Desk, Task success: 0.0
+Last action success: 1.0
+put Vase|-00.71|+00.70|+06.04 on Desk|-00.25|+00.00|+01.41
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [42, 132, 49, 133]
+object navigation (Vase|-00.71|+00.70|+06.04)
+Executed action: find a Vase, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Vase, Task success: 0.0
+Last action success: 1.0
+object navigation (Desk)
+Executed action: find a Desk, Task success: 0.0
+Last action success: 1.0
+put Vase|-00.71|+00.70|+06.04 on Desk|-00.25|+00.00|+01.41
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [42, 132, 49, 133]
+object navigation (Vase|-00.71|+00.70|+06.04)
+Executed action: find a Vase, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Vase, Task success: 0.0
+Last action success: 1.0
+object navigation (Desk)
+Executed action: find a Desk, Task success: 0.0
+Last action success: 1.0
+put Vase|-00.71|+00.70|+06.04 on Desk|-00.25|+00.00|+01.41
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [42, 132, 49, 133, 42, 132, 49, 133, 42, 132, 49, 133]
+object navigation (Vase|-00.71|+00.70|+06.04)
+Executed action: find a Vase, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Vase, Task success: 0.0
+Last action success: 1.0
+Episodes:  36%|███▌      | 18/50 [1:03:04<1:42:10, 191.56s/it]Episodes:  38%|███▊      | 19/50 [1:04:08<1:19:07, 153.14s/it]WARNING:root:PutObject action failed: No valid positions to place object found, trying again...
+WARNING:root:PutObject action failed: No valid positions to place object found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+Episodes:  40%|████      | 20/50 [1:06:23<1:13:49, 147.64s/it]Episodes:  42%|████▏     | 21/50 [1:13:52<1:55:08, 238.22s/it]object navigation (Desk)
+Executed action: find a Desk, Task success: 0.0
+Last action success: 1.0
+put Vase|-00.71|+00.70|+06.04 on Desk|-00.25|+00.00|+01.41
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Vase|-00.71|+00.70|+06.04)
+Executed action: find a Vase, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Vase, Task success: 0.0
+Last action success: 1.0
+object navigation (Desk)
+Executed action: find a Desk, Task success: 0.0
+Last action success: 1.0
+put Vase|-00.71|+00.70|+06.04 on Desk|-00.25|+00.00|+01.41
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Vase|-00.71|+00.70|+06.04)
+Executed action: find a Vase, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Vase, Task success: 0.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Place the yellow and blue vase on the table.
+Planner Output Action: [42, 132, 18, 133]
+object navigation (Vase|-00.71|+00.70|+06.04)
+Executed action: find a Vase, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Vase, Task success: 0.0
+Last action success: 1.0
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+put Vase|-00.71|+00.70|+06.04 on DiningTable|-01.78|+00.01|-02.04
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+empty plan, stop here
+Planner Output Action: -2
+Resetting ThorEnv
+Instruction: Place the remote in the box on the brown shelf.
+Planner Output Action: [68, 116, 61, 133, 21, 133]
+object navigation (RemoteControl|-00.75|+00.62|+00.76)
+Executed action: find a RemoteControl, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the RemoteControl, Task success: 0.0
+Last action success: 1.0
+object navigation (Box)
+Executed action: find a Box, Task success: 0.0
+Last action success: 1.0
+put RemoteControl|-00.75|+00.62|+00.76 on Box|-02.40|+00.57|+04.50
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Shelf|-00.39|+01.45|+05.95)
+Executed action: find a Shelf, Task success: 0.0
+Last action success: 1.0
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [103, 21, 133]
+Executed action: pick up the Box, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [116, 61, 103, 133, 21, 133]
+Executed action: pick up the RemoteControl, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [61, 103, 21, 133]
+object navigation (Box)
+Executed action: find a Box, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Box, Task success: 0.0
+Last action success: 1.0
+object navigation (Shelf|-00.39|+01.45|+05.95)
+Executed action: find a Shelf, Task success: 0.0
+Last action success: 1.0
+put Box|-02.40|+00.57|+04.50 on Shelf|-00.39|+01.45|+05.95
+put Box|-02.40|+00.57|+04.50 on Shelf|-00.39|+01.45|+05.95
+put Box|-02.40|+00.57|+04.50 on Shelf|-00.39|+01.45|+05.95
+put Box|-02.40|+00.57|+04.50 on Shelf|-00.39|+01.45|+05.95
+put Box|-02.40|+00.57|+04.50 on Shelf|-00.39|+01.45|+05.95
+put Box|-02.40|+00.57|+04.50 on Shelf|-00.39|+01.45|+05.95
+put Box|-02.40|+00.57|+04.50 on Shelf|-00.39|+01.45|+05.95
+put Box|-02.40|+00.57|+04.50 on Shelf|-00.40|+00.27|+05.96
+Executed action: put down the object in hand, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put the mug with fork inside it on the round table. 
+Planner Output Action: [60, 102, 14, 133, 14, 97, 29, 133]
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [14, 97, 60, 102, 14, 133, 29, 97, 29, 133]
+object navigation (Mug|+01.23|+00.99|+00.21)
+Executed action: find a Mug, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 1.0
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 102, 133, 29, 133]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 60, 102, 14, 97, 133, 18, 133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+An unexpected error occurred: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=8192, prompt_tokens=10047, total_tokens=18239, completion_tokens_details=None, prompt_tokens_details=None)
+Planner Output Action: [123, 14, 97, 73, 133, 18, 133]
+Executed action: pick up the PepperShaker, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [60, 102, 14, 97, 133, 60, 102, 14, 97, 133, 14, 97, 18, 133, 14, 97, 18, 133, 14, 97]
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [60, 102, 14, 97, 102, 133, 14, 97, 29, 133]
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [60, 102, 14, 97, 133, 60, 102, 14, 133, 29, 97, 133]
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+An unexpected error occurred: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=8192, prompt_tokens=10305, total_tokens=18497, completion_tokens_details=None, prompt_tokens_details=None)
+Planner Output Action: [14, 97, 18, 102, 133, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18]
+object navigation (Mug|+01.23|+00.99|+00.21)
+Executed action: find a Mug, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 1.0
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [134, 60, 102, 14, 97, 133, 14, 97, 133, 18, 133]
+Executed action: drop the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Place a mug with a fork in it onto the round kitchen table.
+Episodes:  44%|████▍     | 22/50 [1:18:41<1:58:14, 253.38s/it]Episodes:  46%|████▌     | 23/50 [1:19:16<1:24:38, 188.09s/it]Episodes:  48%|████▊     | 24/50 [1:20:45<1:08:32, 158.18s/it]Episodes:  50%|█████     | 25/50 [1:21:42<53:19, 127.99s/it]  WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+Planner Output Action: [60, 102, 14, 97, 133, 18, 133]
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [14, 97, 60, 102, 133, 18, 133]
+object navigation (Mug|+01.23|+00.99|+00.21)
+Executed action: find a Mug, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 1.0
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [60, 102, 133, 14, 97, 133, 18, 133]
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 102, 97, 133, 18, 14, 97, 18, 133]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 133, 60, 102, 14, 97, 133, 102, 97, 18, 133]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+put Mug|+01.23|+00.99|+00.21 on DiningTable|-00.16|+00.67|+06.47
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [60, 102, 14, 97, 18, 133]
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [60, 102, 14, 97, 133, 102, 97, 133, 18, 133]
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [60, 102, 14, 97, 133, 18, 97, 133]
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [60, 102, 14, 97, 133, 102, 14, 97, 133, 102, 14, 97, 133, 102, 14, 97, 133, 102, 14, 97]
+object navigation (Fork|+01.29|+00.77|+04.68)
+Executed action: find a Fork, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 102, 14, 97, 133, 60, 102, 14, 97, 133, 18, 133]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Fork, Task success: 0.0
+Last action success: 1.0
+object navigation (Mug|+01.23|+00.99|+00.21)
+Executed action: find a Mug, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Turn on the tall lamp in the corner while carrying a white cushion.
+Planner Output Action: [74, 124, 27, 153]
+object navigation (Pillow)
+Executed action: find a Pillow, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pillow, Task success: 0.0
+Last action success: 1.0
+object navigation (Floorlamp)
+Executed action: find a FloorLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the FloorLamp, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: move the red cloth from the cabinet to the tub
+Planner Output Action: [48, 145, 25, 111, 75, 133]
+object navigation (Cabinet|-02.76|+00.45|+00.60)
+Executed action: find a Cabinet, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Cabinet, Task success: 0.0
+Last action success: 1.0
+object navigation (Cloth)
+Executed action: find a Cloth, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [162, 167, 25, 111, 75, 133]
+object navigation (Cabinet|-02.76|+00.42|-00.76)
+Executed action: find a Cabinet_2, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Cabinet_2, Task success: 0.0
+Last action success: 1.0
+object navigation (Cloth)
+Executed action: find a Cloth, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 1.0
+object navigation (Bathtub)
+Executed action: find a Bathtub, Task success: 0.0
+Last action success: 1.0
+put Cloth|-02.97|+00.11|-00.60 on Bathtub|-00.60|+00.29|+00.83|BathtubBasin
+Executed action: put down the object in hand, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put the red rag into the bathtub
+Planner Output Action: [25, 111, 75, 133]
+object navigation (Cloth)
+Executed action: find a Cloth, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [162, 167, 111, 75, 133]
+object navigation (Cabinet|-02.76|+00.42|-00.76)
+Executed action: find a Cabinet_2, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Cabinet_2, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 1.0
+object navigation (Bathtub)
+Executed action: find a Bathtub, Task success: 0.0
+Last action success: 1.0
+put Cloth|-02.97|+00.11|-00.60 on Bathtub|-00.60|+00.29|+00.83|BathtubBasin
+Executed action: put down the object in hand, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Move a pan beneath a tomato slice on the black table.
+Planner Output Action: [7, 86, 35, 133]
+object navigation (Pan|-00.44|+00.96|-01.85)
+Executed action: find a Pan, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pan, Task success: 0.0
+Last action success: 1.0
+object navigation (Tomato|-04.00|+00.74|-00.37)
+Executed action: find a Tomato, Task success: 0.0
+Last action success: 1.0
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-00.97|+00.99|-03.82
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+WARNING:root:PutObject action failed: No valid positions to place object found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid positions to place object found, trying again...
+WARNING:root:PutObject action failed: No valid positions to place object found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid positions to place object found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: This target object is NOT a receptacle!, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+WARNING:root:PutObject action failed: No valid Receptacle found, trying again...
+Episodes:  52%|█████▏    | 26/50 [1:31:22<1:45:21, 263.39s/it]Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [39, 133]
+object navigation (CounterTop|-01.94|+00.98|-03.67)
+Executed action: find a CounterTop, Task success: 0.0
+Last action success: 1.0
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-01.94|+00.98|-03.67
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-01.94|+00.98|-03.67
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-01.94|+00.98|-03.67
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-01.94|+00.98|-03.67
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-01.94|+00.98|-03.67
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-01.94|+00.98|-03.67
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-01.94|+00.98|-03.67
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-00.33|+00.98|-01.45
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-00.33|+00.98|-01.45
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-00.33|+00.98|-01.45
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-00.33|+00.98|-01.45
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-00.33|+00.98|-01.45
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-00.33|+00.98|-01.45
+put Pan|-00.44|+00.96|-01.85 on CounterTop|-00.33|+00.98|-01.45
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [7, 86, 18, 133]
+object navigation (Pan|-00.44|+00.96|-01.85)
+Executed action: find a Pan, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pan, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [35, 133]
+object navigation (Tomato|-04.00|+00.74|-00.37)
+Executed action: find a Tomato, Task success: 0.0
+Last action success: 1.0
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-00.97|+00.99|-03.82
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [49, 133, 34, 127, 35, 159, 35, 129, 7, 133]
+object navigation (Desk)
+Executed action: find a Desk, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [134, 35, 7, 86, 35, 133]
+Executed action: drop the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Tomato|-04.00|+00.74|-00.37)
+Executed action: find a Tomato, Task success: 0.0
+Last action success: 1.0
+object navigation (Pan|-00.44|+00.96|-01.85)
+Executed action: find a Pan, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pan, Task success: 0.0
+Last action success: 1.0
+object navigation (Tomato|-04.00|+00.74|-00.37)
+Executed action: find a Tomato, Task success: 0.0
+Last action success: 1.0
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-00.97|+00.99|-03.82
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [7, 86, 35, 133]
+object navigation (Pan|-00.44|+00.96|-01.85)
+Executed action: find a Pan, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pan, Task success: 0.0
+Last action success: 1.0
+object navigation (Tomato|-04.00|+00.74|-00.37)
+Executed action: find a Tomato, Task success: 0.0
+Last action success: 1.0
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-00.97|+00.99|-03.82
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [35, 7, 134, 35, 129, 7, 86, 133]
+object navigation (Tomato|-04.00|+00.74|-00.37)
+Executed action: find a Tomato, Task success: 0.0
+Last action success: 1.0
+object navigation (Pan|-00.44|+00.96|-01.85)
+Executed action: find a Pan, Task success: 0.0
+Last action success: 1.0
+Executed action: drop the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [7, 86, 35, 133]
+object navigation (Pan|-00.44|+00.96|-01.85)
+Executed action: find a Pan, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pan, Task success: 0.0
+Last action success: 1.0
+object navigation (Tomato|-04.00|+00.74|-00.37)
+Executed action: find a Tomato, Task success: 0.0
+Last action success: 1.0
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.00|+00.74|-00.37
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+put Pan|-00.44|+00.96|-01.85 on Tomato|-00.97|+00.99|-03.82
+put Pan|-00.44|+00.96|-01.85 on Tomato|-04.08|+00.81|-03.23
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [35, 7, 86, 35, 133]
+object navigation (Tomato|-04.00|+00.74|-00.37)
+Executed action: find a Tomato, Task success: 0.0
+Last action success: 1.0
+object navigation (Pan|-00.44|+00.96|-01.85)
+Executed action: find a Pan, Task success: 0.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put a pot containing a knife and a potato slice on the black table
+Episodes:  54%|█████▍    | 27/50 [1:38:42<2:01:18, 316.45s/it]Planner Output Action: [34, 127, 46, 82, 133, 127, 82, 133, 82, 127, 133, 1, 81, 157, 82, 133, 1, 81, 82, 133, 18, 82, 133]
+object navigation (Knife)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 1.0
+object navigation (Pot)
+Executed action: find a Pot, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pot, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 1, 81, 34, 157, 133, 46, 82, 18, 133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Potato|-00.42|+01.32|-00.41)
+Executed action: find a Potato, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Potato, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+An unexpected error occurred: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=8192, prompt_tokens=9558, total_tokens=17750, completion_tokens_details=None, prompt_tokens_details=None)
+Planner Output Action: [59, 147, 1, 81, 34, 127, 157, 133, 46, 82, 34, 127, 1, 81, 49, 133]
+object navigation (Sidetable)
+Executed action: find a SideTable, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Drawer, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [127, 46, 133, 1, 81, 46, 82, 133, 18, 82, 133]
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [34, 127, 46, 133, 46, 82, 34, 127, 46, 133, 34, 127, 46, 133, 1, 81, 46, 133, 49, 133]
+object navigation (Knife)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 1.0
+object navigation (Pot)
+Executed action: find a Pot, Task success: 0.0
+Last action success: 1.0
+put Knife|-03.20|+00.79|-03.12 on Pot|-00.44|+00.96|-01.85
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Pot)
+Executed action: find a Pot, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pot, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+An unexpected error occurred: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=8192, prompt_tokens=9847, total_tokens=18039, completion_tokens_details=None, prompt_tokens_details=None)
+Planner Output Action: [34, 127, 59, 147, 1, 81, 34, 157, 46, 133, 1, 81, 46, 133, 34, 127, 46, 133, 46, 82, 49, 133]
+object navigation (Knife)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [34, 127, 46, 133, 46, 82, 34, 133, 1, 81, 34, 127, 46, 133, 46, 82, 1, 133, 49, 133]
+object navigation (Knife)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [34, 127, 46, 133, 1, 81, 34, 127, 157, 46, 82, 1, 133, 34, 133, 49, 133]
+object navigation (Knife)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 34, 127, 46, 133, 46, 82, 34, 133, 34, 127, 46, 133, 46, 82, 127, 133, 1, 81, 46, 133, 46, 82, 1, 133, 39, 133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 1.0
+object navigation (Pot)
+Executed action: find a Pot, Task success: 0.0
+Last action success: 1.0
+put Knife|-03.20|+00.79|-03.12 on Pot|-00.44|+00.96|-01.85
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Pot)
+Executed action: find a Pot, Task success: 0.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put 2 yellow knives from the round black table to the drawer of the cabinet with a toaster. 
+Planner Output Action: [34, 127, 48, 145, 51, 147, 133, 148, 34, 127, 48, 145, 51, 147, 133, 148, 146]
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 1.0
+object navigation (Cabinet|+01.31|+02.46|+04.36)
+Executed action: find a Cabinet, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Cabinet, Task success: 0.0
+Last action success: 1.0
+object navigation (Drawer|+01.28|+00.81|+04.72)
+Executed action: find a Drawer, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Drawer, Task success: 0.0
+Last action success: 1.0
+put Knife|-00.33|+00.79|+06.22 on Drawer|+01.28|+00.81|+04.72
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Executed action: close the Drawer, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 34, 127, 48, 145, 51, 147, 133, 148, 18, 34, 127, 48, 145, 51, 147, 133, 148]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Error code: 503 - [{'error': {'code': 503, 'message': 'The model is overloaded. Please try again later.', 'status': 'UNAVAILABLE'}}]
+local variable 'out' referenced before assignment
+Planner Output Action: [18, 34, 127, 48, 51, 147, 133, 148, 18, 34, 127, 48, 51, 147, 133, 148]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 34, 127, 48, 51, 147, 133, 148, 18, 34, 127, 48, 51, 147, 133, 148]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 34, 127, 48, 51, 147, 133, 148, 18, 34, 127, 48, 51, 147, 133, 148]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Episodes:  56%|█████▌    | 28/50 [1:44:22<1:58:36, 323.46s/it]Episodes:  58%|█████▊    | 29/50 [1:50:10<1:55:45, 330.75s/it]Episodes:  60%|██████    | 30/50 [1:51:14<1:23:38, 250.94s/it]Episodes:  62%|██████▏   | 31/50 [1:51:52<59:10, 186.89s/it]  Planner Output Action: [34, 127, 48, 51, 147, 133, 34, 127, 48, 51, 147, 133]
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 34, 127, 48, 51, 147, 133, 148, 18, 34, 127, 48, 51, 147, 133, 148]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 34, 127, 48, 51, 147, 133, 148]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Putting away yellow handled knives in the drawer
+Planner Output Action: [34, 127, 51, 147, 133, 148]
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 1.0
+object navigation (Drawer|+01.28|+00.81|+04.72)
+Executed action: find a Drawer, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Drawer, Task success: 0.0
+Last action success: 1.0
+put Knife|-00.33|+00.79|+06.22 on Drawer|+01.28|+00.81|+04.72
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Executed action: close the Drawer, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [34, 127, 51, 147, 133, 148]
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 34, 127, 51, 147, 133, 148]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 34, 127, 51, 147, 133, 148]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [34, 127, 51, 147, 133, 148]
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [34, 127, 51, 147, 133, 148]
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 34, 127, 51, 147, 133, 148]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 34, 127, 51, 147, 133, 148]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 34, 127, 51, 147, 133, 148]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [127, 51, 147, 133, 148]
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 34, 127, 51, 147, 133, 148]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|-00.33|+00.79|+06.22)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put a clean large metal spoon on the round white table.
+Planner Output Action: [19, 105, 18, 133]
+object navigation (Spoon|+02.27|+00.77|+03.89)
+Executed action: find a Spoon, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Spoon, Task success: 0.0
+Last action success: 1.0
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+put Spoon|+02.27|+00.77|+03.89 on DiningTable|+02.45|+00.67|+03.98
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+empty plan, stop here
+Planner Output Action: -2
+Resetting ThorEnv
+Instruction: Move a pencil from a small black bin to a wooden desk.
+Planner Output Action: [66, 114, 49, 133]
+object navigation (Pencil|-00.90|+01.35|-02.07)
+Executed action: find a Pencil, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pencil, Task success: 0.0
+Last action success: 1.0
+object navigation (Desk)
+Executed action: find a Desk, Task success: 0.0
+Last action success: 1.0
+put Pencil|-00.90|+01.35|-02.07 on Desk|-00.96|00.00|-02.06
+Executed action: put down the object in hand, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Place an apple slice in a square pan, place both in fridge
+Planner Output Action: [22, 107, 34, 127, 22, 160, 7, 133, 22, 107, 7, 133, 7, 86, 78, 139, 133, 140]
+object navigation (Apple|-01.49|+01.42|+03.93)
+Executed action: find a Apple, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Apple, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [18, 107, 34, 127, 160, 7, 86, 22, 107, 133, 78, 139, 7, 86, 133, 140]
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Apple, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 34, 127, 22, 160, 7, 86, 22, 107, 133, 86, 78, 139, 133, 140]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Episodes:  64%|██████▍   | 32/50 [1:56:27<1:04:03, 213.52s/it]Episodes:  66%|██████▌   | 33/50 [1:57:30<47:38, 168.15s/it]  Episodes:  68%|██████▊   | 34/50 [2:02:28<55:15, 207.21s/it]Executed action: pick up the Knife, Task success: 0.0
+Last action success: 1.0
+object navigation (Apple|-01.49|+01.42|+03.93)
+Executed action: find a Apple, Task success: 0.0
+Last action success: 1.0
+Executed action: slice the Apple, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [34, 127, 133, 22, 107, 34, 127, 160, 7, 86, 22, 107, 133, 78, 139, 7, 86, 133, 140]
+object navigation (Knife)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 22, 107, 34, 160, 22, 107, 7, 133, 7, 86, 78, 139, 133, 140]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Apple|-01.49|+01.42|+03.93)
+Executed action: find a Apple, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Apple, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [39, 22, 107, 34, 127, 160, 133, 7, 22, 107, 7, 86, 78, 139, 133, 140]
+object navigation (CounterTop|+00.86|+00.86|+00.98)
+Executed action: find a CounterTop, Task success: 0.0
+Last action success: 1.0
+object navigation (Apple|-01.49|+01.42|+03.93)
+Executed action: find a Apple, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Apple, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [34, 127, 22, 160, 7, 86, 22, 107, 133, 78, 139, 7, 86, 133, 140]
+object navigation (Knife)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 1.0
+object navigation (Apple|-01.49|+01.42|+03.93)
+Executed action: find a Apple, Task success: 0.0
+Last action success: 1.0
+Executed action: slice the Apple, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 22, 107, 34, 127, 22, 160, 7, 86, 22, 107, 133, 7, 86, 78, 139, 133, 140]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Apple|-01.49|+01.42|+03.93)
+Executed action: find a Apple, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Apple, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [7, 86, 22, 107, 7, 133, 7, 86, 78, 139, 133, 140]
+object navigation (Pan|-02.67|+00.81|+03.74)
+Executed action: find a Pan, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pan, Task success: 0.0
+Last action success: 1.0
+object navigation (Apple|-01.49|+01.42|+03.93)
+Executed action: find a Apple, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Apple, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Carry a purple pillow while turning on a lamp
+Planner Output Action: [74, 124, 27, 153]
+object navigation (Pillow)
+Executed action: find a Pillow, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pillow, Task success: 0.0
+Last action success: 1.0
+object navigation (Floorlamp)
+Executed action: find a FloorLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [63, 151]
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put a clean butter knife on a round white table.
+Planner Output Action: [36, 130, 59, 133]
+object navigation (ButterKnife|-00.59|+00.80|+00.54)
+Executed action: find a ButterKnife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the ButterKnife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [39, 130, 18, 133]
+object navigation (CounterTop|+02.81|+00.99|+00.68)
+Executed action: find a CounterTop, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the ButterKnife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [36, 130, 18, 133]
+object navigation (ButterKnife|-00.59|+00.80|+00.54)
+Executed action: find a ButterKnife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the ButterKnife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [39, 130, 18, 133]
+object navigation (CounterTop|+02.81|+00.99|+00.68)
+Executed action: find a CounterTop, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the ButterKnife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [39, 36, 130, 18, 133]
+object navigation (CounterTop|+02.81|+00.99|+00.68)
+Executed action: find a CounterTop, Task success: 0.0
+Last action success: 1.0
+object navigation (ButterKnife|-00.59|+00.80|+00.54)
+Executed action: find a ButterKnife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the ButterKnife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [36, 130, 29, 133]
+object navigation (ButterKnife|-00.59|+00.80|+00.54)
+Executed action: find a ButterKnife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the ButterKnife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [36, 130, 18, 133]
+object navigation (ButterKnife|-00.59|+00.80|+00.54)
+Executed action: find a ButterKnife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the ButterKnife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [36, 130, 79, 133, 2, 155, 156, 36, 130, 18, 133]
+object navigation (ButterKnife|-00.59|+00.80|+00.54)
+Executed action: find a ButterKnife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the ButterKnife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [36, 130, 18, 133]
+object navigation (ButterKnife|-00.59|+00.80|+00.54)
+Executed action: find a ButterKnife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the ButterKnife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [39, 130, 31, 133]
+object navigation (CounterTop|+02.81|+00.99|+00.68)
+Executed action: find a CounterTop, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the ButterKnife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Move both pans from the stove top to the white counter top.
+Planner Output Action: [7, 86, 39, 133, 7, 86, 39, 133]
+object navigation (Pan|+01.54|+00.91|-00.32)
+Executed action: find a Pan, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pan, Task success: 0.0
+Last action success: 1.0
+object navigation (CounterTop|+00.99|+00.95|+01.02)
+Executed action: find a CounterTop, Task success: 0.0
+Last action success: 1.0
+put Pan|+01.54|+00.91|-00.32 on CounterTop|+00.99|+00.95|+01.02
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Pan|+01.54|+00.91|-00.32)
+Executed action: find a Pan, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pan, Task success: 0.0
+Last action success: 1.0
+Episodes:  70%|███████   | 35/50 [2:03:32<41:05, 164.37s/it]Episodes:  72%|███████▏  | 36/50 [2:07:55<45:12, 193.73s/it]Episodes:  74%|███████▍  | 37/50 [2:09:21<34:59, 161.51s/it]Episodes:  76%|███████▌  | 38/50 [2:10:26<26:29, 132.44s/it]Episodes:  78%|███████▊  | 39/50 [2:28:33<1:16:48, 418.97s/it]Episodes:  80%|████████  | 40/50 [2:29:33<51:51, 311.17s/it]  object navigation (CounterTop|+00.99|+00.95|+01.02)
+Executed action: find a CounterTop, Task success: 0.0
+Last action success: 1.0
+put Pan|+01.54|+00.91|-00.32 on CounterTop|+00.99|+00.95|+01.02
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+empty plan, stop here
+Planner Output Action: -2
+Resetting ThorEnv
+Instruction: To wash the red cloth and put it to a cabinet.
+Planner Output Action: [25, 111, 79, 133, 2, 155, 156, 25, 111, 48, 145, 133, 146]
+object navigation (Cloth|-02.90|+00.11|-00.55)
+Executed action: find a Cloth, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [75, 25, 111, 79, 133, 2, 155, 156, 25, 111, 48, 145, 133, 146]
+object navigation (Bathtub)
+Executed action: find a Bathtub, Task success: 0.0
+Last action success: 1.0
+object navigation (Cloth|-02.90|+00.11|-00.55)
+Executed action: find a Cloth, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [25, 111, 79, 2, 155, 156, 48, 145, 133, 146]
+object navigation (Cloth|-02.90|+00.11|-00.55)
+Executed action: find a Cloth, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [25, 111, 79, 133, 2, 155, 156, 25, 111, 48, 145, 133, 146]
+object navigation (Cloth|-02.90|+00.11|-00.55)
+Executed action: find a Cloth, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [75, 25, 111, 79, 133, 2, 155, 156, 25, 111, 48, 145, 133, 146]
+object navigation (Bathtub)
+Executed action: find a Bathtub, Task success: 0.0
+Last action success: 1.0
+object navigation (Cloth|-02.90|+00.11|-00.55)
+Executed action: find a Cloth, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [25, 111, 79, 133, 2, 155, 156, 25, 111, 48, 145, 133, 146]
+object navigation (Cloth|-02.90|+00.11|-00.55)
+Executed action: find a Cloth, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [111, 79, 133, 2, 155, 156, 48, 145, 133, 146]
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [111, 79, 133, 2, 155, 156, 25, 111, 48, 145, 133, 146]
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [75, 25, 111, 79, 133, 25, 111, 48, 145, 133, 146]
+object navigation (Bathtub)
+Executed action: find a Bathtub, Task success: 0.0
+Last action success: 1.0
+object navigation (Cloth|-02.90|+00.11|-00.55)
+Executed action: find a Cloth, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [25, 111, 79, 133, 2, 155, 156, 25, 111, 48, 145, 133, 146]
+object navigation (Cloth|-02.90|+00.11|-00.55)
+Executed action: find a Cloth, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Move a black mug from the desk to the nightstand.
+Planner Output Action: [14, 97, 32, 133]
+object navigation (Mug|-00.12|+00.62|+01.07)
+Executed action: find a Mug, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 1.0
+object navigation (Bed)
+Executed action: find a Bed, Task success: 0.0
+Last action success: 1.0
+put Mug|+00.03|+00.62|+00.83 on Bed|-00.12|+00.00|-01.70
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [59, 97, 133]
+object navigation (SideTable|-01.20|+00.01|-02.47)
+Executed action: find a SideTable, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [74, 97, 59, 133]
+object navigation (Pillow)
+Executed action: find a Pillow, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Mug, Task success: 0.0
+Last action success: 1.0
+object navigation (SideTable|-01.20|+00.01|-02.47)
+Executed action: find a SideTable, Task success: 0.0
+Last action success: 1.0
+put Mug|+00.03|+00.62|+00.83 on SideTable|-01.20|+00.01|-02.47
+Executed action: put down the object in hand, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Take the blue bank card from behind the TV, turn on the lamp in the corner
+Planner Output Action: [56, 96, 27, 153]
+object navigation (CreditCard|+00.45|+00.76|-02.55)
+Executed action: find a CreditCard, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the CreditCard, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [175, 96, 27, 153]
+object navigation (TVStand|+00.00|+00.00|-02.39)
+Executed action: find a TVStand_2, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the CreditCard, Task success: 0.0
+Last action success: 1.0
+object navigation (Floorlamp)
+Executed action: find a FloorLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the FloorLamp, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Turn a light on while holding a white object.
+Planner Output Action: [20, 106, 43, 27, 153]
+object navigation (TissueBox|-00.51|+00.84|-00.72)
+Executed action: find a TissueBox, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the TissueBox, Task success: 0.0
+Last action success: 1.0
+object navigation (ArmChair|+02.66|+00.00|+01.86)
+Executed action: find a ArmChair, Task success: 0.0
+Last action success: 1.0
+object navigation (Floorlamp)
+Executed action: find a FloorLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the FloorLamp, Task success: 0.0
+Last action success: 1.0
+empty plan, stop here
+Planner Output Action: -2
+Resetting ThorEnv
+Instruction: Turn the green lamp on while carrying a tennis racquet.
+Planner Output Action: [23, 108, 27, 153]
+object navigation (Tennisracket)
+Executed action: find a TennisRacket, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the TennisRacket, Task success: 0.0
+Last action success: 1.0
+object navigation (Floorlamp)
+Executed action: find a FloorLamp, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [63, 151]
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: To move a yellow cup to the sink and put a butter knife in the yellow cup. 
+Planner Output Action: [71, 119, 79, 133, 36, 130, 71, 133]
+object navigation (Cup)
+Executed action: find a Cup, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cup, Task success: 0.0
+Last action success: 1.0
+object navigation (Sink)
+Executed action: find a Sink, Task success: 0.0
+Last action success: 1.0
+Episodes:  82%|████████▏ | 41/50 [2:30:14<34:32, 230.32s/it]Episodes:  84%|████████▍ | 42/50 [2:35:07<33:12, 249.09s/it]Episodes:  86%|████████▌ | 43/50 [2:37:40<25:40, 220.03s/it]Episodes:  88%|████████▊ | 44/50 [2:38:15<16:28, 164.69s/it]put Cup|+00.01|+00.93|-01.65 on Sink|+00.02|+00.77|-01.71|SinkBasin
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (ButterKnife|-02.66|+00.87|+03.37)
+Executed action: find a ButterKnife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the ButterKnife, Task success: 0.0
+Last action success: 1.0
+object navigation (Cup)
+Executed action: find a Cup, Task success: 0.0
+Last action success: 1.0
+put ButterKnife|-02.66|+00.87|+03.37 on Cup|+00.01|+00.93|-01.65
+Executed action: put down the object in hand, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put a metal pot with a potato slice in it on a white table.
+Planner Output Action: [1, 81, 34, 127, 157, 46, 82, 1, 81, 133, 18, 133]
+object navigation (Potato|-01.79|+00.83|-03.74)
+Executed action: find a Potato, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Potato, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [34, 127, 1, 157, 46, 82, 1, 133, 18, 133]
+object navigation (Knife|+00.62|+00.78|+00.00)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [46, 82, 1, 81, 34, 127, 157, 133, 46, 82, 1, 81, 133, 18, 82, 133]
+object navigation (Pot|-01.56|+00.93|+01.05)
+Executed action: find a Pot, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Pot, Task success: 0.0
+Last action success: 1.0
+object navigation (Potato|-01.79|+00.83|-03.74)
+Executed action: find a Potato, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Potato, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [39, 1, 81, 34, 127, 157, 133, 1, 81, 133, 46, 82, 1, 133, 18, 133]
+object navigation (Countertop)
+Executed action: find a CounterTop, Task success: 0.0
+Last action success: 1.0
+object navigation (Potato|-01.79|+00.83|-03.74)
+Executed action: find a Potato, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Potato, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 34, 127, 1, 157, 1, 81, 46, 82, 133, 1, 81, 46, 82, 18, 133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Knife|+00.62|+00.78|+00.00)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [1, 81, 82, 133, 18, 133]
+object navigation (Potato|-01.79|+00.83|-03.74)
+Executed action: find a Potato, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Potato, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [34, 127, 1, 157, 133, 1, 81, 46, 133, 46, 82, 1, 133, 1, 81, 46, 133, 46, 82, 18, 133]
+object navigation (Knife|+00.62|+00.78|+00.00)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [34, 127, 1, 157, 1, 81, 82, 133, 18, 82, 133]
+object navigation (Knife|+00.62|+00.78|+00.00)
+Executed action: find a Knife, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Knife, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [39, 1, 81, 133, 18, 34, 127, 1, 157, 18, 133, 1, 81, 46, 133, 46, 82, 1, 133, 18, 133]
+object navigation (Countertop)
+Executed action: find a CounterTop, Task success: 0.0
+Last action success: 1.0
+object navigation (Potato|-01.79|+00.83|-03.74)
+Executed action: find a Potato, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Potato, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [1, 81, 34, 127, 157, 133, 82, 1, 81, 133, 18, 133]
+object navigation (Potato|-01.79|+00.83|-03.74)
+Executed action: find a Potato, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Potato, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Place two credit cards inside a small white safe.
+Planner Output Action: [56, 96, 44, 135, 133, 56, 96, 133, 136]
+object navigation (CreditCard|+02.56|+00.90|-03.18)
+Executed action: find a CreditCard, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the CreditCard, Task success: 0.0
+Last action success: 1.0
+object navigation (Safe)
+Executed action: find a Safe, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Safe, Task success: 0.0
+Last action success: 1.0
+put CreditCard|+02.04|+00.90|-03.11 on Safe|+02.70|+01.23|+01.77
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (CreditCard|+02.56|+00.90|-03.18)
+Executed action: find a CreditCard, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the CreditCard, Task success: 0.0
+Last action success: 1.0
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Executed action: close the Safe, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [56, 96, 133, 136]
+object navigation (CreditCard|+02.56|+00.90|-03.18)
+Executed action: find a CreditCard, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the CreditCard, Task success: 0.0
+Last action success: 1.0
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Executed action: close the Safe, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [44, 136]
+object navigation (Safe)
+Executed action: find a Safe, Task success: 0.0
+Last action success: 1.0
+Executed action: close the Safe, Task success: 0.0
+Last action success: 1.0
+empty plan, stop here
+Planner Output Action: -2
+Resetting ThorEnv
+Instruction: Examine a blue cloth by the light of a desk lamp.
+Planner Output Action: [25, 111, 63, 151]
+object navigation (Cloth)
+Executed action: find a Cloth, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Cloth, Task success: 0.0
+Last action success: 1.0
+object navigation (Desklamp)
+Executed action: find a DeskLamp, Task success: 0.0
+Last action success: 1.0
+Executed action: turn on the DeskLamp, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Put two blue spray bottles in the trash can.
+Planner Output Action: [10, 90, 40, 133, 10, 90, 40, 133]
+object navigation (SprayBottle|-02.34|+00.68|-01.24)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Garbagecan)
+Executed action: find a GarbageCan, Task success: 0.0
+Last action success: 1.0
+put SprayBottle|-02.34|+00.68|-01.24 on GarbageCan|-00.22|+00.00|-01.42
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (SprayBottle|-02.34|+00.68|-01.24)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Garbagecan)
+Executed action: find a GarbageCan, Task success: 0.0
+Last action success: 1.0
+put SprayBottle|-02.34|+00.68|-01.24 on GarbageCan|-00.22|+00.00|-01.42
+Episodes:  90%|█████████ | 45/50 [2:41:42<14:47, 177.46s/it]Episodes:  92%|█████████▏| 46/50 [2:46:06<13:33, 203.41s/it]Episodes:  94%|█████████▍| 47/50 [2:46:39<07:36, 152.22s/it]Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [10, 90, 40, 133]
+object navigation (SprayBottle|-02.34|+00.68|-01.24)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Garbagecan)
+Executed action: find a GarbageCan, Task success: 0.0
+Last action success: 1.0
+put SprayBottle|-02.34|+00.68|-01.24 on GarbageCan|-00.22|+00.00|-01.42
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [40, 133]
+object navigation (Garbagecan)
+Executed action: find a GarbageCan, Task success: 0.0
+Last action success: 1.0
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [10, 90, 40, 133]
+object navigation (SprayBottle|-02.34|+00.68|-01.24)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Garbagecan)
+Executed action: find a GarbageCan, Task success: 0.0
+Last action success: 1.0
+put SprayBottle|-02.34|+00.68|-01.24 on GarbageCan|-00.22|+00.00|-01.42
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [10, 90, 40, 133]
+object navigation (SprayBottle|-02.34|+00.68|-01.24)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Garbagecan)
+Executed action: find a GarbageCan, Task success: 0.0
+Last action success: 1.0
+put SprayBottle|-02.34|+00.68|-01.24 on GarbageCan|-00.22|+00.00|-01.42
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [10, 90, 40, 133]
+object navigation (SprayBottle|-02.34|+00.68|-01.24)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Garbagecan)
+Executed action: find a GarbageCan, Task success: 0.0
+Last action success: 1.0
+put SprayBottle|-02.34|+00.68|-01.24 on GarbageCan|-00.22|+00.00|-01.42
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Planner Output Action: [10, 90, 40, 133]
+object navigation (SprayBottle|-02.34|+00.68|-01.24)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 1.0
+object navigation (Garbagecan)
+Executed action: find a GarbageCan, Task success: 0.0
+Last action success: 1.0
+put SprayBottle|-02.34|+00.68|-01.24 on GarbageCan|-00.22|+00.00|-01.42
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: put the green spray bottle into the cabinet.
+Planner Output Action: [10, 90, 48, 145, 133, 146]
+object navigation (SprayBottle|-01.80|+01.05|+01.94)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [90, 48, 145, 133, 146]
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [10, 90, 48, 145, 133, 146]
+object navigation (SprayBottle|-01.80|+01.05|+01.94)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [10, 90, 48, 145, 133, 146]
+object navigation (SprayBottle|-01.80|+01.05|+01.94)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [10, 90, 48, 145, 133, 146]
+object navigation (SprayBottle|-01.80|+01.05|+01.94)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [90, 48, 145, 133, 146]
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [48, 145, 90, 133, 146]
+object navigation (Cabinet|-01.61|+00.31|+02.49)
+Executed action: find a Cabinet, Task success: 0.0
+Last action success: 1.0
+Executed action: open the Cabinet, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [10, 90, 133]
+object navigation (SprayBottle|-01.80|+01.05|+01.94)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [10, 90, 48, 133, 146]
+object navigation (SprayBottle|-01.80|+01.05|+01.94)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [10, 90, 48, 145, 133, 146]
+object navigation (SprayBottle|-01.80|+01.05|+01.94)
+Executed action: find a SprayBottle, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SprayBottle, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Take the blue cell phone from the dresser, put it on the bed
+Planner Output Action: [12, 93, 32, 133]
+object navigation (CellPhone|+01.54|+00.02|-02.21)
+Executed action: find a CellPhone, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the CellPhone, Task success: 0.0
+Last action success: 1.0
+object navigation (Bed)
+Executed action: find a Bed, Task success: 0.0
+Last action success: 1.0
+put CellPhone|+01.78|+00.80|-02.03 on Bed|-00.85|-00.02|-00.36
+Executed action: put down the object in hand, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: place a black plate with a spoon in it on top of the kitchen table
+Planner Output Action: [19, 105, 31, 122, 133, 105, 31, 133, 18, 133]
+object navigation (Spoon)
+Executed action: find a Spoon, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Spoon, Task success: 0.0
+Last action success: 1.0
+object navigation (Plate)
+Executed action: find a Plate, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Plate, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 31, 122, 105, 18, 133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Plate)
+Executed action: find a Plate, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Plate, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Spoon, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [123, 133, 19, 105, 31, 133, 18, 133]
+Executed action: pick up the PepperShaker, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Episodes:  96%|█████████▌| 48/50 [2:50:23<05:47, 173.74s/it]Episodes:  98%|█████████▊| 49/50 [2:51:32<02:22, 142.25s/it]Episodes: 100%|██████████| 50/50 [2:52:35<00:00, 118.52s/it]Episodes: 100%|██████████| 50/50 [2:52:35<00:00, 207.11s/it]
+Error code: 503 - [{'error': {'code': 503, 'message': 'The model is overloaded. Please try again later.', 'status': 'UNAVAILABLE'}}]
+local variable 'out' referenced before assignment
+Planner Output Action: [105, 133, 18, 133]
+Executed action: pick up the Spoon, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [133, 19, 105, 31, 133, 18, 133]
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Spoon)
+Executed action: find a Spoon, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Spoon, Task success: 0.0
+Last action success: 1.0
+object navigation (Plate)
+Executed action: find a Plate, Task success: 0.0
+Last action success: 1.0
+put Spoon|-02.02|+00.92|+04.15 on Plate|-03.01|+00.90|+03.68
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [31, 122, 18, 133]
+object navigation (Plate)
+Executed action: find a Plate, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Plate, Task success: 0.0
+Last action success: 1.0
+object navigation (Diningtable)
+Executed action: find a DiningTable, Task success: 0.0
+Last action success: 1.0
+put Plate|-03.01|+00.90|+03.68 on DiningTable|-01.35|+00.01|+00.33
+Executed action: put down the object in hand, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: Move a newspaper from a dresser to a black couch.
+Planner Output Action: [50, 88, 37, 133, 52, 88, 52, 133]
+object navigation (Newspaper)
+Executed action: find a Newspaper, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Newspaper, Task success: 0.0
+Last action success: 1.0
+object navigation (Dresser)
+Executed action: find a Dresser, Task success: 0.0
+Last action success: 1.0
+put Newspaper|+03.18|+00.59|-00.54 on Dresser|-00.02|+00.01|+01.72
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (Sofa)
+Executed action: find a Sofa, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Newspaper, Task success: 0.0
+Last action success: 0.0
+Invalid action or task complete. If invalid then Replanning.
+Planner Output Action: [37, 88, 52, 133]
+object navigation (Dresser)
+Executed action: find a Dresser, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the Newspaper, Task success: 0.0
+Last action success: 1.0
+object navigation (Sofa)
+Executed action: find a Sofa, Task success: 0.0
+Last action success: 1.0
+put Newspaper|+03.18|+00.59|-00.54 on Sofa|-02.96|+00.08|+01.39
+Executed action: put down the object in hand, Task success: 1.0
+Last action success: 1.0
+Invalid action or task complete. If invalid then Replanning.
+Resetting ThorEnv
+Instruction: To move two bars of soap to the black bin. 
+Planner Output Action: [24, 113, 40, 133, 24, 113, 40, 133]
+object navigation (SoapBar|-02.44|+00.81|-03.59)
+Executed action: find a SoapBar, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBar, Task success: 0.0
+Last action success: 1.0
+object navigation (Garbagecan)
+Executed action: find a GarbageCan, Task success: 0.0
+Last action success: 1.0
+put SoapBar|-02.44|+00.81|-03.59 on GarbageCan|-00.35|+00.00|-03.85
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+object navigation (SoapBar|-02.44|+00.81|-03.59)
+Executed action: find a SoapBar, Task success: 0.0
+Last action success: 1.0
+Executed action: pick up the SoapBar, Task success: 0.0
+Last action success: 1.0
+object navigation (Garbagecan)
+Executed action: find a GarbageCan, Task success: 0.0
+Last action success: 1.0
+put SoapBar|-02.44|+00.81|-03.59 on GarbageCan|-00.35|+00.00|-03.85
+Executed action: put down the object in hand, Task success: 0.0
+Last action success: 1.0
+empty plan, stop here
+Planner Output Action: -2
+['running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_1_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_2_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_3_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_4_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_5_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_6_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_7_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_8_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_9_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_10_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_11_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_12_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_13_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_14_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_15_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_16_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_17_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_18_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_19_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_20_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_21_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_22_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_23_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_24_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_25_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_26_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_27_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_28_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_29_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_30_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_31_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_32_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_33_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_34_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_35_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_36_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_37_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_38_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_39_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_40_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_41_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_42_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_43_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_44_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_45_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_46_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_47_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_48_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_49_final_res.json', 'running/eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_50_final_res.json'] 50
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_1_final_res.json
+{'reward': 0.5875, 'num_invalid_actions': 0, 'empty_plan': 1, 'instruction': 'Place two yellow bottles on top of a toilet', 'task_success': 0, 'task_progress': 0, 'num_steps': 8, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 63.45780539512634}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_2_final_res.json
+{'reward': 0.08333333333333333, 'num_invalid_actions': 9, 'empty_plan': 0, 'instruction': 'Put two yellow bottles on top of the toilet', 'task_success': 0.0, 'task_progress': 0.0, 'num_steps': 30, 'planner_steps': 10, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.3, 'episode_elapsed_seconds': 298.55018734931946}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_3_final_res.json
+{'reward': -0.0033333333333333158, 'num_invalid_actions': 4, 'empty_plan': 0, 'instruction': 'get two silver bottles with brown pumps, put them in dresser drawer', 'task_success': 0.0, 'task_progress': 0.0, 'num_steps': 30, 'planner_steps': 8, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.13333333333333333, 'episode_elapsed_seconds': 272.9793047904968}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_4_final_res.json
+{'reward': 0.016666666666666673, 'num_invalid_actions': 10, 'empty_plan': 0, 'instruction': 'Put away spatula in the bowl to a black table', 'task_success': 0.0, 'task_progress': 0.0, 'num_steps': 24, 'planner_steps': 10, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.4166666666666667, 'episode_elapsed_seconds': 490.7474453449249}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_5_final_res.json
+{'reward': -0.04999999999999999, 'num_invalid_actions': 0, 'empty_plan': 1, 'instruction': 'Put the green spray bottles on the toilet', 'task_success': 0, 'task_progress': 0, 'num_steps': 4, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 48.7997088432312}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_6_final_res.json
+{'reward': -3.0333333333333337, 'num_invalid_actions': 0, 'empty_plan': 1, 'instruction': 'Turn on a green lamp with a credit card.', 'task_success': 0, 'task_progress': 0, 'num_steps': 3, 'planner_steps': 3, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 70.65724563598633}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_7_final_res.json
+{'reward': -0.27647058823529413, 'num_invalid_actions': 10, 'empty_plan': 0, 'instruction': 'Turn on the desk lamp while holding a yellow vessel', 'task_success': 0.0, 'task_progress': 0.5, 'num_steps': 17, 'planner_steps': 11, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.5882352941176471, 'episode_elapsed_seconds': 255.87953853607178}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_8_final_res.json
+{'reward': -0.0019230769230768917, 'num_invalid_actions': 10, 'empty_plan': 0, 'instruction': 'grab the yellow stand on the table, turn on the lamp', 'task_success': 0.0, 'task_progress': 0.5, 'num_steps': 26, 'planner_steps': 11, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.38461538461538464, 'episode_elapsed_seconds': 287.2780170440674}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_9_final_res.json
+{'reward': -0.13999999999999999, 'num_invalid_actions': 1, 'empty_plan': 1, 'instruction': 'To pick up a yellow object, as well as turn on a lamp.', 'task_success': 0, 'task_progress': 0, 'num_steps': 5, 'planner_steps': 3, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.2, 'episode_elapsed_seconds': 120.95024967193604}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_10_final_res.json
+{'reward': 1.525, 'num_invalid_actions': 0, 'empty_plan': 0, 'instruction': 'Move two tissue boxes from the green cabinet counter top to the toilet', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 8, 'planner_steps': 1, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 33.90802550315857}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_11_final_res.json
+{'reward': 1.0, 'num_invalid_actions': 0, 'empty_plan': 0, 'instruction': 'Pick up a brown bowl to look at under a lit lamp.', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 4, 'planner_steps': 1, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 31.74903416633606}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_12_final_res.json
+{'reward': -0.1388888888888889, 'num_invalid_actions': 10, 'empty_plan': 0, 'instruction': 'Put a knife in a blue container onto the black table in the corner.', 'task_success': 0.0, 'task_progress': 0.0, 'num_steps': 18, 'planner_steps': 10, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.5555555555555556, 'episode_elapsed_seconds': 419.84864926338196}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_13_final_res.json
+{'reward': 0.10666666666666667, 'num_invalid_actions': 8, 'empty_plan': 0, 'instruction': 'Put a mug with a pen in it on a white dresser.', 'task_success': 0.0, 'task_progress': 0.0, 'num_steps': 30, 'planner_steps': 8, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.26666666666666666, 'episode_elapsed_seconds': 219.22926998138428}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_14_final_res.json
+{'reward': 0.2571428571428571, 'num_invalid_actions': 1, 'empty_plan': 0, 'instruction': 'get spray from white drawer to a cabinet.', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 7, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.14285714285714285, 'episode_elapsed_seconds': 214.62498998641968}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_15_final_res.json
+{'reward': 0.9714285714285715, 'num_invalid_actions': 0, 'empty_plan': 1, 'instruction': 'Move the pot with the green sponge inside from the refrigerator to the sink.', 'task_success': 0, 'task_progress': 0, 'num_steps': 7, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 56.535226821899414}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_16_final_res.json
+{'reward': -0.009999999999999986, 'num_invalid_actions': 9, 'empty_plan': 0, 'instruction': 'Place the glass bowl with the pencil inside of it on the white dresser.', 'task_success': 0.0, 'task_progress': 0.0, 'num_steps': 30, 'planner_steps': 10, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.3, 'episode_elapsed_seconds': 387.8378529548645}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_17_final_res.json
+{'reward': -0.15000000000000005, 'num_invalid_actions': 0, 'empty_plan': 0, 'instruction': 'Put the yellow and blue jars on the black desk.', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 12, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 82.43068790435791}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_18_final_res.json
+{'reward': -0.38333333333333336, 'num_invalid_actions': 0, 'empty_plan': 0, 'instruction': 'Put all the vases on the black desk.', 'task_success': 0.0, 'task_progress': 0.0, 'num_steps': 30, 'planner_steps': 5, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 143.605854511261}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_19_final_res.json
+{'reward': -0.95, 'num_invalid_actions': 0, 'empty_plan': 1, 'instruction': 'Place the yellow and blue vase on the table.', 'task_success': 0, 'task_progress': 0, 'num_steps': 4, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 51.0416533946991}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_20_final_res.json
+{'reward': 2.2333333333333334, 'num_invalid_actions': 3, 'empty_plan': 0, 'instruction': 'Place the remote in the box on the brown shelf.', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 12, 'planner_steps': 4, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.25, 'episode_elapsed_seconds': 125.18331122398376}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_21_final_res.json
+{'reward': -0.24, 'num_invalid_actions': 10, 'empty_plan': 0, 'instruction': 'Put the mug with fork inside it on the round table. ', 'task_success': 0.0, 'task_progress': 0.0, 'num_steps': 25, 'planner_steps': 10, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.4, 'episode_elapsed_seconds': 441.42105627059937}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_22_final_res.json
+{'reward': -0.3038461538461539, 'num_invalid_actions': 10, 'empty_plan': 0, 'instruction': 'Place a mug with a fork in it onto the round kitchen table.', 'task_success': 0.0, 'task_progress': 0.3333333333333333, 'num_steps': 26, 'planner_steps': 10, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.38461538461538464, 'episode_elapsed_seconds': 280.6267521381378}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_23_final_res.json
+{'reward': 0.6499999999999999, 'num_invalid_actions': 0, 'empty_plan': 0, 'instruction': 'Turn on the tall lamp in the corner while carrying a white cushion.', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 4, 'planner_steps': 1, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 27.78184986114502}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_24_final_res.json
+{'reward': 2.07, 'num_invalid_actions': 1, 'empty_plan': 0, 'instruction': 'move the red cloth from the cabinet to the tub', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 10, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.1, 'episode_elapsed_seconds': 80.81160759925842}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_25_final_res.json
+{'reward': 2.957142857142857, 'num_invalid_actions': 1, 'empty_plan': 0, 'instruction': 'Put the red rag into the bathtub', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 7, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.14285714285714285, 'episode_elapsed_seconds': 50.7989342212677}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_26_final_res.json
+{'reward': -0.07333333333333333, 'num_invalid_actions': 9, 'empty_plan': 0, 'instruction': 'Move a pan beneath a tomato slice on the black table.', 'task_success': 0.0, 'task_progress': 0.0, 'num_steps': 30, 'planner_steps': 10, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.3, 'episode_elapsed_seconds': 570.8087322711945}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_27_final_res.json
+{'reward': -0.2866666666666667, 'num_invalid_actions': 8, 'empty_plan': 0, 'instruction': 'Put a pot containing a knife and a potato slice on the black table', 'task_success': 0.0, 'task_progress': 0.0, 'num_steps': 30, 'planner_steps': 9, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.26666666666666666, 'episode_elapsed_seconds': 431.52861428260803}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_28_final_res.json
+{'reward': -0.22999999999999998, 'num_invalid_actions': 8, 'empty_plan': 0, 'instruction': 'Put 2 yellow knives from the round black table to the drawer of the cabinet with a toaster. ', 'task_success': 0.0, 'task_progress': 0.5, 'num_steps': 30, 'planner_steps': 8, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.26666666666666666, 'episode_elapsed_seconds': 330.9467034339905}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_29_final_res.json
+{'reward': -0.23, 'num_invalid_actions': 9, 'empty_plan': 0, 'instruction': 'Putting away yellow handled knives in the drawer', 'task_success': 0.0, 'task_progress': 0.5, 'num_steps': 30, 'planner_steps': 11, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.3, 'episode_elapsed_seconds': 338.01665353775024}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_30_final_res.json
+{'reward': 0.45000000000000007, 'num_invalid_actions': 0, 'empty_plan': 1, 'instruction': 'Put a clean large metal spoon on the round white table.', 'task_success': 0, 'task_progress': 0, 'num_steps': 4, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 55.47713899612427}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_31_final_res.json
+{'reward': 1.35, 'num_invalid_actions': 0, 'empty_plan': 0, 'instruction': 'Move a pencil from a small black bin to a wooden desk.', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 4, 'planner_steps': 1, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 27.11938738822937}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_32_final_res.json
+{'reward': -0.13000000000000003, 'num_invalid_actions': 9, 'empty_plan': 0, 'instruction': 'Place an apple slice in a square pan, place both in fridge', 'task_success': 0.0, 'task_progress': 0.0, 'num_steps': 30, 'planner_steps': 9, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.3, 'episode_elapsed_seconds': 266.52746319770813}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_33_final_res.json
+{'reward': 0.9, 'num_invalid_actions': 1, 'empty_plan': 0, 'instruction': 'Carry a purple pillow while turning on a lamp', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 5, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.2, 'episode_elapsed_seconds': 47.816827058792114}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_34_final_res.json
+{'reward': -0.34285714285714286, 'num_invalid_actions': 10, 'empty_plan': 0, 'instruction': 'Put a clean butter knife on a round white table.', 'task_success': 0.0, 'task_progress': 0.3333333333333333, 'num_steps': 21, 'planner_steps': 10, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.47619047619047616, 'episode_elapsed_seconds': 288.7929599285126}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_35_final_res.json
+{'reward': 1.975, 'num_invalid_actions': 0, 'empty_plan': 1, 'instruction': 'Move both pans from the stove top to the white counter top.', 'task_success': 0, 'task_progress': 0, 'num_steps': 8, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 56.85403275489807}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_36_final_res.json
+{'reward': 0.2000000000000001, 'num_invalid_actions': 10, 'empty_plan': 0, 'instruction': 'To wash the red cloth and put it to a cabinet.', 'task_success': 0.0, 'task_progress': 0.3333333333333333, 'num_steps': 21, 'planner_steps': 10, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.47619047619047616, 'episode_elapsed_seconds': 252.2056610584259}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_37_final_res.json
+{'reward': 1.9899999999999998, 'num_invalid_actions': 1, 'empty_plan': 0, 'instruction': 'Move a black mug from the desk to the nightstand.', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 10, 'planner_steps': 3, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.1, 'episode_elapsed_seconds': 79.56419539451599}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_38_final_res.json
+{'reward': 0.1499999999999999, 'num_invalid_actions': 1, 'empty_plan': 0, 'instruction': 'Take the blue bank card from behind the TV, turn on the lamp in the corner', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 6, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.16666666666666666, 'episode_elapsed_seconds': 55.62417006492615}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_39_final_res.json
+{'reward': 0.0, 'num_invalid_actions': 0, 'empty_plan': 1, 'instruction': 'Turn a light on while holding a white object.', 'task_success': 0, 'task_progress': 0, 'num_steps': 5, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 55.48418354988098}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_40_final_res.json
+{'reward': 4.38, 'num_invalid_actions': 1, 'empty_plan': 0, 'instruction': 'Turn the green lamp on while carrying a tennis racquet.', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 5, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.2, 'episode_elapsed_seconds': 49.66602921485901}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_41_final_res.json
+{'reward': 1.8624999999999998, 'num_invalid_actions': 0, 'empty_plan': 0, 'instruction': 'To move a yellow cup to the sink and put a butter knife in the yellow cup. ', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 8, 'planner_steps': 1, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 32.982579946517944}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_42_final_res.json
+{'reward': -0.29600000000000004, 'num_invalid_actions': 10, 'empty_plan': 0, 'instruction': 'Put a metal pot with a potato slice in it on a white table.', 'task_success': 0.0, 'task_progress': 0.0, 'num_steps': 25, 'planner_steps': 10, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.4, 'episode_elapsed_seconds': 284.05976271629333}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_43_final_res.json
+{'reward': -0.11999999999999998, 'num_invalid_actions': 2, 'empty_plan': 1, 'instruction': 'Place two credit cards inside a small white safe.', 'task_success': 0, 'task_progress': 0, 'num_steps': 15, 'planner_steps': 4, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.13333333333333333, 'episode_elapsed_seconds': 114.34782528877258}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_44_final_res.json
+{'reward': 0.34999999999999987, 'num_invalid_actions': 0, 'empty_plan': 0, 'instruction': 'Examine a blue cloth by the light of a desk lamp.', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 4, 'planner_steps': 1, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 26.715930700302124}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_45_final_res.json
+{'reward': 0.29, 'num_invalid_actions': 1, 'empty_plan': 0, 'instruction': 'Put two blue spray bottles in the trash can.', 'task_success': 0.0, 'task_progress': 0.5, 'num_steps': 30, 'planner_steps': 7, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.03333333333333333, 'episode_elapsed_seconds': 181.18087315559387}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_46_final_res.json
+{'reward': -0.321578947368421, 'num_invalid_actions': 10, 'empty_plan': 0, 'instruction': 'put the green spray bottle into the cabinet.', 'task_success': 0.0, 'task_progress': 0.0, 'num_steps': 19, 'planner_steps': 10, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.5263157894736842, 'episode_elapsed_seconds': 253.61378383636475}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_47_final_res.json
+{'reward': 0.6, 'num_invalid_actions': 0, 'empty_plan': 0, 'instruction': 'Take the blue cell phone from the dresser, put it on the bed', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 4, 'planner_steps': 1, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 25.334816455841064}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_48_final_res.json
+{'reward': 1.5047619047619047, 'num_invalid_actions': 5, 'empty_plan': 0, 'instruction': 'place a black plate with a spoon in it on top of the kitchen table', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 21, 'planner_steps': 6, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.23809523809523808, 'episode_elapsed_seconds': 214.44709944725037}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_49_final_res.json
+{'reward': 2.0, 'num_invalid_actions': 1, 'empty_plan': 0, 'instruction': 'Move a newspaper from a dresser to a black couch.', 'task_success': 1.0, 'task_progress': 1.0, 'num_steps': 10, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.1, 'episode_elapsed_seconds': 58.92718243598938}
+eb_alfred/gemini-2.0-flash_laser_alfred_new_prompt_gemini_gd_boxes_with_labels/visual_appearance/results/episode_50_final_res.json
+{'reward': -0.275, 'num_invalid_actions': 0, 'empty_plan': 1, 'instruction': 'To move two bars of soap to the black bin. ', 'task_success': 0, 'task_progress': 0, 'num_steps': 8, 'planner_steps': 2, 'planner_output_error': 0, 'num_invalid_action_ratio': 0.0, 'episode_elapsed_seconds': 54.54563045501709}
+final results: 
+{'reward': 0.4494782278471443, 'num_invalid_actions': 3.86, 'empty_plan': 0.22, 'task_success': 0.36, 'task_progress': 0.43, 'num_steps': 15.28, 'planner_steps': 5.18, 'planner_output_error': 0.0, 'num_invalid_action_ratio': 0.1809772243580293, 'episode_elapsed_seconds': 174.18644989967345}

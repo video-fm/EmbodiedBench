@@ -32,7 +32,7 @@ MESSAGE_WINDOW_LEN = 5
 
 import sys
 
-sys.path.append("/home/asethi04/GroundingDINO")
+sys.path.append("/home/jianih/research/GroundingDINO")
 from groundingdino.util.inference import Model as gd_Model
 from groundingdino.util.inference import load_image as load_gd_image
 from groundingdino.util.utils import get_phrases_from_posmap
@@ -42,8 +42,7 @@ import math
 import numpy as np
 
 
-model_lib_path = "/home/asethi04/LASER/LASER-unified/src/models"
-
+model_lib_path = "/home/jianih/research/LASER/LASER-unified/src/models"
 sys.path.append(model_lib_path)
 
 from llava_clip_model_v3 import PredicateModel as PredicateModel_v3

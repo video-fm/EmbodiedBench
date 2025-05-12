@@ -98,9 +98,9 @@ class EB_NavigationEvaluator():
             #     # selected_indexes = [i - 1 for i in [44, 45, 47, 49, 50, 51, 52, 54, 56, 57, 59, 33, 34, 32, 35, 37, 38, 40, 42, 43,]]
             #     selected_indexes = [i - 1 for i in [51, 54, 59, 33, 35]]
             
-            if eval_set == "visual_appearance":
+            if eval_set == "complex_instruction":
                 # selected_indexes = list(range(27, 60))
-                selected_indexes = list(range(59, 60))
+                selected_indexes = list(range(18, 60))
             # if eval_set == "complex_instruction":
             #     selected_indexes = [i - 1 for i in [38, 26, 44, 35, 18, 33, 43, 23, 32, 54, 49, 9, 8, 58, 57, 30, 16, 17]]
             else: 

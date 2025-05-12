@@ -1,11 +1,3 @@
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-os.environ["remote_url"] = "http://0.0.0.0:15235/v1"
-os.environ["DISPLAY"] = "cherry:12.0"
-os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
-home_dir = "/home/asethi04/embody/EmbodiedBench"
-existing_path = os.environ.get("PYTHONPATH", "")
-os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 import numpy as np
 from tqdm import tqdm
 import time
@@ -16,7 +8,8 @@ from embodiedbench.evaluator.summarize_result import average_json_values
 from embodiedbench.evaluator.evaluator_utils import load_saved_data, update_config_with_args
 from embodiedbench.evaluator.config.system_prompts import alfred_laser_system_prompt
 from embodiedbench.main import logger
-from alfred_examples import laser_sg_examples_pre_post, laser_sg_examples_no_revert
+import os
+
 example_path = os.path.join(os.path.dirname(__file__), 'config/alfred_examples.json')
 
 #common sense, base, and ...

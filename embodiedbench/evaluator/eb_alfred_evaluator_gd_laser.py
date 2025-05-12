@@ -1,11 +1,4 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-os.environ["remote_url"] = "http://0.0.0.0:15235/v1"
-os.environ["DISPLAY"] = "cherry:12.0"
-os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
-home_dir = "/home/asethi04/embody/EmbodiedBench"
-existing_path = os.environ.get("PYTHONPATH", "")
-os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 
 import numpy as np
 from tqdm import tqdm

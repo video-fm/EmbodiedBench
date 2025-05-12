@@ -262,7 +262,7 @@ class VLMPlanner:
         # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         # self.predicate_model = PredicateModel_v3(hidden_dim = 128, num_top_pairs=1, device=device, model_name=clip_model_name).to(device)
         
-        # self.common_objects = ["toilet", "desk", "bed", "wall", "door", "cabinet", "stove", "table", "counter", "window", "mirror", "other"]
+        self.common_objects = ["toilet", "desk", "bed", "wall", "door", "cabinet", "stove", "table", "counter", "window", "mirror", "other"]
 
     def set_actions(self, actions):
         self.actions = actions
@@ -879,7 +879,8 @@ class VLMPlanner:
                     target_bboxes = torch.stack(target_bboxes)
             
             else:
-                labels, boxes = self.predict_gd(image, gd_query_objects, box_threshold=0.1, text_threshold=0.1)
+                # og_labels, og_boxes = self.predict_gd(image, gd_query_objects, box_threshold=0.4, text_threshold=0.4)
+                labels, boxes = self.predict_gd(image, gd_query_objects, box_threshold=0.35, text_threshold=0.35)
                 if len(boxes) != 0:
                     target_labels, target_bboxes = self.predict_laser(
                         image=image, 
@@ -893,10 +894,10 @@ class VLMPlanner:
                     boxes = []
                 
             # if self.boundingbox:
-            if not len(target_bboxes) == 0:
+            if not len(og_boxes) == 0:
                 save_prompts_one_image(frame_image=image, 
                                         boxes=target_bboxes, 
-                                        labels=["" for label in target_labels], 
+                                        labels=target_labels, 
                                         points=[], 
                                         save_path=bbox_path)    
                 prompt_image_path = bbox_path  

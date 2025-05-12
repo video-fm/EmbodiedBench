@@ -249,6 +249,17 @@ class TargetSG(BaseModel):
     target_attribute: list[str]
     target_relation: list[list[str]]
     related_objects: list[str]
+    
+class TargetStateCurrentState(BaseModel):
+    Visual_Description: str
+    target_state: str
+    target_objects: list[str]
+    target_attributes: list[list[str]]
+    target_relations: list[list[str]]
+    current_state: str
+    current_objects: list[str]
+    current_attrbutes: list[list[str]]
+    current_relations: list[list[str]]
 
 class TargetEntityName(BaseModel):
     scene_graph_entities: list[str]

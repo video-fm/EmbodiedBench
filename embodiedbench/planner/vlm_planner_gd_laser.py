@@ -48,6 +48,72 @@ sys.path.append(model_lib_path)
 
 from llava_clip_model_v3 import PredicateModel as PredicateModel_v3
 
+from collections import defaultdict
+
+def get_topk_per_object_name(aggr_res, avg_aggr_res, k):
+    name_to_ids = defaultdict(list)
+
+    # Group object ids by object name
+    for obj_id, content in aggr_res.items():
+        if "name" not in content:
+            continue
+        prob, name = content["name"]
+        if name == "other":
+            continue
+        name_to_ids[name].append(obj_id)
+
+    # Collect top-k per name
+    topk_oid_to_score = {}
+    for name, obj_ids in name_to_ids.items():
+        valid_ids = [(obj_id, avg_aggr_res[obj_id]) for obj_id in obj_ids if obj_id in avg_aggr_res]
+        sorted_ids = sorted(valid_ids, key=lambda x: x[1], reverse=True)[:k]
+        for obj_id, score in sorted_ids:
+            topk_oid_to_score[obj_id] = score
+
+    return topk_oid_to_score
+
+import heapq
+from itertools import combinations
+
+def get_topk_per_relation(predicted_name, binary_predicates, top_k):
+    # Map from relation -> list of (score, (id1, relation, id2), (name1, name2))
+    relation_to_scored_pairs = defaultdict(list)
+
+    for (relation, obj1_label, obj2_label) in binary_predicates:
+        for id1, id2 in combinations(predicted_name.keys(), 2):
+            if id1 == id2:
+                continue
+            
+            preds1 = predicted_name.get(id1, [])
+            preds2 = predicted_name.get(id2, [])
+
+            score1 = next((p for p, label in preds1 if label == obj1_label), 0.0)
+            score2 = next((p for p, label in preds2 if label == obj2_label), 0.0)
+
+            combined_score = score1 * score2
+            if combined_score > 0:
+                relation_to_scored_pairs[relation].append((combined_score, (id1, relation, id2), (obj1_label, obj2_label)))
+
+    # For each relation, keep top-k entries
+    topk_per_relation = {}
+    for rel, scored_list in relation_to_scored_pairs.items():
+        topk = heapq.nlargest(top_k, scored_list, key=lambda x: x[0])
+        topk_per_relation[rel] = [
+            {"pair": pair, "score": score, "names": (subj, obj)}
+            for score, pair, (subj, obj) in topk
+        ]
+
+    return topk_per_relation
+
+def merge_object_pair_ids(topk_per_relation): 
+    all_object_pairs = set()
+    
+    for rel, topk_res_ls in topk_per_relation.items():
+        for topk_res in topk_res_ls:
+            subj, _, obj = topk_res['pair']
+            all_object_pairs.add((0, 0, (subj, obj)))
+
+    return sorted(list(all_object_pairs))
 
 def load_model(model_dir, model_name, epoch, device):
     model_name = model_name + f".{epoch}.model"
@@ -200,7 +266,10 @@ class VLMPlanner:
         gd_only = False,
         top_k=1,
         aggr_thres=0.1,
+        gd_box_threshold = 0.1,
+        gd_text_threshold = 0.1,
     ):
+        
         self.last_visual_description = ""
         self.last_reasoning = ""
         self.model_name = model_name
@@ -227,6 +296,8 @@ class VLMPlanner:
         self.language_only = language_only
         self.kwargs = kwargs
         self.action_key = kwargs.pop("action_key", "action_id")
+        self.gd_box_threshold = gd_box_threshold
+        self.gd_text_threshold = gd_text_threshold
 
         self.scene_graph_prompt = f'''## You are a robot operating in a home. You are given an image and observe the environment for performing the given task. \
             The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'}\
@@ -262,7 +333,7 @@ class VLMPlanner:
         # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         # self.predicate_model = PredicateModel_v3(hidden_dim = 128, num_top_pairs=1, device=device, model_name=clip_model_name).to(device)
         
-        self.common_objects = ["toilet", "desk", "bed", "wall", "door", "cabinet", "stove", "table", "counter", "window", "mirror", "other"]
+        self.common_objects = ["desk", "bed", "wall", "door", "cabinet", "stove", "table", "counter", "window", "mirror", "other"]
 
     def set_actions(self, actions):
         self.actions = actions
@@ -408,10 +479,10 @@ class VLMPlanner:
             else:
                 scene_graph_prompt += f"The last action succeeds. "
                 
-            scene_graph_prompt += (
-                # f"\n\nEnvironmental Feedback: {last_env_feedback}"
-                f"\n\nLast Visual Description: {self.last_visual_description}\n"
-            )
+            # scene_graph_prompt += (
+            #     # f"\n\nEnvironmental Feedback: {last_env_feedback}"
+            #     f"\n\nLast Visual Description: {self.last_visual_description}\n"
+            # )
             
             scene_graph_prompt += (
                 # f"\n\nEnvironmental Feedback: {last_env_feedback}"
@@ -621,11 +692,14 @@ class VLMPlanner:
         return labels, boxes
     
     
+    
     def predict_laser(self, 
                       image, 
                       boxes, 
                       target_names,
                       query_names,
+                      query_relations,
+                      query_relation_kws,
                       query_attributes,
                       ):
         
@@ -637,7 +711,7 @@ class VLMPlanner:
             height, width = image.shape[0], image.shape[1]
             batched_pred_masks = [bbox_to_mask(bbox, height, width) for bbox in boxes]
             batched_object_ids = [[0, 0, i] for i in range(len(batched_pred_masks))]
-
+            
             batched_image_cate_probs, _, _, _ = \
                 self.predicate_model(
                     batched_video_ids=[0],
@@ -650,7 +724,7 @@ class VLMPlanner:
                     batched_binary_kws=[[]],  # Dataset-wise binary predicate labels
                     batched_obj_pairs=[],  # Ground truth binary relations
                     batched_video_splits=[0],  # [number of videos]
-                    batched_binary_predicates=[None],  # None indicates inference time
+                    batched_binary_predicates=[[]],  # None indicates inference time
                 )
                     
             all_unary_res = []
@@ -672,7 +746,7 @@ class VLMPlanner:
                 all_unary_res.append(batched_image_unary_probs)
             
             # Combine the uanry and object name information together 
-            # Step 1: reformat the object name and attributes into better format
+            # Step 1: reformat the object name, attributes, and relations into better format
             predicted_name = {}
             for (oid, name) in batched_image_cate_probs[0]:
                 prob = batched_image_cate_probs[0][(oid, name)].item()
@@ -691,88 +765,149 @@ class VLMPlanner:
                     if kw in query_attributes:
                         reformatted_unary_res[oid][kw] = unary_res[0][(fid, oid, kw)].item()
             
-            # Step 2: Aggregate the object name and attribute predictions together
+            topk_obj_pair_info = get_topk_per_relation(predicted_name, binary_predicates=query_relations, top_k=30)
+            top_obj_pairs = merge_object_pair_ids(topk_obj_pair_info)
+            # my_list = range(len(boxes))
+            # pairs = [(0, 0, (a, b)) for a in my_list for b in my_list if a != b]
+            
+            batched_image_rel_probs = {}
+            if len(top_obj_pairs) > 0:
+                _, _, batched_image_rel_probs, _ = \
+                    self.predicate_model(
+                        batched_video_ids=[0],
+                        batched_videos=[image],
+                        batched_masks=batched_pred_masks,  # batched_object_ids * video_height * video_width
+                        batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
+                        batched_names=[query_names],  # Dataset-wise categorical labels
+                        batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
+                        batched_unary_kws=[[]],  # Dataset-wise unary predicate labels
+                        batched_binary_kws=[query_relation_kws],  # Dataset-wise binary predicate labels
+                        batched_obj_pairs=top_obj_pairs,  # Ground truth binary relations
+                        batched_video_splits=[0],  # [number of videos]
+                        batched_binary_predicates=[query_relations],  # None indicates inference time
+                    )
+                
+            # Step 3: Aggregate the object name and attribute predictions together
             aggr_res = {}            
             
             for oid in predicted_name:
                 top_prob, name = predicted_name[oid][0]
                 if not oid in aggr_res:
-                    aggr_res[oid] = []
+                    aggr_res[oid] = {}
                 
                 if name in target_names:
-                    aggr_res[oid].append(top_prob)
+                    aggr_res[oid]['name'] = top_prob, name
                 else:
                     # the top predicted name is not the target name
-                    aggr_res[oid].append(0)
+                    aggr_res[oid]['name'] = 0, "other"
                     
-            
-            kept_objects   = []          # will hold (oid, top_name_prob)
-            attr_hit_miss  = {}          # oid -> list[(p_attr, label)]  # one item per attribute
-
-            for oid, name_info in predicted_name.items():
-                # ---------- gate on the OBJECT NAME ----------
-                name_prob, name_label = name_info[0]       # most confident name
-                if name_prob <= self.aggr_thres or name_label not in target_names:           # discard if below threshold
+            for oid in reformatted_unary_res: 
+                
+                if not oid in aggr_res:
                     continue
+                
+                if not 'attr' in aggr_res[oid]:
+                    aggr_res[oid]['attr'] = []
+                for attr in reformatted_unary_res[oid]:
+                    aggr_res[oid]['attr'].append((reformatted_unary_res[oid][attr], attr))
+            
+            # Thresholding
+            avg_aggr_res = {}
+            for oid in aggr_res:
+                name_prob, name = aggr_res[oid]['name']
+                
+                # Target Name must rank at top 1
+                if name_prob == 0:
+                    continue
+                
+                # Attribute aggregation
+                probs = [name_prob]
 
-                # ---------- collect attribute labels ----------
-                per_attr_labels = []
-                for attr in query_attributes:
-                    # probability that *this* object has *this* attribute
-                    p_attr = reformatted_unary_res.get(oid, {}).get(attr, 0.0)
+                if 'attr' in aggr_res[oid]:
+                    probs += [p for p, _ in aggr_res[oid]['attr']]
+                
+                # Relation aggregation
+                
+                
+                avg_val = sum(probs) / len(probs)
+                    
+                if avg_val > self.aggr_thres:
+                    avg_aggr_res[oid] = avg_val
+            
 
-                    # choose the textual label based on threshold hit / miss
-                    attr_label = attr if p_attr > self.aggr_thres else f"not {attr}"
+            # Only pick the top-k object according to the setip
+            top_objects_probs = get_topk_per_object_name(aggr_res, avg_aggr_res, k=self.k)
+            # top_objects_probs = {oid: prob for prob, oid in top_objects}
+            
+            selected_objects = list(top_objects_probs.keys())
+            selected_object_bboxes = boxes[selected_objects]
+                                
+            prob_labels = []
+            for oid in top_objects_probs:
+                prob_labels.append(predicted_name[oid][0])
 
-                    per_attr_labels.append((p_attr, attr_label))
-
-                kept_objects.append((oid, name_prob, name_label))
-                attr_hit_miss[oid] = per_attr_labels
-
-            # ---------- pick top-k objects by name confidence -------------
-            kept_objects = sorted(kept_objects, key=lambda x: x[1], reverse=True)[: self.k]
-            selected_oids = [oid for (oid, _, _) in kept_objects]
-
-            label_strings = []                   # will become `prob_labels`
-            for oid, name_prob, name_label in kept_objects:
-                parts = [name_label]                       # first: object class
-                parts.extend(lab for _, lab in attr_hit_miss[oid])   # then attr labels
-                label_strings.append(", ".join(parts))      # -> "toilet yellow not clean"
-
-            prob_labels = label_strings                    # <-- list[str]
-            selected_object_bboxes = boxes[selected_oids]
-
-            return prob_labels, selected_object_bboxes
+        return prob_labels, selected_object_bboxes
+    
     
     def get_sg_kws(self, sg_info):
         
-        target_names = sg_info['target_name']
-        target_attributes = sg_info['target_attribute']   
-        related_objects = set(sg_info['related_objects'])
+        def clean_name(input_name):
+            if '_' in input_name:
+                input_name_ls = input_name.split('_')
+                if input_name_ls[-1].isdigit():
+                    new_name = ' '.join(input_name_ls[:-1])
+                else:
+                    new_name = ' '.join(input_name_ls)
+            else:
+                new_name = input_name
+            return new_name
         
-        target_relations = sg_info['target_relation']
-        relations = set()
+        target_objects = sg_info['target_objects']
+        target_attributes = sg_info['target_attributes']   
+        target_relations = sg_info['target_relations']
+        current_objects = sg_info['current_objects']
+        current_attrbutes = sg_info['current_attrbutes']
+        current_relations = sg_info['current_relations']
+        
+        target_names = [clean_name(object) for object in target_objects]
+        current_names = [clean_name(object) for object in current_objects]
+        target_attribute_kws = [attr for object, attr in target_attributes]
+        current_attribute_kws = [attr for object, attr in current_attrbutes]
 
+        target_relation_preds = set()
+        current_relation_preds = set()
+        
         for rel in target_relations:
             if not len(rel) == 3:
                 continue
             (s, r, o) = rel
-            related_objects.add(s)
-            related_objects.add(o)
-            relations.add(r)
+            s = clean_name(s)
+            o = clean_name(o)
+            target_relation_preds.add((r, s, o))
             
-        related_objects = list(related_objects)
-        relations = list(relations)
+        for rel in current_relations:
+            if not len(rel) == 3:
+                continue
+            (s, r, o) = rel
+            s = clean_name(s)
+            o = clean_name(o)
+            current_relation_preds.add((r, s, o))
+
+        query_objects = list(set(target_names + current_names + self.common_objects)) 
+        query_relation_preds = list(target_relation_preds.union(current_relation_preds))
+        query_other_preds = list(set([("other", sub, obj) for (_, sub, obj) in query_relation_preds]))
+        query_relation_preds = query_relation_preds + query_other_preds
+        query_relation_kws = list(set([r for (r, _, _) in query_relation_preds]))
         
-        if self.blockingobj:
-            blocking_objects = sg_info['blocking_name']
-            query_objects = blocking_objects + related_objects + target_names + self.common_objects 
-            gd_query_objects = blocking_objects + target_names
-        else:
-            query_objects = related_objects + target_names + self.common_objects 
-            gd_query_objects = target_names 
+        # if len(query_relation_kws) > 0:
+        #     query_relation_kws.append("other")
             
-        return target_names, target_attributes, query_objects, gd_query_objects
+        # query_relation_predicates = 
+        
+        return target_names, current_names, query_objects, \
+               target_attribute_kws, current_attribute_kws, \
+               target_relation_preds, current_relation_preds, \
+                query_relation_kws, query_relation_preds
 
     def act_custom(self, prompt, obs):
         assert type(obs) == str  # input image path
@@ -834,10 +969,14 @@ class VLMPlanner:
 
         sg_info = json.loads(out)
 
-        target_names, target_attributes, query_objects, gd_query_objects = self.get_sg_kws(sg_info)
+        target_state = sg_info["target_state"]
+        current_state = sg_info["current_state"]
+        target_names, current_names, query_objects, \
+        target_attribute_kws, current_attribute_kws, \
+        target_relation_preds, current_relation_preds, \
+            query_relation_kws, query_relation_preds = self.get_sg_kws(sg_info)
         scene_graph_prompt = []
 
-        # detections = post_process_detections(all_dets, sg_keywords)
         if type(obs) == str:
             obs = [obs]
         if type(observation) == str:
@@ -867,7 +1006,7 @@ class VLMPlanner:
             if self.gd_only:
                 
                 # Predict bounding box with grounding dino
-                labels, boxes = self.predict_gd(image, target_names, box_threshold=0.4, text_threshold=0.4)
+                labels, boxes = self.predict_gd(image, target_names, box_threshold=self.gd_box_threshold, text_threshold=self.text_box_threshold)
             
                 target_labels, target_bboxes = [], []
                 for label, box in zip(labels, boxes):
@@ -880,21 +1019,25 @@ class VLMPlanner:
             
             else:
                 # og_labels, og_boxes = self.predict_gd(image, gd_query_objects, box_threshold=0.4, text_threshold=0.4)
-                labels, boxes = self.predict_gd(image, gd_query_objects, box_threshold=0.35, text_threshold=0.35)
+                labels, boxes = self.predict_gd(image, query_objects,
+                                                box_threshold=self.gd_box_threshold, 
+                                                text_threshold=self.gd_text_threshold)
                 if len(boxes) != 0:
                     target_labels, target_bboxes = self.predict_laser(
                         image=image, 
                         boxes=boxes, 
                         target_names=target_names,
                         query_names=list(set(query_objects)),
-                        query_attributes=target_attributes,
+                        query_attributes=target_attribute_kws,
+                        query_relation_kws=query_relation_kws,
+                        query_relations=query_relation_preds,
                     )
                 else:
                     target_labels = []
-                    boxes = []
+                    target_bboxes = []
                 
             # if self.boundingbox:
-            if not len(og_boxes) == 0:
+            if not len(target_bboxes) == 0:
                 save_prompts_one_image(frame_image=image, 
                                         boxes=target_bboxes, 
                                         labels=target_labels, 
@@ -966,7 +1109,7 @@ class VLMPlanner:
         if "gemini-1.5-pro" in self.model_name or "gemini-2.0-flash" in self.model_name:
             try:
                 out = self.model.respond(self.episode_messages)
-                time.sleep(15)
+                time.sleep(10)
             except Exception as e:
                 print("An unexpected error occurred:", e)
                 time.sleep(60)

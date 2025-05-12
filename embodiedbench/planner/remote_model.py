@@ -20,6 +20,7 @@ from embodiedbench.planner.planner_utils import (
     ActionPlan_manip,
     ActionPlan_lang_manip,
     TargetSG,
+    TargetStateCurrentState,
     convert_format_2gpt,
     TargetEntityName,
 )
@@ -214,7 +215,7 @@ class RemoteModel:
                 response_format = ActionPlan_manip
         else:
             if get_scene_graph:
-                response_format = TargetSG
+                response_format = TargetStateCurrentState
             elif self.language_only:
                 response_format = ActionPlan
             elif get_entity_name:

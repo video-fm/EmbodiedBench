@@ -683,6 +683,85 @@ class VLMPlanner:
             action = -1
             valid = False
         return action, valid
+    
+    def json_to_action_alt(
+            self,
+            output_text: str,
+            json_keys: tuple = ("executable_plan", "plan"),
+        ):
+        """
+        Parse the model’s JSON and convert it to a list of action-ids.
+
+        • Accept either ``"executable_plan"`` or ``"plan"``.  
+        • Trust an ``action_id`` only if it is in range *and* its name matches
+        the supplied ``action_name`` after normalisation.  
+        • Otherwise attempt to resolve the step purely by its ``action_name``;
+        **the name must exactly (case-insensitive) match one entry in
+        ``self.actions``.**  
+        • Returns  (action_list | int_flag ,  valid_bool)
+            -2  … empty plan / stop  
+            -1  … could not resolve a step           
+
+        Normalisation = lower-case & collapse multiple spaces.
+        """
+        def norm(txt: str) -> str:                # helper
+            return " ".join(txt.lower().split())
+
+        # build fast lookup: normalised name  ->  id
+        name2id = {norm(a): i for i, a in enumerate(self.actions)}
+
+        try:
+            obj = json.loads(output_text)
+
+            # locate a list plan (first key that exists & is a list)
+            plan = next((obj[k] for k in json_keys if isinstance(obj.get(k), list)), None)
+            if plan is None:
+                raise ValueError("no plan key found")
+
+            action_ids = []
+            valid = True
+            for step in plan:
+                if not isinstance(step, dict):
+                    raise ValueError("plan step not dict")
+
+                aid = step.get(self.action_key)          # e.g. "action_id"
+                anm = step.get("action_name")
+                nm  = norm(anm) if isinstance(anm, str) else None
+
+                resolved = None
+
+                # ── (1)  validate a provided id ─────────────────────────────────
+                if (isinstance(aid, int)
+                        and 0 <= aid < len(self.actions)
+                        and nm == norm(self.actions[aid])):
+                    resolved = aid
+
+                # ── (2)  otherwise resolve by exact name match ──────────────────
+                if resolved is None and nm in name2id:
+                    resolved = name2id[nm]
+
+                if resolved is None:      # could not resolve → invalid plan
+                    valid = False
+                    break
+
+                action_ids.append(resolved)
+
+            if not action_ids:            # empty => stop signal
+                action = -2
+                valid  = True
+            elif valid is False:          # at least one step unresolved
+                action = -1
+            else:
+                action = action_ids
+                valid  = True
+
+        except Exception as e:
+            print("Could not parse model JSON:", e)
+            self.output_json_error += 1
+            action = -1
+            valid  = False
+
+        return action, valid
 
     def predict_gd(self, image, classes, box_threshold=0.5, text_threshold=0.4):
         caption = ". ".join(classes)
@@ -938,7 +1017,7 @@ class VLMPlanner:
         target_attributes = sg_info['target_attributes']   
         target_relations = sg_info['target_relations']
         current_objects = sg_info['current_objects']
-        current_attrbutes = sg_info['current_attrbutes']
+        current_attrbutes = sg_info['current_attributes']
         current_relations = sg_info['current_relations']
         
         target_names = list(set([clean_name(object) for object in target_objects]))
@@ -993,7 +1072,7 @@ class VLMPlanner:
         out = out.replace("```json", "").replace("```", "")
         out = fix_json(out)
         logger.debug(f"Model Output:\n{out}\n")
-        action = self.json_to_action(out)
+        action = self.json_to_action_alt(out)
         self.planner_steps += 1
         return action, out
 
@@ -1195,7 +1274,7 @@ class VLMPlanner:
                 }
             )
         logger.debug(f"Model Output:\n{out}\n")
-        action, valid = self.json_to_action(out)
+        action, valid = self.json_to_action_alt(out)
         
         
         if valid:

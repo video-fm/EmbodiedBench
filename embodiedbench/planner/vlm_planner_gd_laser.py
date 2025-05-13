@@ -50,6 +50,147 @@ from llava_clip_model_v3 import PredicateModel as PredicateModel_v3
 
 from collections import defaultdict
 
+import json, textwrap, re, yaml          # pip install pyyaml
+def robust_load_json_full(raw: str):
+    """
+    Heuristically clean up a model reply and return a Python object.
+    Works in this order:
+      1. direct ``json.loads``            (fast-path)
+      2. json-after-fixups               (escape badly placed quotes)
+      3. yaml.safe_load (very forgiving)
+    Raises the last JSON error if every attempt fails.
+    """
+
+    # --- 0) quick path -------------------------------------------------
+    try:
+        return json.loads(raw)
+    except Exception as strict_err:
+        pass                      # fallthrough to the repair pipeline
+
+    txt = raw.translate(str.maketrans({
+        "“": '"', "”": '"',       # fancy → ASCII quotes
+        "‘": "'", "’": "'"
+    }))
+
+    # -- 1) stray quotes OUTSIDE strings → replace by apostrophe --------
+    txt = re.sub(r'(?<![\\"])("(?![\s]*[,:}\]]))', "'", txt)
+
+    # -- 2) ':'  'value'   →   ":" "value"
+    txt = re.sub(r'(":[ \t]*)\'', r'\1"', txt)
+
+    # -- 3) escape single quotes inside strings ------------------------
+    def _esc_single(m):
+        return re.sub(r"(?<!\\)'", r"\\'", m.group(0))
+    txt = re.sub(r'"([^"\\]*(?:\\.[^"\\]*)*)"', _esc_single, txt)
+
+    # -- 4) **escape double quotes that sit INSIDE a double-quoted value**
+    def _esc_double(m):
+        inner = m.group(1)
+        inner_fixed = re.sub(r'(?<!\\)"', r'\\"', inner)
+        return f'"{inner_fixed}"'
+    txt = re.sub(r'"([^"\\]*(?:\\.[^"\\]*)*)"', _esc_double, txt)
+
+    # -- 5) remove control characters ----------------------------------
+    txt = re.sub(r"[\x00-\x1F]", "", txt)
+
+    # ---------- try JSON again ----------------------------------------
+    try:
+        return json.loads(txt)
+    except Exception as json_err:
+        last_err = json_err
+
+    # ---------- final fallback: YAML ----------------------------------
+    try:
+        return yaml.safe_load(txt)
+    except Exception:
+        # give the *JSON* error – easier to understand for callers
+        raise last_err
+
+def robust_load_json(raw: str):
+    """
+    Best-effort loader for the sometimes messy JSON coming from the VLM.
+
+    Strategy
+    --------
+    1.  plain ``json.loads``                                     (fast path)
+    2.  sanitise obvious issues (un-escaped quotes, raw \n \r \t)
+    3.  strip ``` fences   ➜  sanitise again
+    4.  final fall-back:   *extract* the plan list with RegEx and
+        build a minimal JSON around it so that downstream code can continue
+        even if the rest of the payload is hopelessly malformed.
+
+    Will raise the last JSONDecodeError only if **all** four passes fail.
+    """
+    # ---- 1) fast path --------------------------------------------------------
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as e1:
+        pass
+
+    # ---- 2) sanitise & retry -------------------------------------------------
+    try:
+        return json.loads(_sanitize(raw))
+    except json.JSONDecodeError as e2:
+        pass
+
+    # ---- 3) remove markdown fences and retry --------------------------------
+    try:
+        stripped = re.sub(r"```(?:json)?|```", "", raw, flags=re.I).strip()
+        return json.loads(_sanitize(stripped))
+    except json.JSONDecodeError as e3:
+        pass
+
+    # ---- 4) last-ditch: regex-pull a plan list ------------------------------
+    plan_pat = re.compile(
+        r'"(?:executable_plan|plan)"\s*:\s*(\[[^\]]*\])', re.S | re.I
+    )
+    m = plan_pat.search(raw)
+    if not m:
+        # propagate the *original* error – easiest for debugging
+        raise e1
+
+    plan_txt = m.group(1)
+    # minimal valid JSON object
+    return json.loads(f'{{"plan": {plan_txt}}}')
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  _sanitize  – escape the two big culprits:
+#     • stray " inside strings      →   \"
+#     • bare control chars          →   \n / \r / \t
+# ──────────────────────────────────────────────────────────────────────────────
+def _sanitize(text: str) -> str:
+    buf, in_str, i, L = [], False, 0, len(text)
+    while i < L:
+        ch = text[i]
+
+        # toggle / escape stray quotes ----------------------------------------
+        if ch == '"':
+            esc = i and text[i - 1] == '\\'
+            if not esc:
+                in_str = not in_str
+            else:
+                buf.append(ch)
+                i += 1
+                continue
+
+        # if we *are* inside a JSON string …
+        if in_str:
+            # 1) un-escaped quotes that appear *within* the string -------------
+            if ch == '"' and (i + 1 < L and text[i + 1] not in ',:}]\r\n\t '):
+                buf.append('\\')
+
+            # 2) raw control characters  --------------------------------------
+            if ch in '\n\r\t':
+                buf.append('\\' + {'\n': 'n', '\r': 'r', '\t': 't'}[ch])
+                i += 1
+                continue
+
+        buf.append(ch)
+        i += 1
+
+    return ''.join(buf)
+    
 def clean_name(input_name):
     if '_' in input_name:
         input_name_ls = input_name.split('_')
@@ -711,6 +852,11 @@ class VLMPlanner:
         name2id = {norm(a): i for i, a in enumerate(self.actions)}
 
         try:
+            # bad = output_text
+            # # quick sanitiser – remove any quote directly before a t in isn"t ➜ isn't
+            # bad = re.sub(r'isn"t', "isn't", bad)
+
+            # obj = json.loads(bad)   
             obj = json.loads(output_text)
 
             # locate a list plan (first key that exists & is a list)
@@ -1017,13 +1163,13 @@ class VLMPlanner:
         target_attributes = sg_info['target_attributes']   
         target_relations = sg_info['target_relations']
         current_objects = sg_info['current_objects']
-        current_attrbutes = sg_info['current_attributes']
+        current_attributes = sg_info['current_attributes']
         current_relations = sg_info['current_relations']
         
         target_names = list(set([clean_name(object) for object in target_objects]))
         current_names = list(set([clean_name(object) for object in current_objects]))
         target_attribute_kws = list(set([ta[1] for ta in target_attributes if len(ta) == 2]))
-        current_attribute_kws = list(set([ca[1] for ca in current_attrbutes if len(ca) == 2]))
+        current_attribute_kws = list(set([ca[1] for ca in current_attributes if len(ca) == 2]))
 
         target_relation_preds = set()
         current_relation_preds = set()
@@ -1091,7 +1237,7 @@ class VLMPlanner:
         if (
             "claude" in self.model_name
             or "InternVL" in self.model_name
-            or "Qwen2-VL" in self.model_name
+            or "Qwen" in self.model_name
             or self.model_type == "custom"
         ):
             prompt = prompt + template_lang if self.language_only else prompt + template
@@ -1209,7 +1355,7 @@ class VLMPlanner:
             if not image_path == prompt_image_path:
                 obs.append(prompt_image_path) # update to bboxed image path
         
-        if self.scene_graph_text:
+        if self.scene_graph_text and sg_text is not None:
 
             marker = "You need to describe current visual state"
             try:
@@ -1273,8 +1419,18 @@ class VLMPlanner:
                     "content": [{"type": "text", "text": out}],
                 }
             )
+        out = out.replace("'", '"')
+        out = out.replace('"s ', "'s ")
+        out = out.replace('"re ', "'re ")
+        out = out.replace('"ll ', "'ll ")
+        out = out.replace('"t ', "'t ")
+        out = out.replace('"d ', "'d ")
+        out = out.replace('"m ', "'m ")
+        out = out.replace('"ve ', "'ve ")
+        out = out.replace("```json", "").replace("```", "")
+        out = fix_json(out)
         logger.debug(f"Model Output:\n{out}\n")
-        action, valid = self.json_to_action_alt(out)
+        action, valid = self.json_to_action_altembodiedbench/planner/planner_utils.py(out)
         
         
         if valid:

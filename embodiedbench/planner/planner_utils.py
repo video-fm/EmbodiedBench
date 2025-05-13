@@ -25,9 +25,9 @@ The fields in above JSON follows the purpose below:
 3. language_plan is for describing a list of actions to achieve the user instruction. Each action is started by the step number and the action name, 
 4. executable_plan is a list of actions needed to achieve the user instruction, with each action having an action ID and a name.
 5. keep your plan efficient and concise.
-!!! When generating content for JSON strings, avoid using any contractions or abbreviated forms (like 's, 're, 've, 'll, 'd, n't) that use apostrophes. Instead, write out full forms (is, are, have, will, would, not) to prevent parsing errors in JSON. Please do not output any other thing more than the above-mentioned JSON, do not include ```json and ```!!!.
-'''
+!!! When generating content for JSON strings, avoid using any contractions or abbreviated forms (like 's, 're, 've, 'll, 'd, n't) that use apostrophes. Instead, write out full forms (is, are, have, will, would, not) to prevent parsing errors in JSON. Please do not output any other thing more than the above-mentioned JSON, do not include ```json and ```. IMPORTANT: be sure to escape every double-quote that appears inside a string value with a backslash (\"), so the JSON remains valid. For example, state "I need to use the \"Find\" action to locate it" as opposed to "I need to use the Find action to locate it". !!!. 
 
+'''
 
 template_lang_manip = '''\
 The output json format should be {'visual_state_description':str, 'reasoning_and_reflection':str, 'language_plan':str, 'executable_plan':str}
@@ -258,7 +258,7 @@ class TargetStateCurrentState(BaseModel):
     target_relations: list[list[str]]
     current_state: str
     current_objects: list[str]
-    current_attrbutes: list[list[str]]
+    current_attributes: list[list[str]]
     current_relations: list[list[str]]
 
 class TargetEntityName(BaseModel):

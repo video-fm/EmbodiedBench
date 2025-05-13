@@ -37,7 +37,7 @@ target_examples = [
         "target_relations": [["yellow_bottle_1", "on", "toilet_1"], ["yellow_bottle_2", "on", "toilet_1"]], 
         "current_state": "there are two pink bottles and a toilet in the scene. One pink bottle is on the top of the toilet. I am holding another pink bottle."
         "current_objects": ["pink_bottle_1", "pink_bottle_2", "toilet_1"],
-        "current_attrbutes": []
+        "current_attributes": []
         "current_relations": [["pink_bottle_1", "on", "toilet_1"], ["pink_bottle_2", "in front of", "toilet_1"]], 
         }
 ''',
@@ -58,7 +58,7 @@ target_examples = [
         "target_relations": [["ladle_1", "on", "table_1"]], 
         "current_state": "There is a garbage can, fridge and door in the scene."
         "current_objects": ["garbage can", "fridge", "door"],
-        "current_attrbutes": []
+        "current_attributes": []
         "current_relations": [], 
         }
 ''', 
@@ -79,7 +79,7 @@ target_examples = [
         "target_relations": [["ladle_1", "on", "table_1"]], 
         "current_state": "There is a bread,  an egg, a ladle and a table"
         "current_objects": ["ladle_1", "table_1", "egg_1", "bread_1"],
-        "current_attrbutes": []
+        "current_attributes": []
         "current_relations": [["ladle_1", "on", "table_1"], ["egg_1", "on", "table_1"], ["bread_1", "on", "table_1"]], 
         }
 ''', 
@@ -100,7 +100,7 @@ target_examples = [
         "target_relations": [["spoon_1", "in", "plate_1"], ["plate_1", "on", "kitchen_table_1"]], 
         "current_state": "I am currently holding a plate. There is a spoon and an apple on the counter. There is a pan on the sink."
         "current_objects": ["plate_1", "spoon_1", "apple_1", "counter_1", "sink_1", "pan_1"],
-        "current_attrbutes": [["holding", "plate_1"]]
+        "current_attributes": [["holding", "plate_1"]]
         "current_relations": [["spoon_1", "on", "counter_1"], ["apple_1", "on", "counter_1"], ["pan_1", "in", "sink_1"]], 
         }
 '''
@@ -232,7 +232,7 @@ class EB_AlfredEvaluator():
             self.planner.set_actions(self.env.language_skill_set)
             done = False
             while not done:
-                # try: 
+                try: 
                     action, reasoning = self.planner.act(img_path, user_instruction)
                     print(f"Planner Output Action: {action}")
                     if action == -2: # empty plan stop here
@@ -300,9 +300,9 @@ class EB_AlfredEvaluator():
                         episode_info['reward'].append(reward)
                         episode_info['num_invalid_actions'] += (info['last_action_success'] == 0)
                 
-                # except Exception as e: 
-                #     print(e)
-                #     time.sleep(30)
+                except Exception as e: 
+                    print(e)
+                    time.sleep(10)
 
             # evaluation metrics
             episode_info['instruction'] = user_instruction
@@ -350,9 +350,9 @@ if __name__ == '__main__':
         # 'exp_name': 'laser_alfred_old_few_shot_gemini',
         'chat_history': 0, 
         'detection_box': False,
-        'eval_sets': ['base', 'spatial', 'visual_appearance', 'common_sense', 'complex_instruction', 'long_horizon'], 
+        'eval_sets': ['base'], 
         # 'eval_sets': ['spatial'],
-        'selected_indexes': [], 
+        'selected_indexes': list(range(8,10)), 
         'multistep':0, 
         'block_objects': False,
         'sg_text': True,

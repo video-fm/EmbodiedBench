@@ -1,5 +1,11 @@
 import os
-
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["remote_url"] = "http://0.0.0.0:15237/v1"
+os.environ["DISPLAY"] = "cherry:12.0"
+os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
+home_dir = "/home/asethi04/embody/EmbodiedBench"
+existing_path = os.environ.get("PYTHONPATH", "")
+os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 import numpy as np
 from tqdm import tqdm
 import time
@@ -319,7 +325,7 @@ if __name__ == '__main__':
     import argparse
     def parse_arguments():
         parser = argparse.ArgumentParser(description='Change configuration parameters.')
-        parser.add_argument('--model_name', default='gemini-2.0-flash', type=str, help='Name of the model.')
+        parser.add_argument('--model_name', default='Qwen/Qwen2.5-VL-72B-Instruct', type=str, help='Name of the model.')
         parser.add_argument('--n_shots', type=int, help='Number of examples')
         parser.add_argument('--down_sample_ratio', type=float, help='Down sample ratio.')
         parser.add_argument('--model_type', default='remote', type=str, help='Type of the model.')
@@ -336,7 +342,7 @@ if __name__ == '__main__':
 
 
     config = {
-        'model_name': 'gemini-2.0-flash',  # 'Qwen/Qwen2-VL-7B-Instruct',
+        'model_name': 'Qwen/Qwen2.5-VL-72B-Instruct',  # 'Qwen/Qwen2-VL-7B-Instruct',
         'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
@@ -344,8 +350,8 @@ if __name__ == '__main__':
         # 'exp_name': 'laser_alfred_old_few_shot_gemini',
         'chat_history': 0, 
         'detection_box': False,
-        # 'eval_sets': ['base', 'spatial', 'visual_appearance', 'common_sense', 'complex_instruction', 'long_horizon'], 
-        'eval_sets': ['spatial'],
+        'eval_sets': ['base', 'spatial', 'visual_appearance', 'common_sense', 'complex_instruction', 'long_horizon'], 
+        # 'eval_sets': ['spatial'],
         'selected_indexes': [], 
         'multistep':0, 
         'block_objects': False,

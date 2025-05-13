@@ -50,6 +50,70 @@ from llava_clip_model_v3 import PredicateModel as PredicateModel_v3
 
 from collections import defaultdict
 
+def clean_name(input_name):
+    if '_' in input_name:
+        input_name_ls = input_name.split('_')
+        if input_name_ls[-1].isdigit():
+            new_name = ' '.join(input_name_ls[:-1])
+        else:
+            new_name = ' '.join(input_name_ls)
+    else:
+        new_name = input_name
+    return new_name
+
+def format_scene_graph(target_objects, target_attributes, target_relations):
+     # Format structured target state
+    if len(target_objects) > 0:
+        clean_obj = [clean_name(target_obj) for target_obj in target_objects ]
+        object_str = f"The objects are: {clean_obj}"
+    else:
+        object_str = ""
+    
+    if len(target_attributes) > 0:
+        attr_str = (
+            "The attributes are: [" +
+            ", ".join(f"({attr}, {clean_name(obj)})" for attr, obj in target_attributes)
+            + "]" if target_attributes else "The attributes are: []"
+        )
+    else:
+        attr_str = ""
+        
+    if len(target_relations) > 0:
+        rel_str = (
+            "The relations are: [" +
+            ", ".join(f"({clean_name(subj)}, {pred}, {clean_name(obj)})" for subj, pred, obj in target_relations)
+            + "]" if target_relations else "The relations are: []"
+        )
+    else:
+        rel_str = ""
+    
+    output_str_ls = [object_str, attr_str,  rel_str]
+    output_str_ls = [i for i in output_str_ls if not i == ""]
+    output_str = " ".join(output_str_ls)
+    return output_str
+
+def format_state_descriptions(sg_info, current_obj, current_attr, current_rel):
+    # Extract basic elements
+    target_desc = sg_info.get("target_state", "No target state description provided.")
+    current_desc = sg_info.get("current_state", "No current state description provided.")
+    target_objects = sg_info.get("target_objects", [])
+    target_attributes = sg_info.get("target_attributes", [])
+    target_relations = sg_info.get("target_relations", [])
+
+    target_sg_str = format_scene_graph(target_objects, target_attributes, target_relations)
+    
+    current_rel = [rel for _, _, rel in current_rel]
+    current_sg_str = format_scene_graph(current_obj, current_attr, current_rel)
+    
+    sg_str = ""
+    if not current_sg_str == "":
+        sg_str += f"The current scene graph: {current_sg_str}\n"
+    # if not target_sg_str == "":
+    #     sg_str += f"The target state: {target_sg_str}\n"
+    sg_str += (f"\n\n The target state: {target_desc}\n" f"The current state: {current_desc}\n\n")
+
+    return sg_str
+    
 def get_topk_per_object_name(aggr_res, avg_aggr_res, k):
     name_to_ids = defaultdict(list)
 
@@ -868,16 +932,7 @@ class VLMPlanner:
     
     def get_sg_kws(self, sg_info):
         
-        def clean_name(input_name):
-            if '_' in input_name:
-                input_name_ls = input_name.split('_')
-                if input_name_ls[-1].isdigit():
-                    new_name = ' '.join(input_name_ls[:-1])
-                else:
-                    new_name = ' '.join(input_name_ls)
-            else:
-                new_name = input_name
-            return new_name
+
         
         target_objects = sg_info['target_objects']
         target_attributes = sg_info['target_attributes']   
@@ -888,8 +943,8 @@ class VLMPlanner:
         
         target_names = list(set([clean_name(object) for object in target_objects]))
         current_names = list(set([clean_name(object) for object in current_objects]))
-        target_attribute_kws = list(set([attr for object, attr in target_attributes]))
-        current_attribute_kws = list(set([attr for object, attr in current_attrbutes]))
+        target_attribute_kws = list(set([ta[1] for ta in target_attributes if len(ta) == 2]))
+        current_attribute_kws = list(set([ca[1] for ca in current_attrbutes if len(ca) == 2]))
 
         target_relation_preds = set()
         current_relation_preds = set()
@@ -1056,7 +1111,7 @@ class VLMPlanner:
             if not len(target_bboxes) == 0:
                 save_prompts_one_image(frame_image=image, 
                                         boxes=target_bboxes, 
-                                        labels=target_labels, 
+                                        labels=["" for _ in target_bboxes], 
                                         points=[], 
                                         save_path=bbox_path)    
                 prompt_image_path = bbox_path  
@@ -1066,35 +1121,24 @@ class VLMPlanner:
                 target_labels = []
             
             self.processed_images[image_path] = prompt_image_path
-            
-            if type(target_bboxes) == torch.Tensor:
-                bbox_list = target_bboxes.tolist()
-            else:
-                bbox_list = target_bboxes
-            
+
             # Arrange the prompt into vlm
-            if self.scene_graph_text and len(target_labels) > 0:
-                current_scene_graph_prompt = ",".join([f"{obj_name}: {obj_box}" for (obj_name, obj_box) in zip(target_labels, bbox_list)])
-                scene_graph_prompt.append(f"Its scene graph at frame {image_id} is: {current_scene_graph_prompt}. ")
+            if self.scene_graph_text:
+                sg_text = format_state_descriptions(sg_info, target_labels, [], identified_rels)
         
         if self.multistep:
             if not image_path == prompt_image_path:
                 obs.append(prompt_image_path) # update to bboxed image path
         
-        if self.scene_graph_text and len(scene_graph_prompt) > 0:
-            sg_block = (
-                self.scene_graph_prompt_prefix.format(w=width, h=height) +
-                "\n".join(scene_graph_prompt) +
-                "\n"                       # keep a newline before the next sentence
-            )
+        if self.scene_graph_text:
 
             marker = "You need to describe current visual state"
             try:
                 insert_idx = prompt.index(marker)      # first char of the marker
-                prompt = prompt[:insert_idx] + sg_block + prompt[insert_idx:]
+                prompt = prompt[:insert_idx] + sg_text + prompt[insert_idx:]
             except ValueError:
                 # marker not found – fallback: append at the end
-                prompt += sg_block
+                prompt += sg_text
             
         
         else:
@@ -1125,7 +1169,7 @@ class VLMPlanner:
         if "gemini-1.5-pro" in self.model_name or "gemini-2.0-flash" in self.model_name:
             try:
                 out = self.model.respond(self.episode_messages)
-                # time.sleep(10)
+                time.sleep(10)
             except Exception as e:
                 print("An unexpected error occurred:", e)
                 time.sleep(20)

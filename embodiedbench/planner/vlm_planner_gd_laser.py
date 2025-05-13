@@ -206,7 +206,7 @@ def show_box(box, ax, object_id, label="hi"):
     )
 
     if label is not None:
-        ax.text(x0, y0 - 5, label, color="white", fontsize=10, alpha=color[3])
+        ax.text(x0, y0 - 5, label, color="black", fontsize=10, alpha=color[3])
 
 
 def save_prompts_one_image(frame_image, boxes, points, labels, save_path):
@@ -268,6 +268,7 @@ class VLMPlanner:
         aggr_thres=0.1,
         gd_box_threshold = 0.1,
         gd_text_threshold = 0.1,
+        rel_thres=0.3,
     ):
         
         self.last_visual_description = ""
@@ -298,7 +299,8 @@ class VLMPlanner:
         self.action_key = kwargs.pop("action_key", "action_id")
         self.gd_box_threshold = gd_box_threshold
         self.gd_text_threshold = gd_text_threshold
-
+        self.rel_thres = rel_thres
+        
         self.scene_graph_prompt = f'''## You are a robot operating in a home. You are given an image and observe the environment for performing the given task. \
             The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'}\
             Please extract the most visually identifiable features and ignore the more subtle ones. 
@@ -333,7 +335,7 @@ class VLMPlanner:
         # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         # self.predicate_model = PredicateModel_v3(hidden_dim = 128, num_top_pairs=1, device=device, model_name=clip_model_name).to(device)
         
-        self.common_objects = ["desk", "bed", "wall", "door", "cabinet", "stove", "table", "counter", "window", "mirror", "other"]
+        self.common_objects = ["wall", "door", "cabinet", "stove", "counter", "window", "other"]
 
     def set_actions(self, actions):
         self.actions = actions
@@ -494,6 +496,7 @@ class VLMPlanner:
                 prompt += f"""\n\n Considering the above interaction history, to achieve the human instruction: '{user_instruction}', you are supposed to output in json. You need to summarize interaction history {'and environment feedback ' if self.use_feedback else ''}and reason why the last action or plan failed and did not finish the task, output your new plan to achieve the goal from current state. At the end, output the excutable plan with action ids(0 ~ {len(self.actions)-1}) from the available actions."""
             else:
                 prompt += f"""\n\n Considering the above interaction history and the current image state, to achieve the human instruction: '{user_instruction}', you are supposed to output in json. You need to describe current visual state from the image, summarize interaction history {'and environment feedback ' if self.use_feedback else ''}and reason why the last action or plan failed and did not finish the task, output your new plan to achieve the goal from current state. At the end, output the excutable plan with action ids(0 ~ {len(self.actions)-1}) from the available actions."""
+        
         return prompt, scene_graph_prompt
 
     def get_message(self, image, prompt, messages=[]):
@@ -697,6 +700,8 @@ class VLMPlanner:
                       image, 
                       boxes, 
                       target_names,
+                      target_relation_kws,
+                      target_relation_preds,
                       query_names,
                       query_relations,
                       query_relation_kws,
@@ -811,6 +816,19 @@ class VLMPlanner:
                 for attr in reformatted_unary_res[oid]:
                     aggr_res[oid]['attr'].append((reformatted_unary_res[oid][attr], attr))
             
+            
+            rel_preds = batched_image_rel_probs[0]
+
+            identified_rels = []
+            for (_, (subj, obj), rel), p in rel_preds.items():
+                subj_prob, pred_subj_name = predicted_name[subj][0]
+                obj_prob, pred_obj_name = predicted_name[obj][0]
+                rel_prob = p
+                if (rel, pred_subj_name, pred_obj_name) in target_relation_preds:
+                    prob = subj_prob * obj_prob * rel_prob
+                    if prob > self.rel_thres:
+                        identified_rels.append((prob, (rel, subj, obj), (rel, pred_subj_name, pred_obj_name)))
+                
             # Thresholding
             avg_aggr_res = {}
             for oid in aggr_res:
@@ -826,15 +844,13 @@ class VLMPlanner:
                 if 'attr' in aggr_res[oid]:
                     probs += [p for p, _ in aggr_res[oid]['attr']]
                 
-                # Relation aggregation
-                
-                
                 avg_val = sum(probs) / len(probs)
                     
                 if avg_val > self.aggr_thres:
                     avg_aggr_res[oid] = avg_val
             
-
+            # Relation aggregation
+                
             # Only pick the top-k object according to the setip
             top_objects_probs = get_topk_per_object_name(aggr_res, avg_aggr_res, k=self.k)
             # top_objects_probs = {oid: prob for prob, oid in top_objects}
@@ -844,9 +860,10 @@ class VLMPlanner:
                                 
             prob_labels = []
             for oid in top_objects_probs:
-                prob_labels.append(predicted_name[oid][0])
+                prob, label = predicted_name[oid][0]
+                prob_labels.append(f"{prob:.2f}::{label}")
 
-        return prob_labels, selected_object_bboxes
+        return prob_labels, selected_object_bboxes, identified_rels
     
     
     def get_sg_kws(self, sg_info):
@@ -869,13 +886,14 @@ class VLMPlanner:
         current_attrbutes = sg_info['current_attrbutes']
         current_relations = sg_info['current_relations']
         
-        target_names = [clean_name(object) for object in target_objects]
-        current_names = [clean_name(object) for object in current_objects]
-        target_attribute_kws = [attr for object, attr in target_attributes]
-        current_attribute_kws = [attr for object, attr in current_attrbutes]
+        target_names = list(set([clean_name(object) for object in target_objects]))
+        current_names = list(set([clean_name(object) for object in current_objects]))
+        target_attribute_kws = list(set([attr for object, attr in target_attributes]))
+        current_attribute_kws = list(set([attr for object, attr in current_attrbutes]))
 
         target_relation_preds = set()
         current_relation_preds = set()
+        target_relation_kws = set()
         
         for rel in target_relations:
             if not len(rel) == 3:
@@ -884,6 +902,7 @@ class VLMPlanner:
             s = clean_name(s)
             o = clean_name(o)
             target_relation_preds.add((r, s, o))
+            target_relation_kws.add(r)
             
         for rel in current_relations:
             if not len(rel) == 3:
@@ -899,15 +918,10 @@ class VLMPlanner:
         query_relation_preds = query_relation_preds + query_other_preds
         query_relation_kws = list(set([r for (r, _, _) in query_relation_preds]))
         
-        # if len(query_relation_kws) > 0:
-        #     query_relation_kws.append("other")
-            
-        # query_relation_predicates = 
-        
         return target_names, current_names, query_objects, \
                target_attribute_kws, current_attribute_kws, \
                target_relation_preds, current_relation_preds, \
-                query_relation_kws, query_relation_preds
+               target_relation_kws, query_relation_kws, query_relation_preds
 
     def act_custom(self, prompt, obs):
         assert type(obs) == str  # input image path
@@ -974,7 +988,7 @@ class VLMPlanner:
         target_names, current_names, query_objects, \
         target_attribute_kws, current_attribute_kws, \
         target_relation_preds, current_relation_preds, \
-            query_relation_kws, query_relation_preds = self.get_sg_kws(sg_info)
+            target_relation_kws, query_relation_kws, query_relation_preds = self.get_sg_kws(sg_info)
         scene_graph_prompt = []
 
         if type(obs) == str:
@@ -1023,10 +1037,12 @@ class VLMPlanner:
                                                 box_threshold=self.gd_box_threshold, 
                                                 text_threshold=self.gd_text_threshold)
                 if len(boxes) != 0:
-                    target_labels, target_bboxes = self.predict_laser(
+                    target_labels, target_bboxes, identified_rels = self.predict_laser(
                         image=image, 
                         boxes=boxes, 
                         target_names=target_names,
+                        target_relation_kws=target_relation_kws,
+                        target_relation_preds=target_relation_preds,
                         query_names=list(set(query_objects)),
                         query_attributes=target_attribute_kws,
                         query_relation_kws=query_relation_kws,
@@ -1109,10 +1125,10 @@ class VLMPlanner:
         if "gemini-1.5-pro" in self.model_name or "gemini-2.0-flash" in self.model_name:
             try:
                 out = self.model.respond(self.episode_messages)
-                time.sleep(10)
+                # time.sleep(10)
             except Exception as e:
                 print("An unexpected error occurred:", e)
-                time.sleep(60)
+                time.sleep(20)
                 out = self.model.respond(self.episode_messages)
         else:
             try:

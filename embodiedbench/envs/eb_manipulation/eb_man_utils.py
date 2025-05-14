@@ -27,8 +27,8 @@ object_detection_model = YOLO("yolo11n.pt")
 ## SAM2 Setup
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 sam2_checkpoint = "sam2/checkpoints/sam2.1_hiera_large.pt"
-model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
-# model_cfg = "sam2.1/sam2.1_hiera_l.yaml"
+# model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
+model_cfg = "sam2.1/sam2.1_hiera_l.yaml"
 sam2_model = build_sam2(model_cfg, sam2_checkpoint, device=device)
 mask_generator = SAM2AutomaticMaskGenerator(model=sam2_model)
 predictor = SAM2ImagePredictor(sam2_model)
@@ -272,6 +272,7 @@ def mask_to_bbox(mask):
 
 def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, camera_intrinsics_list, use_sam=False, use_masks=False):
     image_save_path_list = []
+    masks = None
     for input_image_path, camera_extrinsics, camera_intrinsics in zip(image_path_list, camera_extrinsics_list, camera_intrinsics_list):
         T_inv = np.linalg.inv(camera_extrinsics)
         rvec = T_inv[:3, :3]
@@ -290,6 +291,7 @@ def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, c
 
         image_bgr = cv2.imread(input_image_path, cv2.IMREAD_COLOR)
         box_id = 0
+        final_bboxes = []
         # find the closest bounding box and save the current index
         object_masks = []
         text_positions = []
@@ -307,10 +309,11 @@ def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, c
             if min_dist > 400: # if the distance is too large, skip this point
                 continue
 
-            if use_masks:
-                object_masks.append(masks[min_idx]['segmentation'])
+            final_bboxes.append(predicted_boxes[min_idx])
+            # if use_masks:
+            object_masks.append(masks[min_idx]['segmentation'])
 
-            else:
+            if not use_masks:
                 increased_box = increase_bbox(predicted_boxes[min_idx], 1.2)
                 center_pixel = image_bgr[(increased_box[1] + increased_box[3]) // 2, (increased_box[0] + increased_box[2]) // 2]
                 # center_pixel = tuple(map(int, center_pixel))
@@ -334,8 +337,11 @@ def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, c
         if use_masks:
             mask_id = 0
             text_positions = []
-
+            # count = 0
             for mask in object_masks:
+                # if count != 0:
+                #     continue
+                # count += 1
                 if mask is None: continue
                 mask_uint8 = mask.astype(np.uint8)
 
@@ -377,7 +383,7 @@ def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, c
         cv2.imwrite(image_save_path, image_bgr)
         image_save_path_list.append(image_save_path)
 
-    return image_save_path_list
+    return image_save_path_list, final_bboxes, object_masks
 
 ####### Generate object information for the initial observation
 def _get_mask_id_to_name_dict_for_input(object_info):

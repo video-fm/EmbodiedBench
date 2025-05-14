@@ -7,14 +7,30 @@ import google.generativeai as genai
 from openai import OpenAI
 import typing_extensions as typing
 import lmdeploy
+import re
 from lmdeploy import pipeline, GenerationConfig, PytorchEngineConfig
-from embodiedbench.planner.planner_config.generation_guide import llm_generation_guide, vlm_generation_guide, vlm_sg_generation_guide
-from embodiedbench.planner.planner_config.generation_guide_manip import llm_generation_guide_manip, vlm_generation_guide_manip
-from embodiedbench.planner.planner_utils import convert_format_2claude, convert_format_2gemini, ActionPlan_1, ActionPlan, ActionPlan_lang, ActionPlan_1_manip, ActionPlan_manip, ActionPlan_lang_manip
+from embodiedbench.planner.planner_config.generation_guide import llm_generation_guide, vlm_generation_guide
+from embodiedbench.planner.planner_config.generation_guide_manip import llm_generation_guide_manip, vlm_generation_guide_manip, vlm_sg_generation_guide
+from embodiedbench.planner.planner_utils import convert_format_2claude, convert_format_2gemini, ActionPlan_1, ActionPlan, ActionPlan_lang, ActionPlan_1_manip, ActionPlan_manip, ActionPlan_lang_manip, ManipulationSceneGraph
 
 temperature = 0
 max_completion_tokens = 2048
 remote_url = os.environ.get('remote_url')
+
+def extract_json_from_string(text):
+    """
+    Extract the first JSON object from a string and parse it into a Python dictionary.
+    Handles newlines, extra text before or after, and escapes.
+    """
+    # Try to find the first JSON-like block using regex
+    match = re.search(r'\{[\s\S]*?\}', text)
+    if match:
+        json_str = match.group(0)
+    else:
+        raise ValueError("No JSON object found in the string.")
+
+    return json_str
+
 
 class RemoteModel:
     def __init__(
@@ -50,7 +66,7 @@ class RemoteModel:
                     api_key=os.getenv("DASHSCOPE_API_KEY"),
                     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
                 )
-            elif "Qwen2-VL" in self.model_name:
+            elif "Qwen2-VL" in self.model_name or "Qwen2.5-VL" in self.model_name:
                 self.model = OpenAI(base_url = remote_url)
             elif "Llama-3.2-11B-Vision-Instruct" in self.model_name:
                 self.model = OpenAI(base_url = remote_url)
@@ -75,15 +91,15 @@ class RemoteModel:
             if "claude" in self.model_name:
                 return self._call_claude(message_history)
             elif "gemini" in self.model_name:
-                return self._call_gemini(message_history)
+                return self._call_gemini(message_history, get_scene_graph)
             elif "gpt" in self.model_name:
-                return self._call_gpt(message_history)
+                return self._call_gpt(message_history, get_scene_graph)
             elif 'qwen' in self.model_name:
                 return self._call_gpt(message_history)
             elif "Qwen2-VL-7B-Instruct" in self.model_name:
                 return self._call_qwen7b(message_history)
-            elif "Qwen2-VL-72B-Instruct" in self.model_name:
-                return self._call_qwen72b(message_history)
+            elif "Qwen2-VL-72B-Instruct" in self.model_name or "Qwen2.5-VL-72B-Instruct" in self.model_name:
+                return self._call_qwen72b(message_history, get_scene_graph)
             elif "Llama-3.2-11B-Vision-Instruct" in self.model_name:
                 return self._call_llama11b(message_history)
             elif "meta-llama/Llama-3.2-90B-Vision-Instruct" in self.model_name:
@@ -148,24 +164,29 @@ class RemoteModel:
             messages=message_history
         )
 
-        return response.content[0].text 
+        return response.content[0].text
 
-    def _call_gemini(self, message_history: list):
+    def _call_gemini(self, message_history: list, get_scene_graph=False):
 
         if not self.language_only:
             message_history = convert_format_2gemini(message_history)
 
+        if get_scene_graph:
+            response_format = ManipulationSceneGraph
+        else:
+            response_format = ActionPlan_lang_manip if self.language_only else ActionPlan_manip
+
         if self.task_type == 'manip':
             response = self.model.beta.chat.completions.parse(
-                model=self.model_name, 
+                model=self.model_name,
                 messages=message_history,
-                response_format= ActionPlan_lang_manip if self.language_only else ActionPlan_manip,
+                response_format=response_format,
                 temperature=temperature,
                 max_tokens=max_completion_tokens
             )
         else:
             response = self.model.beta.chat.completions.parse(
-                model=self.model_name, 
+                model=self.model_name,
                 messages=message_history,
                 response_format= ActionPlan_lang if self.language_only else ActionPlan,
                 temperature=temperature,
@@ -175,18 +196,21 @@ class RemoteModel:
 
         return str(response.choices[0].message.parsed.model_dump_json())
 
-    def _call_gpt(self, message_history: list):
+    def _call_gpt(self, message_history: list, get_scene_graph=False):
 
-        if not self.language_only:
-            if self.task_type == 'manip':
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide_manip))
-            else:
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide))
+        if get_scene_graph:
+            response_format = dict(type='json_schema',  json_schema=dict(name='scene_graph',schema=vlm_sg_generation_guide))
         else:
-            if self.task_type == 'manip':
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide_manip))
+            if not self.language_only:
+                if self.task_type == 'manip':
+                    response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide_manip))
+                else:
+                    response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide))
             else:
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide))
+                if self.task_type == 'manip':
+                    response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide_manip))
+                else:
+                    response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide))
 
         response = self.model.chat.completions.create(
             model=self.model_name,
@@ -198,7 +222,7 @@ class RemoteModel:
         out = response.choices[0].message.content
 
         return out
-    
+
     def _call_qwen7b(self, message_history: list):
 
         if not self.language_only:
@@ -225,7 +249,7 @@ class RemoteModel:
 
         out = response.choices[0].message.content
         return out
-    
+
     def _call_llama90(self, message_history: list):
         if self.task_type == "manip":
             response = self.model.chat.completions.create(
@@ -235,7 +259,7 @@ class RemoteModel:
                 temperature = temperature
             )
             out = response.choices[0].message.content
-            
+
         else:
             response = self.model.chat.completions.create(
                 model="accounts/fireworks/models/llama-v3p2-90b-vision-instruct",
@@ -245,7 +269,7 @@ class RemoteModel:
             )
             out = response.choices[0].message.content
         return out
-    
+
     def _call_llama11b(self, message_history):
 
         if not self.language_only:
@@ -271,23 +295,26 @@ class RemoteModel:
         )
         out = response.choices[0].message.content
         return out
-    
 
-    def _call_qwen72b(self, message_history):
+
+    def _call_qwen72b(self, message_history, get_scene_graph=False):
         if not self.language_only:
             message_history = convert_format_2gemini(message_history)
 
-        if not self.language_only:
-            if self.task_type == 'manip':
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide_manip))
-            else:
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide))
+        if get_scene_graph:
+            response_format = dict(type='json_schema',  json_schema=dict(name='scene_graph',schema=vlm_sg_generation_guide))
         else:
-            if self.task_type == 'manip':
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide_manip))
+            if not self.language_only:
+                if self.task_type == 'manip':
+                    response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide_manip))
+                else:
+                    response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide))
             else:
-                response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide))
-        
+                if self.task_type == 'manip':
+                    response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide_manip))
+                else:
+                    response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide))
+
         response = self.model.chat.completions.create(
             model=self.model_name,
             messages=message_history,
@@ -301,8 +328,13 @@ class RemoteModel:
         out = out.replace("'",'"')
         out = out.replace('\"s ', "\'s ")
         out = out.replace('```json', '').replace('```', '')
+        out = out.replace('\"[', '[').replace("]\"", "]")
+
+        if get_scene_graph:
+            out = extract_json_from_string(out)
+
         return out
-    
+
     def _call_intern38b(self, message_history):
 
         # if not self.language_only:
@@ -348,10 +380,10 @@ if __name__ == "__main__":
     def encode_image(image_path):
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode('utf-8')
-        
+
 
     base64_image = encode_image("../../evaluator/midlevel/output.png")
-        
+
     messages=[
         {
             "role": "user",

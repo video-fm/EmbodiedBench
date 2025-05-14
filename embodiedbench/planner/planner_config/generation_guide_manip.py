@@ -1,3 +1,33 @@
+vlm_sg_generation_guide={
+    "type": "object",
+    "properties": {
+        "entities": {
+            "type": "array",
+            "description": "A list of entities in the scene graph.",
+            "items": {
+                "type": "string",
+                "description": "The name of the entity."
+            }
+        },
+        "shapes": {
+            "type": "array",
+            "description": "A list of shapes of the entities.",
+            "items": {
+                "type": "string",
+                "description": "The shape of the object in the numerical order in the image."
+            }
+        },
+        "colors": {
+            "type": "array",
+            "description": "A list of colors of the entities.",
+            "items": {
+                "type": "string",
+                "description": "The color of the object in the numerical order in the image."
+            }
+        }
+    },
+}
+
 vlm_generation_guide_manip={
     "type": "object",
     'properties': {

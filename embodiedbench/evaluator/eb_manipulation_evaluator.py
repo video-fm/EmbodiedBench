@@ -8,7 +8,8 @@ import argparse
 from embodiedbench.evaluator.config.system_prompts import eb_manipulation_system_prompt
 from embodiedbench.envs.eb_manipulation.EBManEnv import EBManEnv, EVAL_SETS, ValidEvalSets
 from embodiedbench.envs.eb_manipulation.eb_man_utils import form_object_coord_for_input, draw_bounding_boxes, draw_xyz_coordinate
-from embodiedbench.planner.manip_planner import ManipPlanner
+from embodiedbench.planner.manip_planner_laser import ManipPlanner
+# from embodiedbench.planner.manip_planner import ManipPlanner
 from embodiedbench.evaluator.config.eb_manipulation_example import vlm_examples_baseline, llm_examples, vlm_examples_ablation
 from embodiedbench.main import logger
 
@@ -101,6 +102,7 @@ class EB_ManipulationEvaluator():
     def evaluate(self):
         progress_bar = tqdm(total=self.env.number_of_episodes, desc="Episodes")
         while self.env._current_episode_num < self.env.number_of_episodes:
+            bboxes, masks = [], []
             logger.info(f"Evaluating episode {self.env._current_episode_num} ...")
             episode_info = {'reward': [], 'action_success': []}
             image_history = []
@@ -118,7 +120,7 @@ class EB_ManipulationEvaluator():
                     if 'front_rgb' in img_path:
                         img_path_list[i] = draw_xyz_coordinate(img_path, self.config['resolution'])
             if self.config['detection_box'] and not self.config['language_only']:
-                img_path_list = draw_bounding_boxes(img_path_list, all_avg_point_list, camera_extrinsics_list, camera_intrinsics_list, use_sam=True, use_masks=True)
+                img_path_list, bboxes, masks = draw_bounding_boxes(img_path_list, all_avg_point_list, camera_extrinsics_list, camera_intrinsics_list, use_sam=True, use_masks=False)
             if self.config['multistep']:
                 image_history.append(img_path_list[0])
             user_instruction = self.env.episode_language_instruction
@@ -129,9 +131,9 @@ class EB_ManipulationEvaluator():
 
             while not done:
                 if self.config['multistep']:
-                    action, reasoning = self.planner.act(image_history, user_instruction, str(avg_obj_coord), self.env.current_task_variation)
+                    action, reasoning = self.planner.act(image_history, user_instruction, str(avg_obj_coord), self.env.current_task_variation, bboxes, masks)
                 else:
-                    action, reasoning = self.planner.act(img_path_list, user_instruction, str(avg_obj_coord), self.env.current_task_variation)
+                    action, reasoning = self.planner.act(img_path_list, user_instruction, str(avg_obj_coord), self.env.current_task_variation, bboxes, masks)
                 print(f"Planner Output Action: {action}")
                 reasoning_list.append(reasoning)
                 if len(action) == 0:
@@ -162,7 +164,7 @@ class EB_ManipulationEvaluator():
                             if 'front_rgb' in img_path:
                                 img_path_list[i] = draw_xyz_coordinate(img_path, self.config['resolution'])
                     if self.config['detection_box'] and not self.config['language_only']:
-                        img_path_list = draw_bounding_boxes(img_path_list, all_avg_point_list, camera_extrinsics_list, camera_intrinsics_list, use_sam=True, use_masks=True)
+                        img_path_list, bboxes, masks = draw_bounding_boxes(img_path_list, all_avg_point_list, camera_extrinsics_list, camera_intrinsics_list, use_sam=True, use_masks=False)
                         if self.config['multistep']:
                             if image_history[-1].split('.png')[0] in img_path_list[0]:
                                 image_history.pop()
@@ -210,6 +212,7 @@ class EB_ManipulationEvaluator():
             else:
                 self.log_path = 'running/eb_manipulation/{}/{}/{}'.format(real_model_name, self.config["exp_name"], self.eval_set)
             self.env = EBManEnv(eval_set=self.eval_set, img_size=(self.config['resolution'], self.config['resolution']), down_sample_ratio=self.config["down_sample_ratio"], log_path=self.log_path)
+            # self.env = EBManEnv(eval_set=self.eval_set, img_size=(self.config['resolution'], self.config['resolution']), down_sample_ratio=self.config["down_sample_ratio"], log_path=self.log_path, selected_indexes=self.config['selected_indexes'])
             ic_examples = self.load_demonstration()
             self.planner = ManipPlanner(model_name=self.model_name,
                                         model_type=self.config['model_type'],
@@ -238,9 +241,11 @@ class EB_ManipulationEvaluator():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run evaluation with specified model name.")
-    parser.add_argument('--model_name', type=str, default="OpenGVLab/InternVL2_5-78B",help="Name of the model to evaluate.")
+    # parser.add_argument('--model_name', type=str, default="OpenGVLab/InternVL2_5-8B",help="Name of the model to evaluate.")
+    parser.add_argument('--model_name', type=str, default="OpenGVLab/InternVL2_5-38B-MPO",help="Name of the model to evaluate.")
     parser.add_argument('--down_sample_ratio', type=float, default=1.0, help="Down sample ratio for the eval set.")
     parser.add_argument('--model_type', type=str, default='remote', help="Type of the model to evaluate.")
+    # parser.add_argument('--model_type', type=str, default='local', help="Type of the model to evaluate.")
     parser.add_argument('--language_only', type=int, default=0, help="Whether to use language only.")
     parser.add_argument('--eval_sets', type=lambda s: s.split(','), default=[], help='Comma-separated list of evaluation sets.')
     parser.add_argument('--chat_history', type=int, default=0, help='Whether to use chat history.')
@@ -251,7 +256,7 @@ if __name__ == '__main__':
     parser.add_argument('--resolution', type=int, default=500)
     parser.add_argument('--exp_name', type=str, default="baseline")
     parser.add_argument('--visual_icl', type=int, default=0)
-    parser.add_argument('--tp', type=int, default=4, help='number of tensor parallel splits of the model parameters')
+    parser.add_argument('--tp', type=int, default=2, help='number of tensor parallel splits of the model parameters')
     parser.add_argument('--use_sam', type=int, default=1)
     args = parser.parse_args()
 
@@ -275,7 +280,7 @@ if __name__ == '__main__':
         'visual_icl': args.visual_icl,
         'exp_name': args.exp_name,
         'tp': args.tp,
-        'selected_indexes': [0, 12],
+        'selected_indexes': [26],
         'use_sam': args.use_sam
     }
     print("printing config ...")

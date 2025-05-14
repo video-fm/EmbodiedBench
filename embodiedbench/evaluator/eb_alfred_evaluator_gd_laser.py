@@ -9,7 +9,7 @@ from embodiedbench.evaluator.summarize_result import average_json_values
 from embodiedbench.evaluator.evaluator_utils import load_saved_data, update_config_with_args
 from embodiedbench.evaluator.config.system_prompts import alfred_laser_system_prompt
 from embodiedbench.main import logger
-from alfred_examples import laser_sg_examples_pre_post
+from alfred_examples import laser_sg_examples_pre_post, laser_sg_examples_no_revert
 example_path = os.path.join(os.path.dirname(__file__), 'config/alfred_examples.json')
 
 #common sense, base, and ...
@@ -33,9 +33,8 @@ target_examples = [
         "target_objects": ["bottle_1", "bottle_2", "toilet_1"],
         "target_attributes": [["yellow", "bottle_1"], ["yellow", "bottle_2"]]
         "target_relations": [["bottle_1", "on", "toilet_1"], ["bottle_2", "on", "toilet_1"]], 
-        "current_state": "There are two pink bottles and a toilet in the scene. One pink bottle is on the top of the toilet. I am holding another pink bottle."
-        "explanation": "I have pick up the spray bottle in step 1, this is the pink bottle on the toilet,
-                        I have pick up the spray bottle in step 5, this is the pink bottle I am holding right now. "
+        "current_state": "There are two pink bottles and a toilet in the scene. One pink bottle is on the top of the toilet. I am holding another pink bottle.",
+        "explanation": "I have pick up the spray bottle in step 1, this is the pink bottle on the toilet. I have pick up the spray bottle in step 5, this is the pink bottle I am holding right now. ",
         "current_objects": ["bottle_1", "bottle_2" "toilet_1"],
         "current_attributes": [["pink", "bottle_1"], ["pink", "bottle_2"]]
         "current_relations": [["bottle_1", "on", "toilet_1"], ["bottle_2", "in front of", "toilet_1"]], 
@@ -63,10 +62,7 @@ target_examples = [
         "target_attributes": [["rinsed", "ladle_1"]]
         "target_relations": [["ladle_1", "on", "table_1"]], 
         "current_state": "There is a bread,  an egg, a ladle not rinsed and a table. "
-        "explanation": "Although I can see a ladle on the table, the task has not terminated. 
-            This indicates some criteria in the target state is not met. 
-            I need to check the steps in detail to verify. 
-            In Step 2,3,4, although I have opened and closed the Faucet, I have not put the ladle in water. It means the Ladle is not rinsed. "
+        "explanation": "Although I can see a ladle on the table, the task has not terminated. This indicates some criteria in the target state is not met. I need to check the steps in detail to verify. In Step 2,3,4, although I have opened and closed the Faucet, I have not put the ladle in water. It means the Ladle is not rinsed. ",
         "current_objects": ["ladle_1", "table_1", "egg_1", "bread_1"],
         "current_attributes": [["not rinsed", "ladle_1"]]
         "current_relations": [["ladle_1", "on", "table_1"], ["egg_1", "on", "table_1"], ["bread_1", "on", "table_1"]], 
@@ -88,10 +84,7 @@ target_examples = [
         "target_attributes": []
         "target_relations": [["spoon_1", "in", "plate_1"], ["plate_1", "on", "kitchen_table_1"]], 
         "current_state": "I am currently holding a plate. There is a spoon and an apple on the counter. There is a pan on the sink. "
-        "explanation": "My action to pick up the plate is failed. I need to have a detailed look into the action history and preconditions of each action. 
-                         In step 2 and step 4, I tried to pick up two things, spoon and the plate in a row.
-                         We know that the action, pickup, requires holding nothing at hand, but I am holding a plate currently. 
-                         While in the target state, this plate should locate at the kitchen table at the end. "
+        "explanation": "My action to pick up the plate is failed. I need to have a detailed look into the action history and preconditions of each action. In step 2 and step 4, I tried to pick up two things, spoon and the plate in a row. We know that the action, pickup, requires holding nothing at hand, but I am holding a plate currently. While in the target state, this plate should locate at the kitchen table at the end. ",
         "current_objects": ["plate_1", "spoon_1", "apple_1", "counter_1", "sink_1", "pan_1"],
         "current_attributes": [["holding", "plate_1"]]
         "current_relations": [["spoon_1", "on", "counter_1"], ["apple_1", "on", "counter_1"], ["pan_1", "in", "sink_1"]], 
@@ -188,7 +181,7 @@ class EB_AlfredEvaluator():
             examples = json.load(open(example_path, 'r+')) if self.eval_set != 'long_horizon' else json.load(open(exploration_example_path, 'r+'))
             
             if self.config['sg_text']:
-                few_shot_examples = laser_sg_examples_pre_post
+                few_shot_examples = laser_sg_examples_no_revert
             else:
                 few_shot_examples = examples
             model_type = self.config.get('model_type', 'remote')
@@ -344,7 +337,7 @@ if __name__ == '__main__':
         'chat_history': 0, 
         'detection_box': True,
         'eval_sets': ['base'], 
-        'selected_indexes': [10], 
+        'selected_indexes': list(range(20, 30)), 
         'multistep':0, 
         'block_objects': False,
         'sg_text': True,

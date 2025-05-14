@@ -249,10 +249,11 @@ def format_state_descriptions(sg_info, current_obj, current_attr, current_rel):
     sg_str = ""
     if not current_sg_str == "":
         sg_str += f"The current scene graph: {current_sg_str}\n"
-    # if not target_sg_str == "":
-    #     sg_str += f"The target state: {target_sg_str}\n"
+    if not target_sg_str == "":
+        sg_str += f"The target state: {target_sg_str}\n"
     sg_str += (f"\n\n The target state: {target_desc}\n" f"The current state: {current_desc}\n")
     sg_str += f"The explanation is: {sg_info['explanation']} \n\n"
+    
     return sg_str
     
 def get_topk_per_object_name(aggr_res, avg_aggr_res, k):
@@ -1274,7 +1275,8 @@ class VLMPlanner:
         target_relation_preds, current_relation_preds, \
             target_relation_kws, query_relation_kws, query_relation_preds = self.get_sg_kws(sg_info)
         scene_graph_prompt = []
-
+        sg_text = ""
+         
         if type(obs) == str:
             obs = [obs]
         if type(observation) == str:

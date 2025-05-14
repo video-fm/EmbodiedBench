@@ -198,7 +198,7 @@ if __name__ == '__main__':
         'chat_history': 0, 
         'detection_box': 0,
         'eval_sets': ['base'], 
-        'selected_indexes': list(range(10, 15)), 
+        'selected_indexes': list(range(15, 20)), 
         'multistep':0, 
         'resolution': 500, 
         'env_feedback': 1,

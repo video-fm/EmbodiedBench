@@ -256,7 +256,7 @@ class ActionPlanReasoningReflection(BaseModel):
     reflection: str
     reasoning: str
     language_plan: str
-    executable_plan: list[ExecutableActionPrePost]
+    executable_plan: list[ExecutableAction]
 
 class TargetSG(BaseModel):
     target_name: list[str]

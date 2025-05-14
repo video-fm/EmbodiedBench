@@ -173,6 +173,7 @@ class EB_AlfredEvaluator():
             self.eval_set = eval_set
             logger.info(f'Current eval set: {eval_set}')
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
+                        
             self.env = EBAlfEnv(eval_set=self.eval_set, down_sample_ratio=self.config['down_sample_ratio'], 
                                           exp_name=exp_name, selected_indexes=self.config.get('selected_indexes', []), 
                                           detection_box=False,
@@ -207,8 +208,8 @@ class EB_AlfredEvaluator():
             episode_info = {'reward': [], 'num_invalid_actions': 0, 'empty_plan': 0}
             obs = self.env.reset()
             img_path = self.env.save_image(obs)
-            
             current_frames = [obs['head_rgb']]
+            test_ct = 0
             
             user_instruction = self.env.episode_language_instruction
             print(f"Instruction: {user_instruction}")
@@ -288,6 +289,15 @@ class EB_AlfredEvaluator():
                 
                 except Exception as e: 
                     print(e)
+                    test_ct += 1
+                    if test_ct > self.config['max_test_ct']:
+                        if not 'info' in locals():
+                            info = {}
+                            info['task_success'] = False
+                            info['task_progress'] = 0
+                            info["env_step"] = 30
+                            info["episode_elapsed_seconds"] = 1000
+                        break
                     time.sleep(10)
 
             # evaluation metrics
@@ -336,8 +346,10 @@ if __name__ == '__main__':
         'exp_name': 'gd_laser',
         'chat_history': 0, 
         'detection_box': True,
-        'eval_sets': ['base'], 
-        'selected_indexes': list(range(20, 30)), 
+        # 'eval_sets': ['base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
+        # 'eval_sets': ['visual_appearance'],
+        'eval_sets': ['spatial'],
+        'selected_indexes': [i - 1 for i in [35, 38, 39]], 
         'multistep':0, 
         'block_objects': False,
         'sg_text': True,
@@ -356,7 +368,8 @@ if __name__ == '__main__':
         'gd_config_path': '/home/asethi04/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
         'gd_checkpoint_path': '/home/asethi04/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',
         'gd_box_threshold': 0.25, 
-        'gd_text_threshold': 0.3
+        'gd_text_threshold': 0.3,
+        'max_test_ct': 5,
     }
 
     # args = parse_arguments()

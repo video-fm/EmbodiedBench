@@ -211,9 +211,16 @@ def format_scene_graph(target_objects, target_attributes, target_relations):
         object_str = ""
     
     if len(target_attributes) > 0:
+        attr_str_ls = []
+        for attr_info in target_attributes:
+            if len(attr_info) != 2:
+                continue
+            attr, obj = attr_info
+            attr_str_ls.append(f"({attr}, {clean_name(obj)})")
+            
         attr_str = (
             "The attributes are: [" +
-            ", ".join(f"({attr}, {clean_name(obj)})" for attr, obj in target_attributes)
+            ", ".join(attr_str_ls)
             + "]" if target_attributes else "The attributes are: []"
         )
     else:
@@ -1110,8 +1117,10 @@ class VLMPlanner:
                 for attr in reformatted_unary_res[oid]:
                     aggr_res[oid]['attr'].append((reformatted_unary_res[oid][attr], attr))
             
-            
-            rel_preds = batched_image_rel_probs[0]
+            if len(batched_image_rel_probs) > 0:
+                rel_preds = batched_image_rel_probs[0]
+            else:
+                rel_preds = {}
 
             identified_rels = []
             for (_, (subj, obj), rel), p in rel_preds.items():
@@ -1295,7 +1304,7 @@ class VLMPlanner:
             if image_path in self.processed_images:
                 processed_image_path = self.processed_images[image_path]
                 if not processed_image_path in obs:
-                    obs.append(processed_image_path)
+                    obs = [processed_image_path]
                     continue
 
             image = cv2.imread(image_path)

@@ -1,11 +1,4 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-os.environ["remote_url"] = "http://0.0.0.0:15237/v1"
-os.environ["DISPLAY"] = "cherry:12.0"
-os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
-home_dir = "/home/asethi04/embody/EmbodiedBench"
-existing_path = os.environ.get("PYTHONPATH", "")
-os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 import numpy as np
 from tqdm import tqdm
 import time
@@ -16,89 +9,89 @@ from embodiedbench.evaluator.summarize_result import average_json_values
 from embodiedbench.evaluator.evaluator_utils import load_saved_data, update_config_with_args
 from embodiedbench.evaluator.config.system_prompts import alfred_laser_system_prompt
 from embodiedbench.main import logger
-from alfred_examples import laser_sg_examples_no_revert
+from alfred_examples import laser_sg_examples_pre_post
 example_path = os.path.join(os.path.dirname(__file__), 'config/alfred_examples.json')
 
 #common sense, base, and ...
 target_examples = [
 '''
-   Environmental Feedback of last action: The last action succeed. 
-      
-   Reasoning and Reflection of last action:  The robot shall put down the spray bottle on the toilet.
+   The action history:
+   Step 0, action id 10, find a spray bottle, env feedback: Last action executed successfully.
+   Step 1, action id 90, pick up the spray bottle, env feedback: Last action executed successfully.
+   Step 2, action id 17, find a Toilet, env feedback: Last action executed successfully.
+   Step 3, action id 133, put down the object in hand,, env feedback: Last action executed successfully.
+   Step 4, action id 10, find a spray bottle, env feedback: Last action executed successfully.
+   Step 5, action id 90, pick up the spray bottle, env feedback: Last action executed successfully.
+   The last action succeeds.
    
+   Environmental Feedback of last action: The last action succeed. 
+         
    Human Instruction: Place two yellow bottles on top of a toilet.
       
-   Visual Description: I am in a bathroom. I can see a toilet in front of me, and I am holding one soap bottle. There is another soap bottle on the top of another toilet.
-
    Target state and current state in JSON: {
-        "target_state": "there are two yellow bottles on the top of a toilet."
-        "target_objects": ["yellow_bottle_1", "yellow_bottle_2", "toilet_1"],
-        "target_attributes": []
-        "target_relations": [["yellow_bottle_1", "on", "toilet_1"], ["yellow_bottle_2", "on", "toilet_1"]], 
-        "current_state": "there are two pink bottles and a toilet in the scene. One pink bottle is on the top of the toilet. I am holding another pink bottle."
-        "current_objects": ["pink_bottle_1", "pink_bottle_2", "toilet_1"],
-        "current_attributes": []
-        "current_relations": [["pink_bottle_1", "on", "toilet_1"], ["pink_bottle_2", "in front of", "toilet_1"]], 
+        "target_state": "There are two yellow bottles on the top of a toilet."
+        "target_objects": ["bottle_1", "bottle_2", "toilet_1"],
+        "target_attributes": [["yellow", "bottle_1"], ["yellow", "bottle_2"]]
+        "target_relations": [["bottle_1", "on", "toilet_1"], ["bottle_2", "on", "toilet_1"]], 
+        "current_state": "There are two pink bottles and a toilet in the scene. One pink bottle is on the top of the toilet. I am holding another pink bottle."
+        "explanation": "I have pick up the spray bottle in step 1, this is the pink bottle on the toilet,
+                        I have pick up the spray bottle in step 5, this is the pink bottle I am holding right now. "
+        "current_objects": ["bottle_1", "bottle_2" "toilet_1"],
+        "current_attributes": [["pink", "bottle_1"], ["pink", "bottle_2"]]
+        "current_relations": [["bottle_1", "on", "toilet_1"], ["bottle_2", "in front of", "toilet_1"]], 
+        
         }
 ''',
 
 ''' 
-    Environmental Feedback: Last action is invalid. Ladle is not visible because it is in DiningTable. Go there to pick the object instead.
+    The action history:
+    Step 1, action id 109, pick up the Ladle, env feedback: Last action executed successfully.
+    Step 2, action id 2, find a Faucet, env feedback: Last action executed successfully.
+    Step 3, action id 155, turn on the Faucet, env feedback: Last action executed successfully.
+    Step 4, action id 156, turn off the Faucet, env feedback: Last action executed successfully.
+    Step 5, action id 39, find a DiningTable, env feedback: Last action executed successfully.
+    Step 6, action id 133, put down the object in hand, env feedback: Last action executed successfully.
+    The last action succeeds. 
 
-    Reasoning and Reflection: The previous plan failed because Ladle is not visible. I need to find the dinning table before I can pick up the ladle. After picking up the ladle, I need to turn on the faucet to rinse it. Then, I need to turn off the faucet and find the dining table to put the ladle on it.
-
-    Human Instruction: Rinse off a ladle and move it to the table.
-    
-    Visual Description: I am in a room with a garbage can and a fridge. The floor is tiled. There is a door in the background.
-
-    Target state and current state in JSON: {
-        "target_state": "There is a clean ladle on the top of the table."
-        "target_objects": ["ladle_1", "table_1"],
-        "target_attributes": []
-        "target_relations": [["ladle_1", "on", "table_1"]], 
-        "current_state": "There is a garbage can, fridge and door in the scene."
-        "current_objects": ["garbage can", "fridge", "door"],
-        "current_attributes": []
-        "current_relations": [], 
-        }
-''', 
-
-''' 
     Environmental Feedback: Last action executed successfully.
     
-    Reasoning and Reflection: "The instruction is to rinse off something for serving soup and move it to the table. I need to find a suitable object for serving soup, such as a bowl or a ladle. Then, I need to find a faucet to rinse it off. Finally, I need to find a dining table and put the rinsed object on it. I will start by finding a bowl or a laddle.
-
     Human Instruction: Rinse off something for serving soup and move it to the table.
-    
-    Visual Description: I can see a bread, an egg, a ladle and a table.
-    
+        
     Target state and current state in JSON: {
-        "target_state": "There is a ladle on a table."
+        "target_state": "There is a rinsed ladle on a table."
         "target_objects": ["ladle_1", "table_1"],
-        "target_attributes": []
+        "target_attributes": [["rinsed", "ladle_1"]]
         "target_relations": [["ladle_1", "on", "table_1"]], 
-        "current_state": "There is a bread,  an egg, a ladle and a table"
+        "current_state": "There is a bread,  an egg, a ladle not rinsed and a table. "
+        "explanation": "Although I can see a ladle on the table, the task has not terminated. 
+            This indicates some criteria in the target state is not met. 
+            I need to check the steps in detail to verify. 
+            In Step 2,3,4, although I have opened and closed the Faucet, I have not put the ladle in water. It means the Ladle is not rinsed. "
         "current_objects": ["ladle_1", "table_1", "egg_1", "bread_1"],
-        "current_attributes": []
+        "current_attributes": [["not rinsed", "ladle_1"]]
         "current_relations": [["ladle_1", "on", "table_1"], ["egg_1", "on", "table_1"], ["bread_1", "on", "table_1"]], 
         }
 ''', 
 
 '''
-   Environmental Feedback: Last action is invalid. Robot is currently holding Spoon.
-   
-   Reasoning and Reflection: I have already picked up the plate. Now I need to put down the plate first, then pick up the spoon, and then put the spoon on the plate. Finally, I will put the plate with the spoon on the kitchen table.
- 
+   The action history:
+    Step 1, action id 19, find a Spoon, env feedback: Last action executed successfully.
+    Step 2, action id 105, pick up the Spoon, env feedback: Last action executed successfully.
+    Step 3, action id 31, find a Plate, env feedback: Last action executed successfully.
+    Step 4, action id 122, pick up the Plate, env feedback: Last action is invalid. Robot is currently holding Spoon.
+    
    Human Instruction: Set plate with a spoon in it on the kitchen table.
-   
-   Visual Description: I am currently holding a plate. There is a spoon and an apple on the counter. There is a pan on the sink.
-   
+      
    Target state and current state in JSON: {
         "target_state": "There is a spoon on a plate. The plate is on a kitchen table."
         "target_objects": ["spoon_1", "plate_1", "kitchen_table_1"],
         "target_attributes": []
         "target_relations": [["spoon_1", "in", "plate_1"], ["plate_1", "on", "kitchen_table_1"]], 
-        "current_state": "I am currently holding a plate. There is a spoon and an apple on the counter. There is a pan on the sink."
+        "current_state": "I am currently holding a plate. There is a spoon and an apple on the counter. There is a pan on the sink. "
+        "explanation": "My action to pick up the plate is failed. I need to have a detailed look into the action history and preconditions of each action. 
+                         In step 2 and step 4, I tried to pick up two things, spoon and the plate in a row.
+                         We know that the action, pickup, requires holding nothing at hand, but I am holding a plate currently. 
+                         While in the target state, this plate should locate at the kitchen table at the end. "
         "current_objects": ["plate_1", "spoon_1", "apple_1", "counter_1", "sink_1", "pan_1"],
         "current_attributes": [["holding", "plate_1"]]
         "current_relations": [["spoon_1", "on", "counter_1"], ["apple_1", "on", "counter_1"], ["pan_1", "in", "sink_1"]], 
@@ -195,7 +188,7 @@ class EB_AlfredEvaluator():
             examples = json.load(open(example_path, 'r+')) if self.eval_set != 'long_horizon' else json.load(open(exploration_example_path, 'r+'))
             
             if self.config['sg_text']:
-                few_shot_examples = laser_sg_examples_no_revert
+                few_shot_examples = laser_sg_examples_pre_post
             else:
                 few_shot_examples = examples
             model_type = self.config.get('model_type', 'remote')
@@ -323,36 +316,35 @@ class EB_AlfredEvaluator():
 
 if __name__ == '__main__':
     import argparse
-    def parse_arguments():
-        parser = argparse.ArgumentParser(description='Change configuration parameters.')
-        parser.add_argument('--model_name', default='Qwen/Qwen2.5-VL-72B-Instruct', type=str, help='Name of the model.')
-        parser.add_argument('--n_shots', type=int, help='Number of examples')
-        parser.add_argument('--down_sample_ratio', type=float, help='Down sample ratio.')
-        parser.add_argument('--model_type', default='remote', type=str, help='Type of the model.')
-        parser.add_argument('--language_only', type=int, help='Set to True for language only mode.')
-        parser.add_argument('--exp_name', default='gd_laser', type=str, help='Name of the experiment.')
-        parser.add_argument('--chat_history', type=int, help='Set to True to enable chat history.')
-        parser.add_argument('--detection_box', type=int, help='Set to True to enable detection.')
-        parser.add_argument('--eval_sets', type=lambda s: s.split(','), help='Comma-separated list of evaluation sets.')
-        parser.add_argument('--multistep', type=int, help='Number of steps for multi-step reasoning.')
-        parser.add_argument('--resolution', default=500, type=int, help='Resolution for processing.')
-        parser.add_argument('--env_feedback', type=int, help='Set to True to enable environment feedback.')
-        parser.add_argument('--tp', default=4, type=int, help='number of tensor parallel splits of the model parameters')
-        return parser.parse_args()
+    # def parse_arguments():
+    #     parser = argparse.ArgumentParser(description='Change configuration parameters.')
+    #     parser.add_argument('--model_name', default='Qwen/Qwen2.5-VL-72B-Instruct', type=str, help='Name of the model.')
+    #     parser.add_argument('--n_shots', type=int, help='Number of examples')
+    #     parser.add_argument('--down_sample_ratio', type=float, help='Down sample ratio.')
+    #     parser.add_argument('--model_type', default='remote', type=str, help='Type of the model.')
+    #     parser.add_argument('--language_only', type=int, help='Set to True for language only mode.')
+    #     parser.add_argument('--exp_name', default='gd_laser', type=str, help='Name of the experiment.')
+    #     parser.add_argument('--chat_history', type=int, help='Set to True to enable chat history.')
+    #     parser.add_argument('--detection_box', type=int, help='Set to True to enable detection.')
+    #     parser.add_argument('--eval_sets', type=lambda s: s.split(','), help='Comma-separated list of evaluation sets.')
+    #     parser.add_argument('--multistep', type=int, help='Number of steps for multi-step reasoning.')
+    #     parser.add_argument('--resolution', default=500, type=int, help='Resolution for processing.')
+    #     parser.add_argument('--env_feedback', type=int, help='Set to True to enable environment feedback.')
+    #     parser.add_argument('--tp', default=4, type=int, help='number of tensor parallel splits of the model parameters')
+    #     return parser.parse_args()
 
 
     config = {
-        'model_name': 'Qwen/Qwen2.5-VL-72B-Instruct',  # 'Qwen/Qwen2-VL-7B-Instruct',
+        'model_name': 'gpt-4o',  # 'Qwen/Qwen2-VL-7B-Instruct',
         'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        # 'exp_name': 'laser_alfred_old_few_shot_gemini',
+        'exp_name': 'gd_laser',
         'chat_history': 0, 
-        'detection_box': False,
+        'detection_box': True,
         'eval_sets': ['base'], 
-        # 'eval_sets': ['spatial'],
-        'selected_indexes': list(range(8,10)), 
+        'selected_indexes': [10], 
         'multistep':0, 
         'block_objects': False,
         'sg_text': True,
@@ -367,15 +359,15 @@ if __name__ == '__main__':
         'visual':0,
         'gd_only': False,
         'top_k': 3, 
-        'aggr_thres': 0.4,
+        'aggr_thres': 0.2,
         'gd_config_path': '/home/asethi04/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
         'gd_checkpoint_path': '/home/asethi04/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',
         'gd_box_threshold': 0.25, 
         'gd_text_threshold': 0.3
     }
 
-    args = parse_arguments()
-    update_config_with_args(config, args)
+    # args = parse_arguments()
+    # update_config_with_args(config, args)
 
     evaluator = EB_AlfredEvaluator(config)
     evaluator.evaluate_main()

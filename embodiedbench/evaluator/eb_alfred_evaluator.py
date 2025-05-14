@@ -1,11 +1,4 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-os.environ["remote_url"] = "http://0.0.0.0:15235/v1"
-os.environ["DISPLAY"] = "cherry:12.0"
-os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
-home_dir = "/home/asethi04/embody/EmbodiedBench"
-existing_path = os.environ.get("PYTHONPATH", "")
-os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 import numpy as np
 from tqdm import tqdm
 import time
@@ -196,16 +189,16 @@ if __name__ == '__main__':
 
 
     config = {
-        'model_name': 'gemini-2.0-flash',
+        'model_name': 'gpt-4o',
         'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'gemini_alfred_test_visual_BASE',
+        'exp_name': 'baseline',
         'chat_history': 0, 
         'detection_box': 0,
-        'eval_sets': ['visual_appearance'], 
-        'selected_indexes': [], 
+        'eval_sets': ['base'], 
+        'selected_indexes': list(range(10, 15)), 
         'multistep':0, 
         'resolution': 500, 
         'env_feedback': 1,

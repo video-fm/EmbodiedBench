@@ -21,6 +21,7 @@ from embodiedbench.planner.planner_utils import (
     ActionPlan_lang_manip,
     TargetSG,
     TargetStateCurrentState,
+    ActionPlanReasoningReflection,
     convert_format_2gpt,
     TargetEntityName,
 )
@@ -209,13 +210,26 @@ class RemoteModel:
             message_history = convert_format_2gemini(message_history)
 
         if self.task_type == 'manip': 
+            # Manipulation
             if self.language_only:
                 response_format = ActionPlan_lang_manip
             elif not self.language_only:
                 response_format = ActionPlan_manip
-        else:
+                
+        elif self.task_type == "alfred":
+            # Alfred
             if get_scene_graph:
                 response_format = TargetStateCurrentState
+            elif self.language_only:
+                response_format = ActionPlan
+            elif get_entity_name:
+                response_format = TargetEntityName
+            else:
+                response_format = ActionPlan_lang
+        else:
+            # Navigation task
+            if get_scene_graph:
+                response_format = TargetSG
             elif self.language_only:
                 response_format = ActionPlan
             elif get_entity_name:
@@ -258,6 +272,13 @@ class RemoteModel:
                 response_format = ActionPlan_lang_manip
             elif not self.language_only:
                 response_format = ActionPlan_manip
+        elif self.task_type == 'alfred':
+            if get_scene_graph:
+                response_format = TargetStateCurrentState
+            elif self.language_only:
+                response_format = ActionPlan_lang 
+            else:
+                response_format = ActionPlanReasoningReflection
         else:
             if get_scene_graph:
                 response_format = TargetSG

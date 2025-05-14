@@ -25,7 +25,7 @@ class VLMPlanner():
         if model_type == 'custom':
             self.model = CustomModel(model_name, language_only)
         else:
-            self.model = RemoteModel(model_name, model_type, language_only, tp=tp)
+            self.model = RemoteModel(model_name, model_type, language_only, tp=tp, task_type="alfred")
 
         self.use_feedback = use_feedback
         self.multistep = multistep

@@ -237,11 +237,26 @@ def convert_format_2gpt(messages):
 class ExecutableAction(typing.TypedDict): 
     action_id: int
     action_name: str
+    
+class ExecutableActionPrePost(typing.TypedDict): 
+    action_id: int
+    action_name: str
+    pre_condition: list[list[str]]
+    post_condition: list[list[str]]
+    
+    
 class ActionPlan(BaseModel):
     visual_state_description: str
     reasoning_and_reflection: str
     language_plan: str
     executable_plan: list[ExecutableAction]
+    
+class ActionPlanReasoningReflection(BaseModel):
+    visual_state_description: str
+    reflection: str
+    reasoning: str
+    language_plan: str
+    executable_plan: list[ExecutableActionPrePost]
 
 class TargetSG(BaseModel):
     target_name: list[str]
@@ -257,6 +272,7 @@ class TargetStateCurrentState(BaseModel):
     target_attributes: list[list[str]]
     target_relations: list[list[str]]
     current_state: str
+    explanation: str
     current_objects: list[str]
     current_attributes: list[list[str]]
     current_relations: list[list[str]]

@@ -251,8 +251,8 @@ def format_state_descriptions(sg_info, current_obj, current_attr, current_rel):
         sg_str += f"The current scene graph: {current_sg_str}\n"
     # if not target_sg_str == "":
     #     sg_str += f"The target state: {target_sg_str}\n"
-    sg_str += (f"\n\n The target state: {target_desc}\n" f"The current state: {current_desc}\n\n")
-
+    sg_str += (f"\n\n The target state: {target_desc}\n" f"The current state: {current_desc}\n")
+    sg_str += f"The explanation is: {sg_info['explanation']} \n\n"
     return sg_str
     
 def get_topk_per_object_name(aggr_res, avg_aggr_res, k):
@@ -492,7 +492,7 @@ class VLMPlanner:
         if model_type == "custom":
             self.model = CustomModel(model_name, language_only)
         else:
-            self.model = RemoteModel(model_name, model_type, language_only, tp=tp)
+            self.model = RemoteModel(model_name, model_type, language_only, tp=tp, task_type="alfred")
 
         self.use_feedback = use_feedback
         self.multistep = multistep
@@ -508,12 +508,12 @@ class VLMPlanner:
         
         self.scene_graph_prompt = f'''## You are a robot operating in a home. You are given an image and observe the environment for performing the given task. \
             The input given to you is {'an first person view observation' if not self.multistep else 'latest 3 steps of the first person view observations'}\
-            Please extract the most visually identifiable features and ignore the more subtle ones. 
-            Please deduce the object names with a synonym if the descriptions is verbose or functional. 
+            The input text given to you contains the previous action history, and please deduce the current state from both visual image and previous action histories. \
+            Please deduce the object names with a synonym if the descriptions is verbose or functional, or you cannot find it in the scene. 
             For example, substitute "freshly baked baguette" to "loaves", "portable device to access the internet" to "laptop", "light-emiting device on my desk to provide light for my work area" to "desk lamp".
             You are supposed to output in JSON.'''
             
-        self.scene_graph_prompt_prefix = "\n Scene Graph Information: The current image height is {w}, width is {h}. A missing scene graph means the object is not clearly identifiable from the scene. It does not necessarily means this object is not in the scene. \n"
+        self.scene_graph_prompt_prefix = "\n A missing scene graph means the object is not clearly identifiable from the scene. It does not necessarily means this object is not in the scene. \n"
             
 
         self.grounding_model = gd_Model(
@@ -636,7 +636,7 @@ class VLMPlanner:
             else:
                 scene_graph_prompt += f"The last action succeeds. "
                 
-            scene_graph_prompt += f'\n\n## Now the human instruction is: {user_instruction}.'
+            scene_graph_prompt += f'In the explanation field, please include what are the previous actions that leads you to this description. \n\n## Now the human instruction is: {user_instruction}.'
 
             if self.language_only:
                 prompt += f"""\n\n Considering the above interaction history, to achieve the human instruction: '{user_instruction}', you are supposed to output in json. You need to summarize interaction history {'and environment feedback ' if self.use_feedback else ''}and reason why the last action or plan failed and did not finish the task, output your new plan to achieve the goal from current state. At the end, output the executable plan with action ids(0 ~ {len(self.actions)-1}) from the available actions."""
@@ -666,20 +666,23 @@ class VLMPlanner:
                     len(self.actions) - 1, self.available_action_str, ""
                 )
             prompt += f"\n\n## Now the human instruction is: {user_instruction}."
-            prompt += "\n\n The action history:"
+            
+            action_history_prompt = "\n\n The action history:"
             for i, action_feedback in enumerate(prev_act_feedback):
                 if self.use_feedback:
-                    prompt += "\nStep {}, action id {}, {}, env feedback: {}".format(
+                    action_history_prompt += "\nStep {}, action id {}, {}, env feedback: {}".format(
                         i,
                         action_feedback[0],
                         self.actions[action_feedback[0]],
                         action_feedback[1],
                     )
                 else:
-                    prompt += "\nStep {}, action id {}, {}".format(
+                    action_history_prompt += "\nStep {}, action id {}, {}".format(
                         i, action_feedback[0], self.actions[action_feedback[0]]
                     )
-                  
+            
+            prompt += action_history_prompt
+            scene_graph_prompt += action_history_prompt
                     
             if failure:
                 scene_graph_prompt += f"The last action is invalid, and the feedback is: {blocking_feedback} "
@@ -691,10 +694,11 @@ class VLMPlanner:
             #     f"\n\nLast Visual Description: {self.last_visual_description}\n"
             # )
             
-            scene_graph_prompt += (
-                # f"\n\nEnvironmental Feedback: {last_env_feedback}"
-                f"\n\nReasoning and Reflection: {self.last_reasoning}\n"
-            )
+            # scene_graph_prompt += (
+            #     # f"\n\nEnvironmental Feedback: {last_env_feedback}"
+            #     f"\n\nReasoning and Reflection: {self.last_reasoning}\n"
+            # )
+            
             scene_graph_prompt += f'\n\n## Now the human instruction is: {user_instruction}.'
 
             if self.language_only:
@@ -1430,8 +1434,7 @@ class VLMPlanner:
         out = out.replace("```json", "").replace("```", "")
         out = fix_json(out)
         logger.debug(f"Model Output:\n{out}\n")
-        action, valid = self.json_to_action_altembodiedbench/planner/planner_utils.py(out)
-        
+        action, valid = self.json_to_action_alt(out)
         
         if valid:
             plan = json.loads(out)

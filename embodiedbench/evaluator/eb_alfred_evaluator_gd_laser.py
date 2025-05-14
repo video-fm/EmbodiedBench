@@ -1,4 +1,11 @@
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["remote_url"] = "http://0.0.0.0:15235/v1"
+os.environ["DISPLAY"] = "cherry:12.0"
+os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
+home_dir = "/home/asethi04/embody/EmbodiedBench"
+existing_path = os.environ.get("PYTHONPATH", "")
+os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 import numpy as np
 from tqdm import tqdm
 import time
@@ -338,18 +345,18 @@ if __name__ == '__main__':
 
 
     config = {
-        'model_name': 'gpt-4o',  # 'Qwen/Qwen2-VL-7B-Instruct',
+        'model_name': 'gemini-2.0-flash',  # 'Qwen/Qwen2-VL-7B-Instruct',
         'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'gd_laser',
+        'exp_name': 'gd_laser_gemini',
         'chat_history': 0, 
         'detection_box': True,
         # 'eval_sets': ['base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
         # 'eval_sets': ['visual_appearance'],
         'eval_sets': ['spatial'],
-        'selected_indexes': [i - 1 for i in [35, 38, 39]], 
+        'selected_indexes': [i - 1 for i in [35, 38, 39, 40, 41]], 
         'multistep':0, 
         'block_objects': False,
         'sg_text': True,

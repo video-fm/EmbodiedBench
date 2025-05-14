@@ -205,7 +205,7 @@ def clean_name(input_name):
 def format_scene_graph(target_objects, target_attributes, target_relations):
      # Format structured target state
     if len(target_objects) > 0:
-        clean_obj = [clean_name(target_obj) for target_obj in target_objects ]
+        clean_obj = [target_obj for target_obj in target_objects ]
         object_str = f"The objects are: {clean_obj}"
     else:
         object_str = ""
@@ -216,7 +216,7 @@ def format_scene_graph(target_objects, target_attributes, target_relations):
             if len(attr_info) != 2:
                 continue
             attr, obj = attr_info
-            attr_str_ls.append(f"({attr}, {clean_name(obj)})")
+            attr_str_ls.append(f"({attr}, {obj})")
             
         attr_str = (
             "The attributes are: [" +
@@ -226,10 +226,20 @@ def format_scene_graph(target_objects, target_attributes, target_relations):
     else:
         attr_str = ""
         
+    rel_str_ls = []
+    rel_str = ""
     if len(target_relations) > 0:
+        
+        for target_info in target_relations:
+            if len(target_info) != 3: 
+                continue
+        
+            subj, pred, obj = target_info
+            rel_str_ls.append(f"({subj}, {pred}, {obj})")
+            
         rel_str = (
             "The relations are: [" +
-            ", ".join(f"({clean_name(subj)}, {pred}, {clean_name(obj)})" for subj, pred, obj in target_relations)
+            ", ".join(rel_str_ls)
             + "]" if target_relations else "The relations are: []"
         )
     else:
@@ -258,6 +268,7 @@ def format_state_descriptions(sg_info, current_obj, current_attr, current_rel):
         sg_str += f"The current scene graph: {current_sg_str}\n"
     if not target_sg_str == "":
         sg_str += f"The target state: {target_sg_str}\n"
+        
     sg_str += (f"\n\n The target state: {target_desc}\n" f"The current state: {current_desc}\n")
     sg_str += f"The explanation is: {sg_info['explanation']} \n\n"
     
@@ -1434,7 +1445,7 @@ class VLMPlanner:
                     "content": [{"type": "text", "text": out}],
                 }
             )
-        out = out.replace("'", '"')
+        # out = out.replace("'", '"')
         out = out.replace('"s ', "'s ")
         out = out.replace('"re ', "'re ")
         out = out.replace('"ll ', "'ll ")

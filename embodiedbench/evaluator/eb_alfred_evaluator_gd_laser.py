@@ -226,7 +226,7 @@ class EB_AlfredEvaluator():
             self.planner.set_actions(self.env.language_skill_set)
             done = False
             while not done:
-                try: 
+                # try: 
                     action, reasoning = self.planner.act(img_path, user_instruction)
                     print(f"Planner Output Action: {action}")
                     if action == -2: # empty plan stop here
@@ -294,18 +294,18 @@ class EB_AlfredEvaluator():
                         episode_info['reward'].append(reward)
                         episode_info['num_invalid_actions'] += (info['last_action_success'] == 0)
                 
-                except Exception as e: 
-                    print(e)
-                    test_ct += 1
-                    if test_ct > self.config['max_test_ct']:
-                        if not 'info' in locals():
-                            info = {}
-                            info['task_success'] = False
-                            info['task_progress'] = 0
-                            info["env_step"] = 30
-                            info["episode_elapsed_seconds"] = 1000
-                        break
-                    time.sleep(10)
+                # except Exception as e: 
+                #     print(e)
+                #     test_ct += 1
+                #     if test_ct > self.config['max_test_ct']:
+                #         if not 'info' in locals():
+                #             info = {}
+                #             info['task_success'] = False
+                #             info['task_progress'] = 0
+                #             info["env_step"] = 30
+                #             info["episode_elapsed_seconds"] = 1000
+                #         break
+                #     time.sleep(10)
 
             # evaluation metrics
             episode_info['instruction'] = user_instruction
@@ -356,7 +356,9 @@ if __name__ == '__main__':
         # 'eval_sets': ['base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
         # 'eval_sets': ['visual_appearance'],
         'eval_sets': ['spatial'],
-        'selected_indexes': [i - 1 for i in [35, 38, 39, 40, 41]], 
+        'selected_indexes': [i - 1 for i in [35, 38, 39]], 
+        # 'eval_sets': ['base'],
+        # 'selected_indexes': list(range(5, 10)) + list(range(40,50)),
         'multistep':0, 
         'block_objects': False,
         'sg_text': True,

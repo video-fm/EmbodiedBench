@@ -1,4 +1,5 @@
 outputs/
+data/
 *.pyc
 *__pycache__
 .vscode/

@@ -9,11 +9,23 @@ def count_positive_rewards(file_path):
         data = json.load(f)
     # Assumes 'reward' is either at the top level or inside a list
     if isinstance(data, dict):
-        return int(data.get("reward", 0) > 0)
+        return int(data.get("task_success", 0) > 0)
     elif isinstance(data, list):
         return sum(1 for item in data if isinstance(item, dict) and item.get("reward", 0) > 0)
     return 0
 
+def print_ids(correct_file_names, total_file_names):
+    correct_fids = []
+    incorrect_fids = []
+    for file_name in total_file_names:
+        file_id = int(file_name.split('_')[1])
+        if file_name in correct_file_names:
+            correct_fids.append(file_id)
+        else:
+            incorrect_fids.append(file_id)
+    
+    print(f"corrects: {correct_fids} \n incorrects: {incorrect_fids}")
+    
 def analyze_folders(folder1, folder2):
     files1 = get_json_files(folder1)
     files2 = get_json_files(folder2)
@@ -45,15 +57,15 @@ def analyze_folders(folder1, folder2):
     print(f"unique success in {suc1}")
     print(f"  {folder2}: {len(total_correct2)} success, total {len(overlapping_files)}")
     print(f"unique success in {suc2}")
-    print("end")
-
+    print(f"{folder1}:")
+    print_ids(correct_file_names=total_correct1, total_file_names=overlapping_files)
+    print(f"{folder2}:")
+    print_ids(correct_file_names=total_correct2, total_file_names=overlapping_files)
 
 #'eval_sets': ['base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
 
 # Example usage:
-#   'eval_sets': ['base', 'common_sense', 'long_horizon', 'visual_appearance', 'complex_instruction'], 
-# path1 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_baseline/visual_appearance/results"
-path1 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_2/visual_appearance/results"
+path1 = "/home/asethi04/jiani/EmbodiedBench/running/eb_alfred/gpt-4o_baseline/visual_appearance/results"
 # path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/Qwen2.5-VL-72B-Instruct_gd_laser_topk_3/visual_appearance/results"
 
 # path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_3/base/results"
@@ -62,5 +74,8 @@ path1 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_2/visual_a
 path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_3/visual_appearance/results"
 # path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser/complex_instruction/results"
 
+path2 = "/home/asethi04/jiani/EmbodiedBench/running/eb_alfred/gpt-4o_baseline/visual_appearance/results"
+
+# path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gemini-2.0-flash_gd_laser/complex_instruction/results"
 analyze_folders(path1, path2)
 print("end")

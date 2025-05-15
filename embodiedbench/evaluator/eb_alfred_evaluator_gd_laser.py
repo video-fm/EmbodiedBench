@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from tqdm import tqdm
 import time
@@ -34,7 +35,7 @@ target_examples = [
         "target_attributes": [["yellow", "bottle_1"], ["yellow", "bottle_2"]]
         "target_relations": [["bottle_1", "on", "toilet_1"], ["bottle_2", "on", "toilet_1"]], 
         "current_state": "There are two pink bottles and a toilet in the scene. One pink bottle is on the top of the toilet. I am holding another pink bottle.",
-        "explanation": "I have pick up the spray bottle in step 1, this is the pink bottle on the toilet. I have pick up the spray bottle in step 5, this is the pink bottle I am holding right now. ",
+        "explanation": "I have pick up the spray bottle in step 1, this is the pink bottle on the toilet. I have pick up the spray bottle in step 5, this is the pink bottle I am holding right now. From the possible actions, I may try the soap bottle, wine bottle and glass bottle instead. ",
         "current_objects": ["bottle_1", "bottle_2" "toilet_1"],
         "current_attributes": [["pink", "bottle_1"], ["pink", "bottle_2"]]
         "current_relations": [["bottle_1", "on", "toilet_1"], ["bottle_2", "in front of", "toilet_1"]], 
@@ -338,18 +339,18 @@ if __name__ == '__main__':
 
 
     config = {
-        'model_name': 'gemini-2.0-flash',  # 'Qwen/Qwen2-VL-7B-Instruct',
+        'model_name': 'gpt-4o',  # 'Qwen/Qwen2-VL-7B-Instruct',
         'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'gd_laser_gemini',
+        'exp_name': 'gd_laser',
         'chat_history': 0, 
         'detection_box': True,
         # 'eval_sets': ['base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
         # 'eval_sets': ['visual_appearance'],
-        'eval_sets': ['spatial'],
-        'selected_indexes': [i - 1 for i in [35, 38, 39]], 
+        'eval_sets': ['base'],
+        'selected_indexes': [i - 1 for i in [1, 33, 42, 43, 49, 50, 22, 26, 29]], 
         # 'eval_sets': ['base'],
         # 'selected_indexes': list(range(5, 10)) + list(range(40,50)),
         'multistep':0, 

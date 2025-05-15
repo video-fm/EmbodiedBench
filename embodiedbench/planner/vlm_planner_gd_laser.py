@@ -654,7 +654,7 @@ class VLMPlanner:
             else:
                 scene_graph_prompt += f"The last action succeeds. "
                 
-            scene_graph_prompt += f'In the explanation field, please include what are the previous actions that leads you to this description. \n\n## Now the human instruction is: {user_instruction}.'
+            scene_graph_prompt += f'In the explanation field, please include what are the previous actions that leads you to this description. Also provide candidate related objects if one thing is not found. \n\n## Now the human instruction is: {user_instruction}.'
 
             if self.language_only:
                 prompt += f"""\n\n Considering the above interaction history, to achieve the human instruction: '{user_instruction}', you are supposed to output in json. You need to summarize interaction history {'and environment feedback ' if self.use_feedback else ''}and reason why the last action or plan failed and did not finish the task, output your new plan to achieve the goal from current state. At the end, output the executable plan with action ids(0 ~ {len(self.actions)-1}) from the available actions."""
@@ -1382,7 +1382,7 @@ class VLMPlanner:
         
         if self.scene_graph_text and sg_text is not None:
 
-            marker = "You need to describe current visual state"
+            marker = "Now the human instruction is"
             try:
                 insert_idx = prompt.index(marker)      # first char of the marker
                 prompt = prompt[:insert_idx] + sg_text + prompt[insert_idx:]

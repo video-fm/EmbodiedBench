@@ -50,12 +50,14 @@ def analyze_folders(folder1, folder2):
 #'eval_sets': ['base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
 
 # Example usage:
-path1 = "/home/asethi04/jiani/EmbodiedBench/running/eb_alfred/gpt-4o_gd_laser/complex_instruction/results"
+#   'eval_sets': ['base', 'common_sense', 'long_horizon', 'visual_appearance', 'complex_instruction'], 
+
+path1 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_3/base/results"
 # path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/Qwen2.5-VL-72B-Instruct_gd_laser_topk_3/visual_appearance/results"
 
 # path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_3/visual_appearance/results"
 
-path2 = "/home/asethi04/jiani/EmbodiedBench/running/eb_alfred/gpt-4o_baseline/complex_instruction/results"
+path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_3/base/results"
 
 # path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gemini-2.0-flash_gd_laser/complex_instruction/results"
 analyze_folders(path1, path2)

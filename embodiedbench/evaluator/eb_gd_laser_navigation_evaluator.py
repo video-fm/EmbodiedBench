@@ -98,13 +98,11 @@ class EB_NavigationEvaluator():
             #     # selected_indexes = [i - 1 for i in [44, 45, 47, 49, 50, 51, 52, 54, 56, 57, 59, 33, 34, 32, 35, 37, 38, 40, 42, 43,]]
             #     selected_indexes = [i - 1 for i in [51, 54, 59, 33, 35]]
             
-            if eval_set == "complex_instruction":
-                # selected_indexes = list(range(27, 60))
-                selected_indexes = list(range(18, 60))
-            # if eval_set == "complex_instruction":
-            #     selected_indexes = [i - 1 for i in [38, 26, 44, 35, 18, 33, 43, 23, 32, 54, 49, 9, 8, 58, 57, 30, 16, 17]]
-            else: 
-                selected_indexes = list(range(0, 60))
+            # if eval_set == "common_sense":
+            #     selected_indexes = list(range(0, 20))
+            # else: 
+            
+            selected_indexes = list(reversed(range(0, 60)))
                 
             self.env = EBNavigationEnv(eval_set=self.eval_set, down_sample_ratio=self.config['down_sample_ratio'], 
                                    exp_name=exp_name, multiview=self.config['multiview'], boundingbox=False, 
@@ -298,14 +296,13 @@ if __name__ == '__main__':
     #           'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
     #           'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',}
     
-    config = {'model_name': 'Qwen/Qwen2.5-VL-72B-Instruct', 
+    config = {'model_name': 'gpt-4o', 
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 
             #   'eval_sets': ['base', 'common_sense', 'long_horizon', 'visual_appearance', 'complex_instruction'], 
-            #   'eval_sets': ['long_horizon', 'visual_appearance', 'complex_instruction', 'base', 'common_sense'], 
-              'eval_sets': ['complex_instruction', 'base', 'common_sense', ],
-              
+            #   'eval_sets': ['complex_instruction', 'base', 'common_sense'], 
+              'eval_sets': ['complex_instruction'],               
               'chat_history': True, 
               'n_shots': 3, 
               'multiview': False, 
@@ -314,7 +311,7 @@ if __name__ == '__main__':
               'block_objects': False,
               'multistep': True, 
               'resolution': 500, 
-              'exp_name': 'gd_laser_topk_3', 
+              'exp_name': 'gd', 
               'visual_icl': False, 
               'tp': 4,
               'action_num_per_plan': 5,
@@ -323,9 +320,9 @@ if __name__ == '__main__':
               'purpose': "retest",
               'icl_abl':0, 
               'visual':0,
-              'gd_only': False,
-              'top_k': 3, 
-              'aggr_thres': 0.1,
+              'gd_only': True,
+              'top_k': 1, 
+              'aggr_thres': 0.3,
               'max_test_ct': 5,
               'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
               'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',

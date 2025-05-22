@@ -105,6 +105,18 @@ wget https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0/gro
 export GROUNDING_DINO_PATH=/path/to/your/GroundingDINO
 ```
 
+### LASER Model Setup
+1. Please download the supplementary LASER code:
+
+
+2. Set the environment variable for the LASER model path (replace the path with the actual location of the `src/models` directory):
+```bash
+export LASER_MODEL_PATH=/path/to/your/LASER-unified/src/models
+```
+
+**Note:**
+You must set this environment variable in every shell/session where you run the code, or add it to your `.bashrc`/`.zshrc` for convenience.
+
 ## Start Headless Server
 Please run startx.py script before running experiment on headless servers. The server should be started in another tmux window. We use X_DISPLAY id=1 by default.
 ```bash

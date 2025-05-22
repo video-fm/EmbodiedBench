@@ -45,7 +45,9 @@ import math
 import numpy as np
 
 
-model_lib_path = "/home/jianih/research/LASER/LASER-unified/src/models"
+model_lib_path = os.getenv('LASER_MODEL_PATH')
+if not model_lib_path:
+    raise ValueError("Please set the LASER_MODEL_PATH environment variable to the path of your LASER model installation")
 sys.path.append(model_lib_path)
 
 from llava_clip_model_v3 import PredicateModel as PredicateModel_v3

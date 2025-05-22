@@ -4,12 +4,6 @@ ESCA: Contextualizing Embodied Agents via Scene-Graph Generation
 </h1>
 
 
-<p align="center">
-  📄  <a href=""><strong>Paper</strong></a> |  
-  🤗 <a href="https://huggingface.co/EmbodiedBench"><strong>Dataset</strong></a> |
-  🏠 <a href=""><strong>Project Website</strong></a>
-</p>
-
 
 
 # Overview 
@@ -42,7 +36,6 @@ This repository is built on top of [EmbodiedBench](https://github.com/EmbodiedBe
 
 Download repo
 ```bash
-git clone git@github.com:EmbodiedBench/EmbodiedBench.git
 cd EmbodiedBench
 ```
 

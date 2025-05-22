@@ -11,17 +11,8 @@ ESCA: Contextualizing Embodied Agents via Scene-Graph Generation
 </p>
 
 
-<p align="center">
-    Anonymous Author(s)<br>
-    Affiliation<br>
-    Address<br>
-    email
-</p>
 
-
-<img src="docs/images/framework.png" width="100%" />
-
-# 🔥 Overview 
+# Overview 
 We introduce **ESCA** (Embodied and Scene-Graph Contextualized Agent), a framework designed to contextualize Multi-modal Large Language Models (MLLMs) through open-domain scene graph generation. ESCA provides structured visual grounding, helping MLLMs make sense of complex and ambiguous sensory environments. At its core is SGClip, a CLIP-based model that captures semantic visual features, including entity classes, physical attributes, actions, interactions, and inter-object relations.
 
 ESCA operates as a multi-stage pipeline, generating task-aware scene graphs that reflect both visual content and human instructions. Through experiments on two challenging embodied environments, we demonstrate that ESCA consistently improves the performance of all evaluated MLLMs, including both open-source and proprietary models.
@@ -106,7 +97,7 @@ export GROUNDING_DINO_PATH=/path/to/your/GroundingDINO
 ```
 
 ### LASER Model Setup
-1. Please download the supplementary LASER code:
+1. Please download the supplementary LASER code
 
 
 2. Set the environment variable for the LASER model path (replace the path with the actual location of the `src/models` directory):
@@ -116,6 +107,18 @@ export LASER_MODEL_PATH=/path/to/your/LASER-unified/src/models
 
 **Note:**
 You must set this environment variable in every shell/session where you run the code, or add it to your `.bashrc`/`.zshrc` for convenience.
+
+### LASER Model Weights
+
+Please download the LASER model weights from the following website:
+
+[Download LASER model weights here](<INSERT_LINK_HERE>)
+
+After downloading, move the model file(s) to the `models` directory in your EmbodiedBench folder:
+
+```bash
+mv /path/to/downloaded/model_file.model /path/to/EmbodiedBench/models/
+```
 
 ## Start Headless Server
 Please run startx.py script before running experiment on headless servers. The server should be started in another tmux window. We use X_DISPLAY id=1 by default.
@@ -130,7 +133,7 @@ To run the EB-ALFRED evaluator with ESCA:
 
 ```bash
 conda activate embench
-python -m embodiedbench.evaluator.eb_alfred_evaluator_gd_laser
+python -m embodiedbench.evaluator.eb_esca_alfred_evaluator
 ```
 
 ### EB-Navigation Evaluator
@@ -138,7 +141,7 @@ To run the EB-Navigation evaluator with ESCA:
 
 ```bash
 conda activate embench_nav
-python -m embodiedbench.evaluator.eb_gd_laser_navigation_evaluator
+python -m embodiedbench.evaluator.eb_gd_esca_navigation_evaluator
 ```
 
 Both evaluators support various configuration options through command-line arguments or config files. Key parameters include:
@@ -146,7 +149,7 @@ Both evaluators support various configuration options through command-line argum
 - `n_shots`: Number of examples for few-shot learning
 - `detection_box`: Enable/disable detection box visualization
 - `sg_text`: Enable/disable scene graph text output
-- `gd_only`: Use only Grounding DINO for object detection
+- `gd_only`: Use only Grounding DINO for object detection without the scene graph generation of ESCA
 - `top_k`: Number of top predictions to consider
 - `aggr_thres`: Aggregation threshold for predictions
 

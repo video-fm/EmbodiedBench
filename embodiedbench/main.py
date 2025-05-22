@@ -11,25 +11,14 @@ if not logger.hasHandlers():
     stream_handler.setFormatter(formatter)
     logger.addHandler(stream_handler)
 
-link_path = os.path.join(os.path.dirname(__file__), 'envs/eb_habitat/data')
-try:
-    os.symlink(link_path, 'data')
-except FileExistsError:
-    pass 
-
-
 # the corresponding evaluator class
 class_names = {
-    "eb-alf": "EB_AlfredEvaluator",
-    "eb-hab": "EB_HabitatEvaluator",
     "eb-nav": "EB_NavigationEvaluator",
     "eb-man": "EB_ManipulationEvaluator"
 }
 
 # the evaluator file you want to use
 module_names = {
-    "eb-alf": "eb_alfred_evaluator",
-    "eb-hab": "eb_habitat_evaluator",
     "eb-nav": "eb_navigation_evaluator",
     "eb-man": "eb_manipulation_evaluator"
 }

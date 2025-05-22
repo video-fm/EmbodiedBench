@@ -27,7 +27,10 @@ template_lang = laser_lang_template
 MESSAGE_WINDOW_LEN = 5
 
 import sys
-sys.path.append("/home/jianih/research/GroundingDINO")
+gd_path = os.getenv('GROUNDING_DINO_PATH')
+if not gd_path:
+    raise ValueError("Please set the GROUNDING_DINO_PATH environment variable to the path of your GroundingDINO installation")
+sys.path.append(gd_path)
 from groundingdino.util.inference import Model as gd_Model
 from groundingdino.util.inference import load_image as load_gd_image
 from groundingdino.util.utils import get_phrases_from_posmap
@@ -254,8 +257,7 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
     
         self.grounding_model.model = self.grounding_model.model.to("cuda:0")
         
-        all_model_dir = "/home/jianih/research/LASER/data/LLaVA-Video-178K-v2/models"
-        model_dir = os.path.join(all_model_dir, f"ensemble-02-10")
+        model_dir = os.path.join(os.path.dirname(__file__), "..", "models")
         model_name = "ensemble-2025-02-10-14-57-22"
         epoch = 0
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

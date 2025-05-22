@@ -1,11 +1,4 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-os.environ["remote_url"] = "http://0.0.0.0:15235/v1"
-os.environ["DISPLAY"] = "cherry:12.0"
-os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
-home_dir = "/home/asethi04/embody/EmbodiedBench"
-existing_path = os.environ.get("PYTHONPATH", "")
-os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 import numpy as np
 from tqdm import tqdm
 import time
@@ -55,12 +48,13 @@ class EB_AlfredEvaluator():
         self.config = config
         self.env = None
         self.planner = None
-        # self.gd_checkpoint_path = config['gd_checkpoint_path']
-
-        # self.gd_config_path = config['gd_config_path']
         
-        self.gd_checkpoint_path= "/home/asethi04/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth"
-        self.gd_config_path = "/home/asethi04/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
+        gd_path = os.getenv('GROUNDING_DINO_PATH')
+        if not gd_path:
+            raise ValueError("Please set the GROUNDING_DINO_PATH environment variable to the path of your GroundingDINO installation")
+            
+        self.gd_checkpoint_path = os.path.join(gd_path, 'checkpoints/groundingdino_swint_ogc.pth')
+        self.gd_config_path = os.path.join(gd_path, 'groundingdino/config/GroundingDINO_SwinT_OGC.py')
 
     def check_config_valid(self):
         if self.config['multistep'] + self.config['chat_history'] > 1:
@@ -254,8 +248,7 @@ if __name__ == '__main__':
         'resolution': 500, 
         'env_feedback': 1,
         'tp': 4,
-        'gd_config_path': '/home/asethi04/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
-        'gd_checkpoint_path': '/home/asethi04/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth'
+
     }
 
     args = parse_arguments()

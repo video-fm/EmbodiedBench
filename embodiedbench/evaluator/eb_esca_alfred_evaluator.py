@@ -3,7 +3,7 @@ from tqdm import tqdm
 import time
 import json
 from embodiedbench.envs.eb_alfred.EBAlfEnv import EBAlfEnv, ValidEvalSets
-from embodiedbench.planner.vlm_planner_gd_laser import VLMPlanner
+from embodiedbench.planner.vlm_planner_gd_esca import VLMPlanner
 from embodiedbench.evaluator.summarize_result import average_json_values
 from embodiedbench.evaluator.evaluator_utils import load_saved_data, update_config_with_args
 from embodiedbench.evaluator.config.system_prompts import alfred_laser_system_prompt
@@ -133,12 +133,12 @@ class EB_AlfredEvaluator():
         self.config = config
         self.env = None
         self.planner = None
-        # self.gd_checkpoint_path = config['gd_checkpoint_path']
-
-        # self.gd_config_path = config['gd_config_path']
-        
-        self.gd_checkpoint_path= "/home/asethi04/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth"
-        self.gd_config_path = "/home/asethi04/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
+        gd_path = os.getenv('GROUNDING_DINO_PATH')
+        if not gd_path:
+            raise ValueError("Please set the GROUNDING_DINO_PATH environment variable to the path of your GroundingDINO installation")
+            
+        self.gd_checkpoint_path = os.path.join(gd_path, 'checkpoints/groundingdino_swint_ogc.pth')
+        self.gd_config_path = os.path.join(gd_path, 'groundingdino/config/GroundingDINO_SwinT_OGC.py')
 
     def check_config_valid(self):
         if self.config['multistep'] + self.config['chat_history'] > 1:
@@ -346,12 +346,8 @@ if __name__ == '__main__':
         'exp_name': 'gd_laser_gemini',
         'chat_history': 0, 
         'detection_box': True,
-        # 'eval_sets': ['base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
-        # 'eval_sets': ['visual_appearance'],
-        'eval_sets': ['spatial'],
-        'selected_indexes': [i - 1 for i in [35, 38, 39]], 
-        # 'eval_sets': ['base'],
-        # 'selected_indexes': list(range(5, 10)) + list(range(40,50)),
+        'eval_sets': ['base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
+        'selected_indexes': [], 
         'multistep':0, 
         'block_objects': False,
         'sg_text': True,
@@ -367,8 +363,6 @@ if __name__ == '__main__':
         'gd_only': False,
         'top_k': 3, 
         'aggr_thres': 0.2,
-        'gd_config_path': '/home/asethi04/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
-        'gd_checkpoint_path': '/home/asethi04/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',
         'gd_box_threshold': 0.25, 
         'gd_text_threshold': 0.3,
         'max_test_ct': 5,

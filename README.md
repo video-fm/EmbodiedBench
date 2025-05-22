@@ -1,89 +1,52 @@
 <h1 align="center">
 <img src="docs/images/embodied-logo.png" alt="embodied-logo" width="40" height="40" style="vertical-align: middle; margin-top: -12px;">
-EmbodiedBench: Comprehensive Benchmarking Multi-modal Large Language Models for Vision-Driven Embodied Agents
+ESCA: Contextualizing Embodied Agents via Scene-Graph Generation
 </h1>
 
 
 <p align="center">
-  📄  <a href="http://arxiv.org/abs/2502.09560"><strong>Paper</strong></a> |  
+  📄  <a href=""><strong>Paper</strong></a> |  
   🤗 <a href="https://huggingface.co/EmbodiedBench"><strong>Dataset</strong></a> |
-  🏠 <a href="https://embodiedbench.github.io"><strong>Project Website</strong></a>
+  🏠 <a href=""><strong>Project Website</strong></a>
 </p>
 
 
 <p align="center">
-    <a href="https://yangrui2015.github.io/">Rui Yang*</a>, 
-    <a href="">Hanyang Chen*</a>, 
-    <a href="https://jyzhang1208.github.io/">Junyu Zhang*</a>, 
-    <a href="">Mark Zhao*</a>, 
-    <a href="https://qiancheng0.github.io/">Cheng Qian</a>, 
-    <a href="https://jameskrw.github.io/">Kangrui Wang</a>, 
-    <a href="https://qinengwang-aiden.github.io/">Qineng Wang</a>, 
-    <a href="">Teja Venkat Koripella</a>, 
-    <a href="">Marziyeh Movahedi</a>, 
-    <a href="https://limanling.github.io/">Manling Li</a>, 
-    <a href="https://blender.cs.illinois.edu/hengji.html">Heng Ji</a>, 
-    <a href="https://www.huan-zhang.com/">Huan Zhang</a>, 
-    <a href="https://tongzhang-ml.org/">Tong Zhang</a>
+    Anonymous Author(s)<br>
+    Affiliation<br>
+    Address<br>
+    email
 </p>
-<p align="center">University of Illinois Urbana-Champaign, Northwestern University, University of Toronto, Toyota Technological Institute at Chicago</p>
 
 
 <img src="docs/images/framework.png" width="100%" />
 
 # 🔥 Overview 
-We introduce **EmbodiedBench**, a comprehensive benchmark designed to evaluate **Multi-modal Large Language Models (MLLMs) as embodied agents**. While existing benchmarks have primarily focused on Large Language Models (LLMs) and high-level tasks, EmbodiedBench takes a leap forward by offering a comprehensive, fine-grained evaluation of MLLM-based agents across both **high-level and low-level tasks**, as well as **six critical agent capabilities**. 
+We introduce **ESCA** (Embodied and Scene-Graph Contextualized Agent), a framework designed to contextualize Multi-modal Large Language Models (MLLMs) through open-domain scene graph generation. ESCA provides structured visual grounding, helping MLLMs make sense of complex and ambiguous sensory environments. At its core is SGClip, a CLIP-based model that captures semantic visual features, including entity classes, physical attributes, actions, interactions, and inter-object relations.
 
-EmbodiedBench is more than a benchmark—it’s a **multifaceted, standardized evaluation platform** that not only uncovers the current challenges in embodied AI but also provides actionable insights to push the boundaries of MLLM-driven embodied agents.  
+ESCA operates as a multi-stage pipeline, generating task-aware scene graphs that reflect both visual content and human instructions. Through experiments on two challenging embodied environments, we demonstrate that ESCA consistently improves the performance of all evaluated MLLMs, including both open-source and proprietary models.
 
 
 ## 🚀 **Key Features** 
 
-- 🛠️ **Diverse Tasks with Hierarchical Action Levels:**  
-  **1,128 testing tasks** across four environments, spanning from high-level tasks (EB-ALFRED and EB-Habitat) to low-level tasks (EB-Navigation and EB-Manipulation). We created new high-quality datasets and enhanced existing simulators to support comprehensive assessments.
+- 🛠️ **Structured Scene Understanding:**  
+  ESCA decomposes visual understanding into four modular stages: concept extraction, object identification, scene graph prediction, and visual summarization.
 
-- 🎯 **Capability-Oriented Evaluation:**  
-  **Six specialized subsets** to evaluate essential agent capabilities, including commonsense reasoning, complex instruction, spatial awareness, visual perception, and long-term planning. 
+- 🎯 **SGClip Model:**  
+  A CLIP-based foundation model for structured scene understanding that supports open-domain concept coverage and probabilistic predictions.
 
-- ⚡ **Unified APIs for Embodied Environments:**  
-  EmbodiedBench provides **[Gym](https://github.com/openai/gym)-style APIs for all environments**, ensuring ease of use and seamless agent evaluation.  
+- ⚡ **Transfer Protocol:**  
+  A general transfer protocol based on customizable prompt templates that enables ESCA to generalize across different downstream tasks.
 
-- 🏹 **Effortless MLLM/LLM Evaluation (API & Local Support):**  
-  - Supports **proprietary** (e.g., OpenAI API) and **open-source models** (local execution).  
-  - Enables self-hosted model evaluation using OpenAI API-style calls or offline execution based on [LMDeploy](https://github.com/InternLM/lmdeploy).  
-  - While mainly focused on MLLMs, EmbodiedBench also supports **LLM evaluation**.  
+- 🏹 **ESCA-Video-87K Dataset:**  
+  A large-scale dataset with 87K video clips, paired with natural language captions, object traces, and spatial-temporal programmatic specifications.
 
-
-- 🔧 **Configurable Textual and Visual Designs:**  
-Our flexible configuration options enable in-depth experimentation with **visual input**, **textual and visual in-context prompts**, **environment feedback**, **camera resolution**, **detection boxes**, and **multi-step/multi-view image inputs** and more, empowering researchers to better understand the role of each component in agent performance.
-
-
-### Planning Examples in EB-ALFRED and EB-Manipulation
-<img src="docs/images/planning_example.png" width="100%" />
-
-
-### Comparison with related benchmarks
-
-"Fine-grained" indicates a multi-dimensional evaluation approach rather than an overall accuracy.  
-¹AgentBench and VisualAgentBench include domains such as household, games, and web.  
-²VLABench is originally used for evaluating VLA models.
-
-| Benchmark | Category | Action Level | #Env. | #Test Tasks | Multimodal | Fine-grained | LLM/VLM Support |
-|-----------|----------|--------------|------|-------------|------------|--------------|-----------------|
-| Alfred  | Household | High | 1 | 3062 | ✅ | ❌ | ❌ |
-| VLMbench  | Manipulation | Low | 1 | 4760 | ✅ | ❌ | ❌ |
-| Language Rearrangement  | Household | High | 1 | 1000 | ✅ | ✅ | ❌ |
-| GOAT-bench  | Navigation | Low | 1 | 3919 | ✅ | ❌ | ❌ |
-| AgentBench  | Multi-domain¹ | High | 8 | 1091 | ❌ | ❌ | ✅ |
-| Lota-bench  | Household | High | 2 | 308 | ❌ | ❌ | ✅ |
-| VisualAgentBench  | Multi-domain¹ | High | 5 | 746 | ✅ | ❌ | ✅ |
-| Embodied Agent Interface  | Household | High | 2 | 438 | ❌ | ✅ | ✅ |
-| VLABench  | Manipulation | Low² | 1 | 100 | ✅ | ✅ | ✅ |
-| **EmbodiedBench (ours)** | Multi-domain | High & Low | 4 | 1128 | ✅ | ✅ | ✅ |
-
-
+- 🔧 **Neurosymbolic Learning:**  
+  A model-driven, self-supervised learning pipeline that eliminates the need for manual scene graph annotations.
 
 # 🖥️ Installation
+This repository is built on top of [EmbodiedBench](https://github.com/EmbodiedBench/EmbodiedBench). We maintain all the original setup instructions while adding our ESCA-specific components.
+
 **Note: we need to install three conda environments, one for EB-ALFRED and EB-Habitat, one for EB-Navigation, and one for EB-Manipulation. Please use ssh download instead of HTTP download to avoid error during git lfs pull.**
 
 Download repo
@@ -120,230 +83,72 @@ git lfs install
 git lfs pull
 ```
 
+## Environment Setup
+
+### GroundingDINO Setup
+1. Clone the GroundingDINO repository:
+```bash
+git clone https://github.com/IDEA-Research/GroundingDINO.git
+```
+
+2. Download the required model files:
+```bash
+# Create checkpoints directory
+mkdir -p GroundingDINO/checkpoints
+
+# Download the model checkpoint
+wget https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0/groundingdino_swint_ogc.pth -P GroundingDINO/checkpoints/
+```
+
+3. Set the environment variable for GroundingDINO path:
+```bash
+export GROUNDING_DINO_PATH=/path/to/your/GroundingDINO
+```
+
 ## Start Headless Server
 Please run startx.py script before running experiment on headless servers. The server should be started in another tmux window. We use X_DISPLAY id=1 by default.
 ```bash
 python -m embodiedbench.envs.eb_alfred.scripts.startx 1
 ```
 
-## EB-Alfred
-Download dataset from huggingface.
-```bash
-conda activate embench
-git clone https://huggingface.co/datasets/EmbodiedBench/EB-ALFRED
-mv EB-ALFRED embodiedbench/envs/eb_alfred/data/json_2.1.0
-```
-Run the following code to ensure the EB-ALFRED environment is working correctly. `Remember to start headless server.`
+## Running ESCA Evaluators
+
+### EB-ALFRED Evaluator
+To run the EB-ALFRED evaluator with ESCA:
 
 ```bash
 conda activate embench
-python -m embodiedbench.envs.eb_alfred.EBAlfEnv
+python -m embodiedbench.evaluator.eb_alfred_evaluator_gd_laser
 ```
 
-## EB-Habitat
+### EB-Navigation Evaluator
+To run the EB-Navigation evaluator with ESCA:
 
-- Install [Habitat-Sim](https://github.com/facebookresearch/habitat-sim) and [Habitat-Lab](https://github.com/facebookresearch/habitat-lab) via
-
- ```bash
-conda activate embench
-conda install -y habitat-sim==0.3.0 withbullet  headless -c conda-forge -c aihabitat
-git clone -b 'v0.3.0' --depth 1 https://github.com/facebookresearch/habitat-lab.git ./habitat-lab
-cd ./habitat-lab
-pip install -e habitat-lab
-cd ..
- ```
-
-- Download YCB and ReplicaCAD dataset for the Language Rearrangement task. 
-```bash
-conda install -y -c conda-forge git-lfs
-python -m habitat_sim.utils.datasets_download --uids rearrange_task_assets
-mv data embodiedbench/envs/eb_habitat
-```
-After the above step, there should be a data folder under envs/eb_habitat.
-
-Run the following code to ensure the EB-Habitat environment is working correctly.
-```bash
-conda activate embench
-python -m embodiedbench.envs.eb_habitat.EBHabEnv
-```
-
-## EB-Navigation
-
-Run the following code to ensure the EB-Navigation environment is working correctly.
 ```bash
 conda activate embench_nav
-python -m embodiedbench.envs.eb_navigation.EBNavEnv
+python -m embodiedbench.evaluator.eb_gd_laser_navigation_evaluator
 ```
 
-## EB-Manipulation
-* Install Coppelia Simulator
-
-CoppeliaSim V4.1.0 required for Ubuntu 20.04; you can find other versions here (https://www.coppeliarobotics.com/previousVersions#)
-
-```bash
-conda activate embench_man
-cd embodiedbench/envs/eb_manipulation
-wget https://downloads.coppeliarobotics.com/V4_1_0/CoppeliaSim_Pro_V4_1_0_Ubuntu20_04.tar.xz
-tar -xf CoppeliaSim_Pro_V4_1_0_Ubuntu20_04.tar.xz
-rm CoppeliaSim_Pro_V4_1_0_Ubuntu20_04.tar.xz
-mv CoppeliaSim_Pro_V4_1_0_Ubuntu20_04/ /PATH/YOU/WANT/TO/PLACE/COPPELIASIM
-```
-
-* Add the following to your *~/.bashrc* file:
-
-```bash
-export COPPELIASIM_ROOT=/PATH/YOU/WANT/TO/PLACE/COPPELIASIM
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$COPPELIASIM_ROOT
-export QT_QPA_PLATFORM_PLUGIN_PATH=$COPPELIASIM_ROOT
-```
-
-> Remember to source your bashrc (`source ~/.bashrc`) or 
-zshrc (`source ~/.zshrc`) after this.
-
-* Install the PyRep, EB-Manipulation package and dataset:
-```bash
-git clone https://github.com/stepjam/PyRep.git
-cd PyRep
-pip install -r requirements.txt
-pip install -e .
-cd ..
-pip install -r requirements.txt
-pip install -e .
-cp ./simAddOnScript_PyRep.lua $COPPELIASIM_ROOT
-git clone https://huggingface.co/datasets/EmbodiedBench/EB-Manipulation
-mv EB-Manipulation/data/ ./
-rm -rf EB-Manipulation/
-cd ../../..
-```
-
-> Remember that whenever you re-install the PyRep, simAddOnScript_PyRep.lua will be overwritten. Then, you should copy this again.
-
-* Run the following code to ensure the EB-Manipulation is working correctly (start headless server if you have not):
-```bash
-conda activate embench_man
-export DISPLAY=:1
-python -m embodiedbench.envs.eb_manipulation.EBManEnv
-```
-
-
-# 🚀 Quick Start
-### Proprietary Models
-Before running evaluations, set up your environment variables if you plan to use proprietary models:
-```bash
-export OPENAI_API_KEY="your_oai_api_key_here"
-export GEMINI_API_KEY="your_gemini_api_key_here"
-export ANTHROPIC_API_KEY="your_anpic_api_key_here"
-export DASHSCOPE_API_KEY="your_dashscope_api_here" # the official qwen apis
-```
-To evaluate MLLMs in EmbodiedBench, activate the corresponding Conda environment and run:
-```bash
-conda activate embench
-python -m embodiedbench.main env=eb-alf model_name=gpt-4o-mini exp_name='baseline'
-python -m embodiedbench.main env=eb-hab model_name=gpt-4o-mini exp_name='baseline'
-
-conda activate embench_nav
-python -m embodiedbench.main env=eb-nav model_name=gpt-4o exp_name='baseline'
-
-conda activate embench_man 
-python -m embodiedbench.main env=eb-man model_name=claude-3-5-sonnet-20241022 exp_name='baseline'
-```
-#### Configuration Options
-You can customize the evaluation using the following flags:
-- **`env`**: The environment to test. Choose from:  
-  - `'eb-alf'` (EB-ALFREd)  
-  - `'eb-hab'` (EB-Habitat)  
-  - `'eb-man'` (EB-Manipulation)  
-  - `'eb-nav'` (EB-Navigation)  
-
-- **`model_name`**: Full model name, including proprietary options like:  
-  - `'gpt-4o'`, `'gpt-4o-mini'`, `'claude-3-5-sonnet-20241022'`, `'gemini-1.5-pro'`, `'gemini-2.0-flash-exp'`, `'gemini-1.5-flash'`  
-
-- **`model_type`**: Set to `'remote'` by default.  
-- **`down_sample_ratio`**: Data sampling ratio (default `1.0`). Use `0.1` for debugging (10% of the dataset).  
-- **`language_only`**: If `True` (or `1`), the agent receives only text input (default: `False`).  
-- **`eval_sets`**: List of subsets to evaluate (default: all subsets).  
-- **`chat_history`**: Enables multi-turn interaction (`False` by default, as it may reduce performance).  
-- **`n_shots`**: Maximum number of textual examples for in-context learning (varies by environment).  
-- **`multiview`**: Uses multi-view images as input (only for EB-Manipulation & EB-Navigation, default: `False`).  
-- **`multistep`**: Includes historical multi-step images (`False` by default).  
-- **`detection_box`**: Enables detection box input (valid for EB-ALFREd, EB-Navigation, and EB-Manipulation).  
-- **`resolution`**: Image resolution (default: `500`).  
-- **`exp_name`**: Name of the experiment, used in logging.  
-- **`visual_icl`**: Enables visual in-context learning (`False` by default).  
-- **`log_level`**: Sets the logging level (`INFO` by default). Use `DEBUG` for debugging purpose.
-
-> ⚠️ **Important:** Avoid enabling multiple flags simultaneously from `visual_icl`, `multiview`, `multistep`, and `chat_history` to prevent excessive image inputs and conflicts.  
-
----
-
-### Open-source Models
-We support two deployment methods for open-source models: **offline running** and **model serving**.  
-
-#### **1️⃣ Offline Running**  
-For local execution, set `model_type=local` and adjust `tp` (tensor parallelism) based on GPU memory.  
-- A rough guideline: For 48GB GPUs, use `tp = ceil(model size (in B) / 10)`.  
-```bash
-conda activate embench
-python -m embodiedbench.main env=eb-alf model_name=Qwen/Qwen2-VL-7B-Instruct model_type=local exp_name='baseline' tp=1
-python -m embodiedbench.main env=eb-hab model_name=OpenGVLab/InternVL2_5-8B model_type=local exp_name='baseline' tp=1
-
-
-conda activate embench_nav
-python -m embodiedbench.main env=eb-nav model_name=OpenGVLab/InternVL2_5-38B model_type=local exp_name='baseline' tp=4
-
-conda activate embench_man 
-python -m embodiedbench.main env=eb-man model_name=meta-llama/Llama-3.2-11B-Vision-Instruct model_type=local exp_name='baseline' tp=2
-```
-
-#### **2️⃣ Online Model Serving (Recommended)**  
-Model serving decouples **model execution** from **evaluation**, allowing flexible deployment via API calls.  
-```bash
-## Step 0, create an environment for lmdeploy
-conda env create -f conda_envs/lmdeploy.yaml
-conda activate lmdeploy
-pip install lmdeploy
-
-## Step 1, open another tmux window, runing the model
-lmdeploy serve api_server "OpenGVLab/InternVL2_5-8B" --server-port $port --tp 1
-
-## Step 2, running the evaluation
-conda activate embench
-export remote_url='IP_address:port/v1' # set the address for access
-python -m embodiedbench.main env=eb-hab model_name=OpenGVLab/InternVL2_5-8B exp_name='baseline' 
-```
-You can also refer to [LMDeploy](https://github.com/InternLM/lmdeploy) for more details.
-
-
-#### **3️⃣ Online Serving for Unsupported Models**  
-Lmdeploy often lags behind the release of new models. To address this, we offer a more flexible and dynamic model serving approach. Follow these steps to deploy and evaluate new models:
-
-```bash
-## 1. Modify the code and hyperparameters in `server.py` according to your requirements.
-## We now support "microsoft/Phi-4-multimodal-instruct", 'AIDC-AI/Ovis2-16B', 'AIDC-AI/Ovis2-34B', 'google/gemma-3-12b-it' 
-## 2. Start the server and install any necessary packages:
-pip install flask
-CUDA_VISIBLE_DEVICES=${gpu_ids} python server.py
-
-## 3. Run the evaluation in custom mode:
-export server_url="IP_address:port/process"
-python -m embodiedbench.main env=eb-hab model_name='microsoft/Phi-4-multimodal-instruct' model_type='custom' exp_name='new_model'
-```
-
-
-## Docker
-We have provided a docker file under the Docker folder. 
-
-
-# Update History
-- 2025.03.19, provide support for new MLLMs including "microsoft/Phi-4-multimodal-instruct", 'AIDC-AI/Ovis2-16B', 'AIDC-AI/Ovis2-34B', 'google/gemma-3-12b-it', fix some common generated JSON errors.
-
-
-
-# Acknowledgement
-This repo is based on awesome embodied benchmarks and simulations [Lota-Bench](https://github.com/lbaa2022/LLMTaskPlanning), [ALFRED](https://github.com/askforalfred/alfred), [ai2thor](https://github.com/allenai/ai2thor), [EmbodiedAgentInterface](https://github.com/embodied-agent-interface/embodied-agent-interface), [ML-Llarp](https://github.com/apple/ml-llarp), [Habitat](https://github.com/facebookresearch/habitat-lab), [VLMBench](https://github.com/eric-ai-lab/VLMbench), and [RLBench](https://github.com/stepjam/RLBench). Our open-source model deployment is based on [LMDeploy](https://github.com/InternLM/lmdeploy). 
+Both evaluators support various configuration options through command-line arguments or config files. Key parameters include:
+- `model_name`: The MLLM to use (e.g., 'gpt-4o', 'gemini-2.0-flash')
+- `n_shots`: Number of examples for few-shot learning
+- `detection_box`: Enable/disable detection box visualization
+- `sg_text`: Enable/disable scene graph text output
+- `gd_only`: Use only Grounding DINO for object detection
+- `top_k`: Number of top predictions to consider
+- `aggr_thres`: Aggregation threshold for predictions
 
 # Citation
+If you use this codebase, please cite both our paper and the original EmbodiedBench paper:
+
 ```
+@article{esca2025,
+  title={ESCA: Contextualizing Embodied Agents via Scene-Graph Generation},
+  author={Anonymous Author(s)},
+  journal={arXiv preprint},
+  year={2025}
+}
+
 @article{yang2025embodiedbench,
   title={EmbodiedBench: Comprehensive Benchmarking Multi-modal Large Language Models for Vision-Driven Embodied Agents},
   author={Yang, Rui and Chen, Hanyang and Zhang, Junyu and Zhao, Mark and Qian, Cheng and Wang, Kangrui and Wang, Qineng and Koripella, Teja Venkat and Movahedi, Marziyeh and Li, Manling and others},

@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 import json
 from embodiedbench.envs.eb_navigation.EBNavEnv import EBNavigationEnv, ValidEvalSets
-from embodiedbench.planner.nav_planner_gd_laser import EBNavigationPlanner
+from embodiedbench.planner.nav_planner_gd_esca import EBNavigationPlanner
 from embodiedbench.evaluator.summarize_result import average_json_values
 import sys
 import warnings
@@ -58,8 +58,8 @@ class EB_NavigationEvaluator():
 
         self.model_name = config['model_name']
         self.eval_sets = config["eval_sets"]
-        self.gd_checkpoint_path = config['gd_checkpoint_path']
-        self.gd_config_path = config['gd_config_path']
+        self.gd_checkpoint_path = None
+        self.gd_config_path = None
         self.eval_set = None
         self.config = config
 
@@ -70,6 +70,13 @@ class EB_NavigationEvaluator():
         
         self.env = None
         self.planner = None
+
+        gd_path = os.getenv('GROUNDING_DINO_PATH')
+        if not gd_path:
+            raise ValueError("Please set the GROUNDING_DINO_PATH environment variable to the path of your GroundingDINO installation")
+            
+        self.gd_checkpoint_path = os.path.join(gd_path, 'checkpoints/groundingdino_swint_ogc.pth')
+        self.gd_config_path = os.path.join(gd_path, 'groundingdino/config/GroundingDINO_SwinT_OGC.py')
 
     def save_episode_metric(self, episode_info):
         episode_idx = self.env._current_episode_num if not len(self.env.selected_indexes) else self.env.selected_indexes[self.env._current_episode_num - 1] + 1
@@ -205,13 +212,9 @@ class EB_NavigationEvaluator():
             episode_info['instruction'] = user_instruction
             episode_info['reward'] = np.mean(episode_info['reward'])
             episode_info['task_success'] = info['task_success']
-            # episode_info["task_progress"] = info['task_progress']
-            # episode_info['subgoal_reward'] = info['subgoal_reward']
             episode_info['num_steps'] = info["env_step"]
             episode_info['planner_steps'] = self.planner.planner_steps
             episode_info['planner_output_error'] = self.planner.output_json_error
-            # episode_info["num_invalid_actions"] = info["num_invalid_actions"]
-            # episode_info["num_invalid_action_ratio"] = info["num_invalid_actions"] / info["env_step"]
             episode_info["episode_elapsed_seconds"] = info["episode_elapsed_seconds"]
             self.save_episode_metric(episode_info)
             progress_bar.update()
@@ -254,55 +257,13 @@ def save_video_from_rgb_images(images, output_path, fps=30):
     print(f"Video saved to {output_path}")
     
 if __name__ == '__main__':
-    
-    # config = {
-    #     'model_name': sys.argv[2],  #'gpt-4o-mini', claude-3-5-sonnet-20241022, sys.argv[2]
-    #     # 'model_name': "OpenGVLab/InternVL2_5-38B",
-    #     'down_sample_ratio': 1, # 0.000666,
-    #     'model_type': 'remote',
-    #     'language_only': False,
-    #     'dataset': sys.argv[1],
-    #     'chat_history': True, 
-    #     'action_num_per_plan': 5,
-    #     'fov': 100,
-    #     'n_shots' : int(sys.argv[4]),   # int(sys.argv[3])
-    #     'sleep_time':  0, #int(sys.argv[3]),
-    #     'multiview': 0, #sys.argv[3]=='1',
-    #     'boundingbox': 0, #sys.argv[4]=='1',
-    #     'target_only': 0, #sys.argv[5]=='1',
-    #     'multistep':0, #sys.argv[6]=='1',
-    #     'resolution': 500, #int(sys.argv[7]),
-    #     'purpose': "retest", #sys.argv[8],
-    #     'exp_name': sys.argv[3],
-    #     'icl_abl':0, #sys.argv[10]=='1',
-    #     'visual':0 #sys.argv[11]=='1',
-    # }
-    
-    # config = {'model_name': 'OpenGVLab/InternVL2_5-38B-MPO', 
-    #           'down_sample_ratio': 1, 
-    #           'model_type': 'remote', 
-    #           'language_only': False, 
-    #         #  'eval_sets': [ 'base', 'visual_appearance', 'common_sense', 'complex_instruction', 'long_horizon'], 
-    #           'eval_sets': ['long_horizon'], 
-    #           'chat_history': False, 
-    #           'n_shots': 3, 
-    #           'multiview': False, 
-    #           'detection_box': False, 
-    #           'multistep': False, 
-    #           'resolution': 500, 
-    #           'exp_name': 'base_gd_laser_two_imgs', 
-    #           'visual_icl': False, 
-    #           'tp': 4, 
-    #           'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
-    #           'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',}
+
     
     config = {'model_name': 'gpt-4o', 
               'down_sample_ratio': 1, 
               'model_type': 'remote', 
               'language_only': False, 
-            #   'eval_sets': ['base', 'common_sense', 'long_horizon', 'visual_appearance', 'complex_instruction'], 
-            #   'eval_sets': ['complex_instruction', 'base', 'common_sense'], 
-              'eval_sets': ['complex_instruction'],               
+              'eval_sets': ['base', 'common_sense', 'long_horizon', 'visual_appearance', 'complex_instruction'], 
               'chat_history': True, 
               'n_shots': 3, 
               'multiview': False, 
@@ -324,8 +285,6 @@ if __name__ == '__main__':
               'top_k': 1, 
               'aggr_thres': 0.3,
               'max_test_ct': 5,
-              'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
-              'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',
               }
               
     evaluator = EB_NavigationEvaluator(config)

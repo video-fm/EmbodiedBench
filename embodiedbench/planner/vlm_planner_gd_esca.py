@@ -32,7 +32,10 @@ MESSAGE_WINDOW_LEN = 5
 
 import sys
 
-sys.path.append("/home/jianih/research/GroundingDINO")
+gd_path = os.getenv('GROUNDING_DINO_PATH')
+if not gd_path:
+    raise ValueError("Please set the GROUNDING_DINO_PATH environment variable to the path of your GroundingDINO installation")
+sys.path.append(gd_path)
 from groundingdino.util.inference import Model as gd_Model
 from groundingdino.util.inference import load_image as load_gd_image
 from groundingdino.util.utils import get_phrases_from_posmap
@@ -547,16 +550,12 @@ class VLMPlanner:
         self.aggr_thres = aggr_thres
         self.k = top_k
         
-        all_model_dir = "/home/asethi04/common-data/jiani_common/llava_models"
-        model_dir = os.path.join(all_model_dir, f"ensemble-02-10")
+        model_dir = os.path.join(os.path.dirname(__file__), "..", "models")
         model_name = "ensemble-2025-02-10-14-57-22"
         epoch = 0
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.predicate_model = load_model(model_dir, model_name, epoch, device)
-        # clip_model_name = "openai/clip-vit-base-patch16"
-        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # self.predicate_model = PredicateModel_v3(hidden_dim = 128, num_top_pairs=1, device=device, model_name=clip_model_name).to(device)
         
         self.common_objects = ["wall", "door", "cabinet", "stove", "counter", "window", "other"]
 

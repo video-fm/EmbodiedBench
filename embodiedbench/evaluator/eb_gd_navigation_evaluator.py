@@ -24,8 +24,13 @@ class EB_NavigationEvaluator():
 
         self.model_name = config['model_name']
         self.eval_sets = config["eval_sets"]
-        self.gd_checkpoint_path = config['gd_checkpoint_path']
-        self.gd_config_path = config['gd_config_path']
+        gd_path = os.getenv('GROUNDING_DINO_PATH')
+        if not gd_path:
+            raise ValueError("Please set the GROUNDING_DINO_PATH environment variable to the path of your GroundingDINO installation")
+            
+        self.gd_checkpoint_path = os.path.join(gd_path, 'checkpoints/groundingdino_swint_ogc.pth')
+        self.gd_config_path = os.path.join(gd_path, 'groundingdino/config/GroundingDINO_SwinT_OGC.py')
+        
         self.eval_set = None
         self.config = config
 
@@ -231,8 +236,7 @@ if __name__ == '__main__':
               'exp_name': 'multistep_baseline_gd_two_imgs', 
               'visual_icl': False, 
               'tp': 4, 
-              'gd_config_path': '/home/jianih/research/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
-              'gd_checkpoint_path': '/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',}
+              }
     
     evaluator = EB_NavigationEvaluator(config)
     evaluator.evaluate_main()

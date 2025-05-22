@@ -21,7 +21,12 @@ template_lang = template_lang
 MESSAGE_WINDOW_LEN = 5
 
 import sys
-sys.path.append("/home/asethi04/GroundingDINO")
+import os
+
+gd_path = os.getenv('GROUNDING_DINO_PATH')
+if not gd_path:
+    raise ValueError("Please set the GROUNDING_DINO_PATH environment variable to the path of your GroundingDINO installation")
+sys.path.append(gd_path)
 from groundingdino.util.inference import Model as gd_Model
 from groundingdino.util.inference import load_image as load_gd_image
 from groundingdino.util.utils import get_phrases_from_posmap

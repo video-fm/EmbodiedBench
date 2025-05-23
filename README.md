@@ -138,6 +138,13 @@ wget https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0/gro
 export GROUNDING_DINO_PATH=/path/to/your/GroundingDINO
 ```
 
+### SAM 2.1 Setup
+1. Clone the SAM2 repository:
+```bash
+git clone https://github.com/facebookresearch/sam2.git
+```
+2. Follow the instructions in SAM2's README to finish the setup
+
 ### LASER Model Setup
 1. Please download the supplementary LASER code
 

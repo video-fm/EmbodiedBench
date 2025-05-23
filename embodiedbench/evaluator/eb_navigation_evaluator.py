@@ -58,10 +58,7 @@ class EB_NavigationEvaluator():
             logger.info(f'Current eval set: {eval_set}')
             exp_name = f"{self.model_name.split('/')[-1]}_{self.config['exp_name']}/{eval_set}" if len(self.config['exp_name']) else f"{self.model_name.split('/')[-1]}/{eval_set}"
 
-            if eval_set == "base":
-                selected_indexes = list(range(0, 60))
-            else: 
-                selected_indexes = list(range(0, 60))
+            selected_indexes = [44]
                 
             self.env = EBNavigationEnv(eval_set=self.eval_set, down_sample_ratio=self.config['down_sample_ratio'], 
                                    exp_name=exp_name, multiview=self.config['multiview'], boundingbox=self.config['detection_box'], 
@@ -302,7 +299,7 @@ if __name__ == '__main__':
               'model_type': 'remote', 
               'language_only': False, 
             #   'eval_sets': ['common_sense', 'base',  'visual_appearance', 'complex_instruction', 'long_horizon'], 
-              'eval_sets': ['long_horizon'], 
+              'eval_sets': ['visual_appearance'], 
               'chat_history': False, 
               'n_shots': 3, 
               'multiview': False, 

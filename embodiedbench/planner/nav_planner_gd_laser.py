@@ -759,11 +759,12 @@ You are supposed to output in JSON. Note that nested quotes is not allowed. Plea
             if self.gd_only:
                 
                 # Predict bounding box with grounding dino
-                labels, boxes = self.predict_gd(image, target_names, box_threshold=0.2, text_threshold=0.1)
+                target = ' '.join(target_attributes) + ' ' + ' '.join(target_names)
+                labels, boxes = self.predict_gd(image, target, box_threshold=0.2, text_threshold=0.1)
             
                 target_labels, target_bboxes = [], []
                 for label, box in zip(labels, boxes):
-                    if label in target_names:
+                    if not label is None:
                         target_labels.append(label)
                         target_bboxes.append(box)
                         

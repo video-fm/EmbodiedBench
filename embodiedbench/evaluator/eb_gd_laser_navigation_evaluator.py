@@ -102,7 +102,7 @@ class EB_NavigationEvaluator():
             #     selected_indexes = list(range(0, 20))
             # else: 
             
-            selected_indexes = list(reversed(range(0, 60)))
+            selected_indexes = [45]
                 
             self.env = EBNavigationEnv(eval_set=self.eval_set, down_sample_ratio=self.config['down_sample_ratio'], 
                                    exp_name=exp_name, multiview=self.config['multiview'], boundingbox=False, 
@@ -302,7 +302,7 @@ if __name__ == '__main__':
               'language_only': False, 
             #   'eval_sets': ['base', 'common_sense', 'long_horizon', 'visual_appearance', 'complex_instruction'], 
             #   'eval_sets': ['complex_instruction', 'base', 'common_sense'], 
-              'eval_sets': ['complex_instruction'],               
+              'eval_sets': ['visual_appearance'],               
               'chat_history': True, 
               'n_shots': 3, 
               'multiview': False, 
@@ -311,7 +311,7 @@ if __name__ == '__main__':
               'block_objects': False,
               'multistep': True, 
               'resolution': 500, 
-              'exp_name': 'gd', 
+              'exp_name': 'gd_2', 
               'visual_icl': False, 
               'tp': 4,
               'action_num_per_plan': 5,

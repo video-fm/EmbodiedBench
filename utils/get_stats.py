@@ -45,20 +45,22 @@ def analyze_folders(folder1, folder2):
     print(f"unique success in {suc1}")
     print(f"  {folder2}: {len(total_correct2)} success, total {len(overlapping_files)}")
     print(f"unique success in {suc2}")
+    print("end")
 
 
 #'eval_sets': ['base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
 
 # Example usage:
 #   'eval_sets': ['base', 'common_sense', 'long_horizon', 'visual_appearance', 'complex_instruction'], 
-
-path1 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_3/base/results"
+# path1 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_baseline/visual_appearance/results"
+path1 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_2/visual_appearance/results"
 # path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/Qwen2.5-VL-72B-Instruct_gd_laser_topk_3/visual_appearance/results"
 
-# path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_3/visual_appearance/results"
+# path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_3/base/results"
+# path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser/common_sense/results"
+# path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_1/long_horizon/results"
+path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_3/visual_appearance/results"
+# path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser/complex_instruction/results"
 
-path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_3/base/results"
-
-# path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gemini-2.0-flash_gd_laser/complex_instruction/results"
 analyze_folders(path1, path2)
 print("end")

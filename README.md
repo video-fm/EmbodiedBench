@@ -144,6 +144,10 @@ export GROUNDING_DINO_PATH=/path/to/your/GroundingDINO
 git clone https://github.com/facebookresearch/sam2.git
 ```
 2. Follow the instructions in SAM2's README to finish the setup
+3. Set the environment variable for the SAM2 repo path
+```bash
+export SAM_REPO_PATH=/path/to/your/SAM2
+```
 
 ### LASER Model Setup
 1. Please download the supplementary LASER code

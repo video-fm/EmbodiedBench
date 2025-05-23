@@ -10,7 +10,7 @@ import lmdeploy
 
 from lmdeploy import pipeline, GenerationConfig, PytorchEngineConfig
 from embodiedbench.planner.planner_config.generation_guide import llm_generation_guide, vlm_generation_guide, vlm_sg_generation_guide, vlm_target_generation_guide
-from embodiedbench.planner.planner_config.generation_guide_manip import llm_generation_guide_manip, vlm_generation_guide_manip
+from embodiedbench.planner.planner_config.generation_guide_manip import llm_generation_guide_manip, vlm_generation_guide_manip, manip_vlm_sg_generation_guide
 from embodiedbench.planner.planner_utils import (
     convert_format_2claude,
     convert_format_2gemini,
@@ -25,6 +25,7 @@ from embodiedbench.planner.planner_utils import (
     ActionPlanReasoningReflection,
     convert_format_2gpt,
     TargetEntityName,
+    ManipulationSceneGraph,
 )
 
 temperature = 0
@@ -46,7 +47,7 @@ def extract_json_from_string(text):
         raise ValueError("No JSON object found in the string.")
 
     return json_str
-    
+
 class RemoteModel:
     def __init__(
         self,
@@ -133,15 +134,24 @@ class RemoteModel:
                 raise ValueError(f"Unsupported model name: {self.model_name}")
 
     def _call_local(self, message_history: list, get_scene_graph=False):
-        
+
         if self.task_type == 'manip':
-            response_format = {
-                "type": "json_schema",
-                "json_schema": {
-                    "name": "embodied_planning",
-                    "schema": llm_generation_guide_manip if self.language_only else vlm_generation_guide_manip
+            if get_scene_graph:
+                response_format = {
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "scene_graph",
+                        "schema": manip_vlm_sg_generation_guide
+                    }
                 }
-            }
+            else:
+                response_format = {
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "embodied_planning",
+                        "schema": llm_generation_guide_manip if self.language_only else vlm_generation_guide_manip
+                    }
+                }
         else:
             if get_scene_graph:
                 response_format = {
@@ -159,11 +169,11 @@ class RemoteModel:
                         "schema": llm_generation_guide if self.language_only else vlm_generation_guide
                     }
                 }
-        
-        
-        
+
+
+
         if 'InternVL2_5' in self.model.model_name:
-            
+
             response = self.model(
             message_history,
             gen_config=GenerationConfig(
@@ -171,15 +181,15 @@ class RemoteModel:
                 max_new_tokens=max_completion_tokens,
                 )
             )
-            
+
             # easy to meet json errors
             out = response.text
             out = out.replace("'",'"')
             out = out.replace('\"s ', "\'s ")
             out = out.replace('```json', '').replace('```', '')
-            
+
         else:
-            
+
             response = self.model(
             message_history,
             gen_config=GenerationConfig(
@@ -189,7 +199,7 @@ class RemoteModel:
                 )
             )
             out = response.text
-            
+
         return out
 
     def _call_claude(self, message_history: list, get_scene_graph=False):
@@ -204,21 +214,21 @@ class RemoteModel:
             messages=message_history
         )
 
-        
-        return response.content[0].text 
+
+        return response.content[0].text
 
     def _call_gemini(self, message_history: list, get_scene_graph=False, get_entity_name=False):
 
         if not self.language_only:
             message_history = convert_format_2gemini(message_history)
 
-        if self.task_type == 'manip': 
-            # Manipulation
-            if self.language_only:
-                response_format = ActionPlan_lang_manip
-            elif not self.language_only:
-                response_format = ActionPlan_manip
-                
+        if self.task_type == 'manip':
+            if get_scene_graph:
+                response_format = ManipulationSceneGraph
+            else:
+                response_format = ActionPlan_lang_manip if self.language_only else ActionPlan_manip
+
+
         elif self.task_type == "alfred":
             # Alfred
             if get_scene_graph:
@@ -239,9 +249,9 @@ class RemoteModel:
                 response_format = TargetEntityName
             else:
                 response_format = ActionPlan_lang
-            
+
         response = self.model.beta.chat.completions.parse(
-            model=self.model_name, 
+            model=self.model_name,
             messages=message_history,
             response_format=response_format,
             temperature=temperature,
@@ -256,8 +266,8 @@ class RemoteModel:
 
         if not self.language_only:
             message_history = convert_format_2gpt(message_history)
-            
-        # if self.task_type == 'manip': 
+
+        # if self.task_type == 'manip':
         #     if self.language_only:
         #         response_format = llm_generation_guide_manip
         #     elif not self.language_only:
@@ -269,27 +279,30 @@ class RemoteModel:
         #         response_format = llm_generation_guide
         #     else:
         #         response_format = vlm_generation_guide
-        
-        if self.task_type == 'manip': 
-            if self.language_only:
-                response_format = ActionPlan_lang_manip
-            elif not self.language_only:
-                response_format = ActionPlan_manip
+
+        if self.task_type == 'manip':
+            if get_scene_graph:
+                response_format = dict(type='json_schema',  json_schema=dict(name='scene_graph',schema=manip_vlm_sg_generation_guide))
+            else:
+                if self.language_only:
+                    response_format = ActionPlan_lang_manip
+                elif not self.language_only:
+                    response_format = ActionPlan_manip
         elif self.task_type == 'alfred':
             if get_scene_graph:
                 response_format = TargetStateCurrentState
             elif self.language_only:
-                response_format = ActionPlan_lang 
+                response_format = ActionPlan_lang
             else:
                 response_format = ActionPlanReasoningReflection
         else:
             if get_scene_graph:
                 response_format = TargetSG
             elif self.language_only:
-                response_format = ActionPlan_lang 
+                response_format = ActionPlan_lang
             else:
                 response_format =  ActionPlan
-                
+
         response = client.responses.parse(
             model=self.model_name,
             input=message_history,
@@ -299,7 +312,7 @@ class RemoteModel:
         out = response.output_text
 
         return out
-    
+
     def _call_qwen7b(self, message_history: list, get_scene_graph=False):
 
         if not self.language_only:
@@ -326,7 +339,7 @@ class RemoteModel:
 
         out = response.choices[0].message.content
         return out
-    
+
     def _call_llama90(self, message_history: list, get_scene_graph=False):
         if self.task_type == "manip":
             response = self.model.chat.completions.create(
@@ -336,7 +349,7 @@ class RemoteModel:
                 temperature = temperature
             )
             out = response.choices[0].message.content
-            
+
         else:
             response = self.model.chat.completions.create(
                 model="accounts/fireworks/models/llama-v3p2-90b-vision-instruct",
@@ -346,7 +359,7 @@ class RemoteModel:
             )
             out = response.choices[0].message.content
         return out
-    
+
     def _call_llama11b(self, message_history, get_scene_graph=False):
 
         if not self.language_only:
@@ -372,7 +385,7 @@ class RemoteModel:
         )
         out = response.choices[0].message.content
         return out
-    
+
 
     def _call_qwen72b(self, message_history, get_scene_graph=False):
         if not self.language_only:
@@ -380,7 +393,7 @@ class RemoteModel:
 
         # if get_scene_graph:
         #     response_format = None
-            
+
         # elif not self.language_only:
         #     if self.task_type == 'manip':
         #         response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=vlm_generation_guide_manip))
@@ -391,7 +404,7 @@ class RemoteModel:
         #         response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide_manip))
         #     else:
         #         response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide))
-        
+
         # vlm_target_generation_guide
         response = self.model.chat.completions.create(
             model=self.model_name,
@@ -407,12 +420,12 @@ class RemoteModel:
         out = out.replace('\"s ', "\'s ")
         out = out.replace('```json', '').replace('```', '')
         out = out.replace('\"[', '[').replace("]\"", "]")
-        
+
         if get_scene_graph:
             out = extract_json_from_string(out)
-        
+
         return out
-    
+
     def _call_intern38b(self, message_history, get_scene_graph=False):
 
         # if not self.language_only:
@@ -462,10 +475,10 @@ if __name__ == "__main__":
     def encode_image(image_path):
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode('utf-8')
-        
+
 
     base64_image = encode_image("../../evaluator/midlevel/output.png")
-        
+
     messages=[
         {
             "role": "user",

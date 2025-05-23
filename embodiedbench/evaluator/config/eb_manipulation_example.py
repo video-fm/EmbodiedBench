@@ -92,28 +92,28 @@ Output: {
 
 # examples for place_into_shape_sorter_color (4-shot)
 shape_sorter_examples_vlm = [
-"""Human Instruction: Put the red star into the shape sorter. 
+"""Human Instruction: Put the red star into the shape sorter.
 Input: {'object 1': [65, 11, 17], 'object 2': [50, 38, 17], 'object 3': [40, 64, 37], 'object 4': [45, 83, 17]}
 Output: {
     "visual_state_description": "From left to right, I can see a purple star at [65, 11, 17], a red star at [50, 38, 17], a shape sorter at [40, 64, 37] and a green star at [45, 83, 17].",
     "reasoning_and_reflection": "I need to identify the location of the star hole on the shape sorter first. I can see that the star hole is at the center of the shape sorter, which is at [40, 64, 37]. Then, the task is to pick up the red star at [50, 38, 17] and put it into the star hole on the shape sorter. The plan involves moving the gripper to the star's position, closing the gripper to pick it up, moving upwards, moving to the top of the star hole, and releasing the star into the hole.",
     "executable_plan": "[[51, 38, 25, 119, 59, 26, 1], [51, 38, 17, 119, 59, 26, 0], [51, 38, 27, 119, 59, 26, 0], [40, 65, 49, 0, 60, 45, 0], [40, 65, 41, 0, 60, 45, 1]]"
 }""",
-"""Human Instruction: Put the maroon star into the shape sorter. 
+"""Human Instruction: Put the maroon star into the shape sorter.
 Input: {'object 1': [35, 30, 17], 'object 2': [29, 38, 17], 'object 3': [53, 38, 17], 'object 4': [64, 58, 37]}
 Output: {
     "visual_state_description": "From left to right, I can see a purple star at [35, 30, 17], a maroon star at [29, 38, 17], a green star at [53, 38, 17] and a shape sorter at [64, 58, 37].",
     "reasoning_and_reflection": "I need to identify the location of the star hole on the shape sorter first. I can see that the star hole is at the center of the shape sorter, which is at [64, 58, 37]. Then, the task is to pick up the maroon star at [29, 38, 17] and put it into the star hole on the shape sorter. The plan involves moving the gripper to the star's position, closing the gripper to pick it up, moving upwards, moving to the top of the star hole, and releasing the star into the hole.",
     "executable_plan": "[[29, 39, 24, 1, 61, 109, 1], [29, 38, 16, 1, 61, 109, 0], [30, 40, 26, 1, 61, 109, 0], [65, 60, 48, 0, 61, 54, 0], [65, 60, 40, 0, 61, 54, 1]]"
 }""",
-"""Human Instruction: Put the lime star into the shape sorter. 
+"""Human Instruction: Put the lime star into the shape sorter.
 Input: {'object 1': [47, 13, 17], 'object 2': [27, 36, 16], 'object 3': [38, 50, 17], 'object 4': [54, 69, 37]}
 Output: {
     "visual_state_description": "From left to right, I can see a grey star at [47, 13, 17], a purple star at [27, 36, 16], a lime star at [38, 50, 17] and a shape sorter at [54, 69, 37].",
     "reasoning_and_reflection": "I need to identify the location of the star hole on the shape sorter first. I can see that the star hole is at the center of the shape sorter, which is at [54, 69, 37]. Then, the task is to pick up the lime star at [38, 50, 17] and put it into the star hole on the shape sorter. The plan involves moving the gripper to the star's position, closing the gripper to pick it up, moving upwards, moving to the top of the star hole, and releasing the star into the hole.",
     "executable_plan": "[[38, 49, 23, 0, 60, 108, 1], [38, 49, 15, 0, 60, 108, 0], [38, 49, 25, 0, 60, 108, 0], [54, 69, 47, 0, 60, 3, 0], [54, 69, 39, 0, 60, 3, 1]]"
 }""",
-"""Human Instruction: Put the green star into the shape sorter. 
+"""Human Instruction: Put the green star into the shape sorter.
 Input: {'object 1': [70, 27, 37], 'object 2': [66, 59, 17], 'object 3': [38, 63, 17], 'object 4': [63, 77, 17]}
 Output: {
     "visual_state_description": "From left to right, I can see a shape sorter at [70, 27, 37], a white star at [66, 59, 17], a green star at [38, 63, 17] and a white star at [63, 77, 17].",
@@ -123,25 +123,25 @@ Output: {
 ]
 
 shape_sorter_examples_llm = [
-"""Human Instruction: Put the red star into the shape sorter. 
+"""Human Instruction: Put the red star into the shape sorter.
 Input: {'object 1': [65, 11, 17], 'object 2': [50, 38, 17], 'object 3': [40, 64, 37], 'object 4': [45, 83, 17]}
 Output: {
     "reasoning_and_reflection": "I need to identify the location of the star hole on the shape sorter first. I can see that the star hole is at the center of the shape sorter, which is at [40, 64, 37]. Then, the task is to pick up the red star at [50, 38, 17] and put it into the star hole on the shape sorter. The plan involves moving the gripper to the star's position, closing the gripper to pick it up, moving upwards, moving to the top of the star hole, and releasing the star into the hole.",
     "executable_plan": "[[51, 38, 25, 119, 59, 26, 1], [51, 38, 17, 119, 59, 26, 0], [51, 38, 27, 119, 59, 26, 0], [40, 65, 49, 0, 60, 45, 0], [40, 65, 41, 0, 60, 45, 1]]"
 }""",
-"""Human Instruction: Put the maroon star into the shape sorter. 
+"""Human Instruction: Put the maroon star into the shape sorter.
 Input: {'object 1': [35, 30, 17], 'object 2': [29, 38, 17], 'object 3': [53, 38, 17], 'object 4': [64, 58, 37]}
 Output: {
     "reasoning_and_reflection": "I need to identify the location of the star hole on the shape sorter first. I can see that the star hole is at the center of the shape sorter, which is at [64, 58, 37]. Then, the task is to pick up the maroon star at [29, 38, 17] and put it into the star hole on the shape sorter. The plan involves moving the gripper to the star's position, closing the gripper to pick it up, moving upwards, moving to the top of the star hole, and releasing the star into the hole.",
     "executable_plan": "[[29, 39, 24, 1, 61, 109, 1], [29, 38, 16, 1, 61, 109, 0], [30, 40, 26, 1, 61, 109, 0], [65, 60, 48, 0, 61, 54, 0], [65, 60, 40, 0, 61, 54, 1]]"
 }""",
-"""Human Instruction: Put the lime star into the shape sorter. 
+"""Human Instruction: Put the lime star into the shape sorter.
 Input: {'object 1': [47, 13, 17], 'object 2': [27, 36, 16], 'object 3': [38, 50, 17], 'object 4': [54, 69, 37]}
 Output: {
     "reasoning_and_reflection": "I need to identify the location of the star hole on the shape sorter first. I can see that the star hole is at the center of the shape sorter, which is at [54, 69, 37]. Then, the task is to pick up the lime star at [38, 50, 17] and put it into the star hole on the shape sorter. The plan involves moving the gripper to the star's position, closing the gripper to pick it up, moving upwards, moving to the top of the star hole, and releasing the star into the hole.",
     "executable_plan": "[[38, 49, 23, 0, 60, 108, 1], [38, 49, 15, 0, 60, 108, 0], [38, 49, 25, 0, 60, 108, 0], [54, 69, 47, 0, 60, 3, 0], [54, 69, 39, 0, 60, 3, 1]]"
 }""",
-"""Human Instruction: Put the green star into the shape sorter. 
+"""Human Instruction: Put the green star into the shape sorter.
 Input: {'object 1': [70, 27, 37], 'object 2': [66, 59, 17], 'object 3': [38, 63, 17], 'object 4': [63, 77, 17]}
 Output: {
     "reasoning_and_reflection": "I need to identify the location of the star hole on the shape sorter first. I can see that the star hole is at the center of the shape sorter, which is at [70, 27, 37]. Then, the task is to pick up the green star at [38, 63, 17] and put it into the star hole on the shape sorter. The plan involves moving the gripper to the star's position, closing the gripper to pick it up, moving upwards, moving to the top of the star hole, and releasing the star into the hole.",
@@ -339,3 +339,84 @@ vlm_examples_ablation = {
     "place": shape_sorter_examples_vlm,
     "wipe": wipe_examples_vlm_ablation
 }
+
+
+# scene_graph_examples = [
+# """ Visual Description: I can see a purple cylinder, a blue moon, a green star, a purple cube, a yellow container, and a purple container.
+#     Scene Graph Entities as JSON:
+#     {"entities": ["purple cylinder", "blue moon", "green star", "purple cube", "yellow container", "purple container"]}
+# """,
+
+# """ Visual Description: I can see a purple cylinder, a maroon cube, an orange star, a teal cube, a silver container, and a blue triangular prism.
+#     Scene Graph Entities as JSON:
+#     {"entities": ["purple cylinder", "maroon cube", "orange star", "teal cube", "silver container", "blue triangular prism"]}
+# """,
+
+# """ Visual Description: I see a navy cube and a red cube.
+#     Scene Graph Entities as JSON:
+#     {"entities": ["navy cube", "red cube"]}
+# """,
+
+# """ Visual Description: I can see a grey star, a red star, a blue star, and a shape sorter.
+#     Scene Graph Entities as JSON:
+#     {"entities": ["grey star", "red star", "blue star", "shape sorter"]}
+# """,
+
+# """ Visual Description: I can see a yellow sponge, a black rectangle area, and a brown rectangle area.
+#     Scene Graph Entities as JSON:
+#     {"entities": ["yellow sponge", "black rectangle area", "brown rectangle area"]}
+# """,
+
+# """ Visual Description: I can see a rose container, a black star, a green container, a green triangular prism, and a grey cylinder.
+#     Scene Graph Entities as JSON:
+#     {"entities": ["rose container", "black star", "green container", "green triangular prism", "grey cylinder"]}
+# """,
+
+# """ Visual Description: I can see a purple cylinder, a teal cube, an orange star, two silver containers (with different shapes), a red hook, and a teal triangular prism.
+#     Scene Graph Entities as JSON:
+#     {"entities": ["purple cylinder", "teal cube", "orange star", "silver container", "silver container", "red hook", "teal triangular prism"]}
+# """
+# ]
+
+
+# scene_graph_examples = [
+# """ Visual Description: From left to right, I can see a purple cylinder at [45, 13, 18], a blue moon at [72, 20, 18], a green star at [50, 42, 17], a purple cube at [36, 42, 18], a yellow container at [70, 43, 17] and a purple container at [50, 77, 17].
+#     Scene Graph Entities as JSON:
+#     {"entities": ["purple cylinder", "blue moon", "green star", "purple cube", "yellow container", "purple container"]}
+# """,
+
+# """ Visual Description: From left to right, I can see a rose container at [78, 20, 17], a black star at [28, 30, 17], a green container at [39, 47, 17], a green triangular prism at [50, 72, 17] and a grey cylinder at [39, 75, 18].
+#     Scene Graph Entities as JSON:
+#     {"entities": ["rose container", "black star", "green container", "green triangular prism", "grey cylinder"]}
+# """,
+
+# """ Visual Description: From left to right, I can see a purple cylinder at [42, 24, 19], an olive star at [54, 53, 19], a grey star at [65, 68, 19] and a red star at [39, 73, 18].
+#     Scene Graph Entities as JSON:
+#     {"entities": ["purple cylinder", "olive star", "grey star", "red star"]}
+# """,
+# ]
+
+scene_graph_examples = []
+
+scene_graph_examples = [
+""" Human Instruction: Pick up the purple cylinder.
+    Visual Description: From left to right, I can see a purple cylinder at [45, 13, 18], a blue moon at [72, 20, 18], a green star at [50, 42, 17], a purple cube at [36, 42, 18], a yellow container at [70, 43, 17] and a purple container at [50, 77, 17].
+    {"entities": ["purple cylinder", "blue moon", "green star", "purple cube", "yellow container", "purple container"],
+    "shapes": ["cylinder", "moon", "star", "cube", "container", "container"],
+    "colors": ["purple", "blue", "green", "purple", "yellow", "purple"]}
+""",
+
+""" Human Instruction: Pick up the triangular prism and put it into the green container.
+    Visual Description: From left to right, I can see a rose container at [78, 20, 17], a black star at [28, 30, 17], a green container at [39, 47, 17], a green triangular prism at [50, 72, 17] and a grey cylinder at [39, 75, 18].
+    {"entities": ["rose container", "black star", "green container", "green triangular prism", "grey cylinder"],
+    "shapes": ["container", "star", "container", "triangular prism", "cylinder"],
+    "colors": ["rose", "black", "green", "green", "grey"]}
+""",
+
+""" Human Instruction: Pick up the star.
+    Visual Description: From left to right, I can see a purple cylinder at [42, 24, 19], an olive star at [54, 53, 19], a grey star at [65, 68, 19] and a red star at [39, 73, 18].
+    {"entities": ["purple cylinder", "olive star", "grey star", "red star"],
+    "shapes": ["cylinder", "star", "star", "star"],
+    "colors": ["purple", "olive", "grey", "red"]}
+""",
+]

@@ -1,9 +1,22 @@
 import os
 from typing import List
 import numpy as np
+import torch
+import torchvision
+import matplotlib.pyplot as plt
+
+import sys
+sam_lib_path = os.getenv('SAM_REPO_PATH')
+if not sam_lib_path:
+    raise ValueError("Please set the SAM_REPO_PATH environment variable to the path of your SAM repository installation")
+sys.path.append(sam_lib_path)
+from sam2.build_sam import build_sam2
+from sam2.sam2_image_predictor import SAM2ImagePredictor
+from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 from pyrep.objects import VisionSensor
 from ultralytics import YOLO
 import cv2
+from PIL import Image
 from scipy.spatial.transform import Rotation
 
 SCENE_BOUNDS = np.array([-0.3, -0.5, 0.6, 0.7, 0.5, 1.6])
@@ -12,6 +25,17 @@ VOXEL_SIZE = 100
 CAMERAS = ['front', 'left_shoulder', 'right_shoulder', 'wrist']
 USE_GENERAL_OBJECT_NAMES = True
 object_detection_model = YOLO("yolo11n.pt")
+
+
+## SAM2 Setup
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+sam2_checkpoint = "sam2/checkpoints/sam2.1_hiera_large.pt"
+# model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
+model_cfg = "sam2.1/sam2.1_hiera_l.yaml"
+sam2_model = build_sam2(model_cfg, sam2_checkpoint, device=device)
+mask_generator = SAM2AutomaticMaskGenerator(model=sam2_model)
+predictor = SAM2ImagePredictor(sam2_model)
+print("Finished setting up SAM2")
 
 # From https://github.com/stepjam/RLBench/blob/master/rlbench/backend/utils.py
 def point_to_voxel_index(
@@ -40,7 +64,7 @@ def get_continous_action_from_discrete(discrete_action):
     res = (bounds[3:] - bounds[:3]) / VOXEL_SIZE
     attention_coordinate = bounds[:3] + res * trans_indicies + res / 2
     quat = discrete_euler_to_quaternion(rot_and_grip_indicies)
-    
+
     continuous_action = np.concatenate([
         attention_coordinate,
         quat,
@@ -89,7 +113,7 @@ def draw_xyz_coordinate(image_path, resolution):
 
         # Save the image with the axes
         cv2.imwrite(image_path, image)
-    
+
     elif resolution == 300:
         origin = (38, 142)  # Adjust based on the table's position in the image
 
@@ -201,23 +225,59 @@ def increase_bbox(bbox, scale_factor=1):
 
     return [new_x1, new_y1, new_x2, new_y2]
 
-def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, camera_intrinsics_list):
+
+def extract_bboxes_from_auto_masks(masks):
+    bboxes = []
+    for mask in masks:
+        bbox = mask['bbox']
+        bboxes.append([bbox[0], bbox[1], bbox[0] + bbox[2], bbox[1] + bbox[3]])
+    return bboxes
+
+def sam2_auto_bbox(image_path):
+    image = Image.open(image_path)
+    image = np.array(image.convert("RGB"))
+    predictor.set_image(image)
+
+    masks = mask_generator.generate(image)
+    bounding_boxes = extract_bboxes_from_auto_masks(masks)
+    return bounding_boxes, masks
+
+
+def mask_to_bbox(mask):
+    rows, cols = np.where(mask)
+    if rows.size == 0 or cols.size == 0:
+        return None  # No object found
+    top, left = rows.min(), cols.min()
+    bottom, right = rows.max(), cols.max()
+    return [left, top, right, bottom]  # (x_min, y_min, x_max, y_max)
+
+
+def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, camera_intrinsics_list, use_sam=False, use_masks=False):
     image_save_path_list = []
+    masks = None
     for input_image_path, camera_extrinsics, camera_intrinsics in zip(image_path_list, camera_extrinsics_list, camera_intrinsics_list):
         T_inv = np.linalg.inv(camera_extrinsics)
         rvec = T_inv[:3, :3]
         tvec = T_inv[:3, 3]
         pixel_points_2D, _ = cv2.projectPoints(np.array(world_points), rvec, tvec, camera_intrinsics, np.zeros(4))
 
-        # get the bounding boxes using YOLO
-        results = object_detection_model.predict(source=input_image_path, conf=0.0001, line_width=1, verbose=False)
-        predicted_boxes = results[0].boxes.xyxy
-        image_bgr = cv2.imread(input_image_path, cv2.IMREAD_COLOR)
+        if use_sam:
+            # get the bounding boxes using SAM
+            # predicted_boxes, masks = sam2_bbox(input_image_path, pixel_points_2D)
+            predicted_boxes, masks = sam2_auto_bbox(input_image_path)
+            print("Using SAM to get the bounding boxes")
+        else:
+            # get the bounding boxes using YOLO
+            results = object_detection_model.predict(source=input_image_path, conf=0.0001, line_width=1, verbose=False)
+            predicted_boxes = results[0].boxes.xyxy
 
+        image_bgr = cv2.imread(input_image_path, cv2.IMREAD_COLOR)
         box_id = 0
+        final_bboxes = []
         # find the closest bounding box and save the current index
+        object_masks = []
         text_positions = []
-        for point in pixel_points_2D: 
+        for point in pixel_points_2D:
             x, y = point[0]
             min_dist = float('inf')
             min_idx = -1
@@ -230,33 +290,82 @@ def draw_bounding_boxes(image_path_list, world_points, camera_extrinsics_list, c
                     min_idx = i
             if min_dist > 400: # if the distance is too large, skip this point
                 continue
-            increased_box = increase_bbox(predicted_boxes[min_idx], 1.2)
-            center_pixel = image_bgr[(increased_box[1] + increased_box[3]) // 2, (increased_box[0] + increased_box[2]) // 2]
-            # center_pixel = tuple(map(int, center_pixel))
-            center_pixel = (0, 0, 255)
-            cv2.rectangle(image_bgr, (int(increased_box[0]), int(increased_box[1])), (int(increased_box[2]), int(increased_box[3])), center_pixel, 1)
-            text_position = (int(increased_box[0]) + 20, int(increased_box[1]) - 10)
-            for pos in text_positions:
-                if abs(pos[0] - text_position[0]) < 10 and abs(pos[1] - text_position[1]) < 10:
-                    text_position = (int(increased_box[0]) + 10, int(increased_box[1]) - 10)
-            text_positions.append(text_position)
-            cv2.putText(image_bgr, 
-                        str(box_id + 1),  # Box number starting from 1
-                        text_position, 
-                        cv2.FONT_HERSHEY_SIMPLEX, 
-                        0.4,  # Font scale
-                        center_pixel,  # Green color for the text
-                        1,
-                        cv2.LINE_AA)
-            box_id += 1
+
+            final_bboxes.append(predicted_boxes[min_idx])
+            # if use_masks:
+            object_masks.append(masks[min_idx]['segmentation'])
+
+            if not use_masks:
+                increased_box = increase_bbox(predicted_boxes[min_idx], 1.2)
+                center_pixel = image_bgr[(increased_box[1] + increased_box[3]) // 2, (increased_box[0] + increased_box[2]) // 2]
+                # center_pixel = tuple(map(int, center_pixel))
+                center_pixel = (0, 0, 255)
+                cv2.rectangle(image_bgr, (int(increased_box[0]), int(increased_box[1])), (int(increased_box[2]), int(increased_box[3])), center_pixel, 1)
+                text_position = (int(increased_box[0]) + 20, int(increased_box[1]) - 10)
+                for pos in text_positions:
+                    if abs(pos[0] - text_position[0]) < 10 and abs(pos[1] - text_position[1]) < 10:
+                        text_position = (int(increased_box[0]) + 10, int(increased_box[1]) - 10)
+                text_positions.append(text_position)
+                cv2.putText(image_bgr,
+                            str(box_id + 1),  # Box number starting from 1
+                            text_position,
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.4,  # Font scale
+                            center_pixel,  # Green color for the text
+                            1,
+                            cv2.LINE_AA)
+                box_id += 1
+
+        if use_masks:
+            mask_id = 0
+            text_positions = []
+            # count = 0
+            for mask in object_masks:
+                # if count != 0:
+                #     continue
+                # count += 1
+                if mask is None: continue
+                mask_uint8 = mask.astype(np.uint8)
+
+                if mask_uint8.ndim != 2 and mask_uint8.shape[0] == 1:
+                    mask_uint8 = mask_uint8.squeeze(0)
+
+
+                contours, _ = cv2.findContours(mask_uint8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+                if not contours:
+                    print("Warning: No contours found for a mask.")
+                    continue
+
+                contour_color = (0, 0, 255)
+                cv2.drawContours(image_bgr, contours, -1, contour_color, 2)
+
+                x, y, w, h = cv2.boundingRect(contours[0])
+                text_position = (x + w // 2, y - 10)
+
+                for pos in text_positions:
+                    if abs(pos[0] - text_position[0]) < 30 and abs(pos[1] - text_position[1]) < 15:
+                        text_position = (text_position[0], text_position[1] - 20)
+                text_positions.append(text_position)
+
+                cv2.putText(image_bgr,
+                            str(mask_id + 1),
+                            text_position,
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.4,
+                            contour_color,
+                            1,
+                            cv2.LINE_AA)
+                mask_id += 1
+
         base, ext = os.path.splitext(input_image_path)
         image_save_path = f"{base}_annotated{ext}"
 
         # save the image with the bounding boxes
         cv2.imwrite(image_save_path, image_bgr)
         image_save_path_list.append(image_save_path)
-    
-    return image_save_path_list
+
+    return image_save_path_list, final_bboxes, object_masks
 
 ####### Generate object information for the initial observation
 def _get_mask_id_to_name_dict_for_input(object_info):
@@ -295,7 +404,7 @@ def form_obs_for_input(
     mask_dict,
     mask_id_to_real_name,
     point_cloud_dict):
-    
+
     # convert object id to char and average and discretize point cloud per object
     uniques = np.unique(np.concatenate(list(mask_dict.values()), axis=0))
     real_name_to_avg_coord = {}
@@ -323,7 +432,7 @@ def form_obs_for_input(
             # implicit_name_to_avg_coord[f"{i}"] = value
             i += 1
         real_name_to_avg_coord = implicit_name_to_avg_coord
-    
+
     # Sort the objects based on the y-coordinate
     sorted_indices = sorted(range(len(all_avg_point_list)), key=lambda i: all_avg_point_list[i][1])
     all_avg_point_list = [all_avg_point_list[i] for i in sorted_indices]
@@ -340,16 +449,16 @@ def form_object_coord_for_input(obs, task_class, camera_types):
     mask_dict = _get_mask_dict_for_input(obs)
 
     task_handler = TASK_HANDLERS[task_class]()
-    sim_name_to_real_name = task_handler.sim_name_to_real_name 
+    sim_name_to_real_name = task_handler.sim_name_to_real_name
     mask_id_to_real_name = {mask_id: sim_name_to_real_name[name] for mask_id, name in mask_id_to_sim_name.items()
                         if name in sim_name_to_real_name}
-    avg_coord, all_avg_point_list = form_obs_for_input(mask_dict, mask_id_to_real_name, point_cloud_dict)            
+    avg_coord, all_avg_point_list = form_obs_for_input(mask_dict, mask_id_to_real_name, point_cloud_dict)
     return avg_coord, all_avg_point_list, camera_extrinsics_list, camera_intrinsics_list
 
 class base_task_handler:
     def __init__(self, sim_name_to_real_name):
         self.sim_name_to_real_name = sim_name_to_real_name
-    
+
 class pick_cube_shape(base_task_handler):
     def __init__(self):
         sim_name_to_real_name = {

@@ -59,3 +59,33 @@ llm_generation_guide_manip={
     },
     "required": ["reasoning_and_reflection", "language_plan", "executable_plan"]
 }
+
+manip_vlm_sg_generation_guide={
+    "type": "object",
+    "properties": {
+        "entities": {
+            "type": "array",
+            "description": "A list of entities in the scene graph.",
+            "items": {
+                "type": "string",
+                "description": "The name of the entity."
+            }
+        },
+        "shapes": {
+            "type": "array",
+            "description": "A list of shapes of the entities.",
+            "items": {
+                "type": "string",
+                "description": "The shape of the object in the numerical order in the image."
+            }
+        },
+        "colors": {
+            "type": "array",
+            "description": "A list of colors of the entities.",
+            "items": {
+                "type": "string",
+                "description": "The color of the object in the numerical order in the image."
+            }
+        }
+    },
+}

@@ -6,57 +6,51 @@ ESCA: Contextualizing Embodied Agents via Scene-Graph Generation
 
 
 
-# Overview 
+# Overview
 We introduce **ESCA** (Embodied and Scene-Graph Contextualized Agent), a framework designed to contextualize Multi-modal Large Language Models (MLLMs) through open-domain scene graph generation. ESCA provides structured visual grounding, helping MLLMs make sense of complex and ambiguous sensory environments. At its core is SGClip, a CLIP-based model that captures semantic visual features, including entity classes, physical attributes, actions, interactions, and inter-object relations.
 
 ESCA operates as a multi-stage pipeline, generating task-aware scene graphs that reflect both visual content and human instructions. Through experiments on two challenging embodied environments, we demonstrate that ESCA consistently improves the performance of all evaluated MLLMs, including both open-source and proprietary models.
 
 
-## 🚀 **Key Features** 
+## 🚀 **Key Features**
 
-- 🛠️ **Structured Scene Understanding:**  
+- 🛠️ **Structured Scene Understanding:**
   ESCA decomposes visual understanding into four modular stages: concept extraction, object identification, scene graph prediction, and visual summarization.
 
-- 🎯 **SGClip Model:**  
+- 🎯 **SGClip Model:**
   A CLIP-based foundation model for structured scene understanding that supports open-domain concept coverage and probabilistic predictions.
 
-- ⚡ **Transfer Protocol:**  
+- ⚡ **Transfer Protocol:**
   A general transfer protocol based on customizable prompt templates that enables ESCA to generalize across different downstream tasks.
 
-- 🏹 **ESCA-Video-87K Dataset:**  
+- 🏹 **ESCA-Video-87K Dataset:**
   A large-scale dataset with 87K video clips, paired with natural language captions, object traces, and spatial-temporal programmatic specifications.
 
-- 🔧 **Neurosymbolic Learning:**  
+- 🔧 **Neurosymbolic Learning:**
   A model-driven, self-supervised learning pipeline that eliminates the need for manual scene graph annotations.
 
 # 🖥️ Installation
 This repository is built on top of [EmbodiedBench](https://github.com/EmbodiedBench/EmbodiedBench). We maintain all the original setup instructions while adding our ESCA-specific components.
 
-**Note: we need to install three conda environments, one for EB-ALFRED and EB-Habitat, one for EB-Navigation, and one for EB-Manipulation. Please use ssh download instead of HTTP download to avoid error during git lfs pull.**
+**Note: we need to install three conda environments, one for EB-Navigation and one for EB-Manipulation. Please use ssh download instead of HTTP download to avoid error during git lfs pull.**
 
 Download repo
 ```bash
 cd EmbodiedBench
 ```
 
-**You have two options for installation: you can either use 
+**You have two options for installation: you can either use
 ```bash install.sh``` or manually run the provided commands. After completing the installation with `bash install.sh`, you will need to start the headless server and verify that each environment is properly set up.**
 
-1️⃣ Environment for ```Habitat and Alfred```
+1️⃣ Environment for ```EB-Navigation```
 ```bash
-conda env create -f conda_envs/environment.yaml 
-conda activate embench
-pip install -e .
-```
-2️⃣ Environment for ```EB-Navigation```
-```bash
-conda env create -f conda_envs/environment_eb-nav.yaml 
+conda env create -f conda_envs/environment_eb-nav.yaml
 conda activate embench_nav
 pip install -e .
 ```
-3️⃣ Environment for ```EB-Manipulation```
+2️⃣ Environment for ```EB-Manipulation```
 ```bash
-conda env create -f conda_envs/environment_eb-man.yaml 
+conda env create -f conda_envs/environment_eb-man.yaml
 conda activate embench_man
 pip install -e .
 ```
@@ -82,7 +76,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$COPPELIASIM_ROOT
 export QT_QPA_PLATFORM_PLUGIN_PATH=$COPPELIASIM_ROOT
 ```
 
-> Remember to source your bashrc (`source ~/.bashrc`) or 
+> Remember to source your bashrc (`source ~/.bashrc`) or
 zshrc (`source ~/.zshrc`) after this.
 
 * Install the PyRep, EB-Manipulation package and dataset:
@@ -110,7 +104,7 @@ export DISPLAY=:1
 python -m embodiedbench.envs.eb_manipulation.EBManEnv
 ```
 
-**Note: EB-Alfred, EB-Habitat and EB-Manipulation require downloading large datasets from Hugging Face or GitHub repositories. Ensure Git LFS is properly initialized by running the following commands:**
+**Note: EB-Habitat and EB-Manipulation require downloading large datasets from Hugging Face or GitHub repositories. Ensure Git LFS is properly initialized by running the following commands:**
 ```bash
 git lfs install
 git lfs pull
@@ -180,14 +174,6 @@ python -m embodiedbench.envs.eb_alfred.scripts.startx 1
 ```
 
 ## Running ESCA Evaluators
-
-### EB-ALFRED Evaluator
-To run the EB-ALFRED evaluator with ESCA:
-
-```bash
-conda activate embench
-python -m embodiedbench.evaluator.eb_esca_alfred_evaluator
-```
 
 ### EB-Navigation Evaluator
 To run the EB-Navigation evaluator with ESCA:

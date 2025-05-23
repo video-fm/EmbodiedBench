@@ -61,6 +61,55 @@ conda activate embench_man
 pip install -e .
 ```
 
+* Install Coppelia Simulator
+
+CoppeliaSim V4.1.0 required for Ubuntu 20.04; you can find other versions here (https://www.coppeliarobotics.com/previousVersions#)
+
+```bash
+conda activate embench_man
+cd embodiedbench/envs/eb_manipulation
+wget https://downloads.coppeliarobotics.com/V4_1_0/CoppeliaSim_Pro_V4_1_0_Ubuntu20_04.tar.xz
+tar -xf CoppeliaSim_Pro_V4_1_0_Ubuntu20_04.tar.xz
+rm CoppeliaSim_Pro_V4_1_0_Ubuntu20_04.tar.xz
+mv CoppeliaSim_Pro_V4_1_0_Ubuntu20_04/ /PATH/YOU/WANT/TO/PLACE/COPPELIASIM
+```
+
+* Add the following to your *~/.bashrc* file:
+
+```bash
+export COPPELIASIM_ROOT=/PATH/YOU/WANT/TO/PLACE/COPPELIASIM
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$COPPELIASIM_ROOT
+export QT_QPA_PLATFORM_PLUGIN_PATH=$COPPELIASIM_ROOT
+```
+
+> Remember to source your bashrc (`source ~/.bashrc`) or 
+zshrc (`source ~/.zshrc`) after this.
+
+* Install the PyRep, EB-Manipulation package and dataset:
+```bash
+git clone https://github.com/stepjam/PyRep.git
+cd PyRep
+pip install -r requirements.txt
+pip install -e .
+cd ..
+pip install -r requirements.txt
+pip install -e .
+cp ./simAddOnScript_PyRep.lua $COPPELIASIM_ROOT
+git clone https://huggingface.co/datasets/EmbodiedBench/EB-Manipulation
+mv EB-Manipulation/data/ ./
+rm -rf EB-Manipulation/
+cd ../../..
+```
+
+> Remember that whenever you re-install the PyRep, simAddOnScript_PyRep.lua will be overwritten. Then, you should copy this again.
+
+* Run the following code to ensure the EB-Manipulation is working correctly (start headless server if you have not):
+```bash
+conda activate embench_man
+export DISPLAY=:1
+python -m embodiedbench.envs.eb_manipulation.EBManEnv
+```
+
 **Note: EB-Alfred, EB-Habitat and EB-Manipulation require downloading large datasets from Hugging Face or GitHub repositories. Ensure Git LFS is properly initialized by running the following commands:**
 ```bash
 git lfs install

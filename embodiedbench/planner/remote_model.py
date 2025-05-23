@@ -282,7 +282,8 @@ class RemoteModel:
 
         if self.task_type == 'manip':
             if get_scene_graph:
-                response_format = dict(type='json_schema',  json_schema=dict(name='scene_graph',schema=manip_vlm_sg_generation_guide))
+                # response_format = dict(type='json_schema',  json_schema=dict(name='scene_graph',schema=manip_vlm_sg_generation_guide))
+                response_format = ManipulationSceneGraph
             else:
                 if self.language_only:
                     response_format = ActionPlan_lang_manip

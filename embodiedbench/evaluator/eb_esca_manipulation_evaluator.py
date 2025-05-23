@@ -241,7 +241,7 @@ class EB_ManipulationEvaluator():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run evaluation with specified model name.")
     # parser.add_argument('--model_name', type=str, default="OpenGVLab/InternVL2_5-8B",help="Name of the model to evaluate.")
-    parser.add_argument('--model_name', type=str, default="OpenGVLab/InternVL2_5-38B-MPO",help="Name of the model to evaluate.")
+    parser.add_argument('--model_name', type=str, default="gemini-2.0-flash",help="Name of the model to evaluate.")
     parser.add_argument('--down_sample_ratio', type=float, default=1.0, help="Down sample ratio for the eval set.")
     parser.add_argument('--model_type', type=str, default='remote', help="Type of the model to evaluate.")
     # parser.add_argument('--model_type', type=str, default='local', help="Type of the model to evaluate.")
@@ -288,3 +288,4 @@ if __name__ == '__main__':
     evaluator = EB_ManipulationEvaluator(config)
     evaluator.check_config_valid()
     evaluator.evaluate_main()
+    print("hi")

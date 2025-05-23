@@ -30,8 +30,8 @@ object_detection_model = YOLO("yolo11n.pt")
 ## SAM2 Setup
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 sam2_checkpoint = "sam2/checkpoints/sam2.1_hiera_large.pt"
-# model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
-model_cfg = "sam2.1/sam2.1_hiera_l.yaml"
+model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
+# model_cfg = "sam2.1/sam2.1_hiera_l.yaml"
 sam2_model = build_sam2(model_cfg, sam2_checkpoint, device=device)
 mask_generator = SAM2AutomaticMaskGenerator(model=sam2_model)
 predictor = SAM2ImagePredictor(sam2_model)

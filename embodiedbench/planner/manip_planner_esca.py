@@ -670,48 +670,18 @@ Identify each object surrounded by a red bounding box or mask by its color and s
             print(e)
 
         output = json.loads(out)
-        # kws = list(set(output['entities']))
 
-        # ## Extract the {color: shape}
-        # color_to_shape_dict = collections.defaultdict(set)
-        # all_shapes = set()
-        # for string in kws:
-        #     color = string.split(' ')[0]
-        #     shape = ' '.join(string.split(' ')[1:])
-        #     color_to_shape_dict[color].add(shape)
-        #     all_shapes.add(shape)
-
-
-        # ## construct inputs to laser
-        # obs = ['running/eb_manipulation/InternVL2_5-38B-MPO/baseline/base/images/episode_1/episode_1_step_0_front_rgb.png']
-        # # laser_input_dict = self.process_laser_inputs(obs, bboxes, masks, object_kws, color_kws)
-        # # cate_kws = list(all_shapes)
-        # # shape_to_idx = {shape: idx for idx, shape in enumerate(cate_kws)}
-        # # unary_kws = list(color_to_shape_dict.keys())
-        # print("output: ", output)
-        # print("output keys: ", output.keys())
+        ## construct inputs to laser
         shape_kws = output['shapes']
         color_kws = output['colors']
         entities_kws = output['entities']
         laser_input_dict = self.process_laser_inputs(obs, bboxes, masks, entities_kws, color_kws)
-        # laser_input_dict = self.process_laser_inputs(obs, bboxes, masks, entities_kws, [])
 
         if len(bboxes) != 0 and len(masks) != 0:
 
             entities_logits, color_logits, binary_logits, _ = self.predicate_model(**laser_input_dict, output_logit=True)
 
-
-
-            # entity_list = color_kws
-
-            # ## reformat from (_, obj_id, _), _ in predicted_logits to (obj_id, _), _ in predicted_logits
-            # predicted_likelihoods = {(oid, color): p for (_, oid, color), p in color_logits[0].items()}
             result = self.assign_entities_with_dynamic_softmax(entities_kws, entities_logits[0])
-
-            # construct the new prompt
-            # shape_to_idx = {}
-            # laser_output_string = self.process_laser_outputs(cate, unary, binary, color_to_shape_dict, shape_to_idx)
-            # ####
 
             output_string = ", 'Current visual state description': 'From left to right, I can see "
             result = sorted(result.items(), key=lambda x: x[0])

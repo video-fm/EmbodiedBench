@@ -139,7 +139,7 @@ export GROUNDING_DINO_PATH=/path/to/your/GroundingDINO
 ```
 
 ### SAM 2.1 Setup
-1. Clone the SAM2 repository:
+1. Clone the SAM2 repository inside the EmbodiedBench folder:
 ```bash
 git clone https://github.com/facebookresearch/sam2.git
 ```

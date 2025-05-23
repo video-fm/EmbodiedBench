@@ -193,7 +193,14 @@ conda activate embench_nav
 python -m embodiedbench.evaluator.eb_gd_esca_navigation_evaluator
 ```
 
-Both evaluators support various configuration options through command-line arguments or config files. Key parameters include:
+### EB-Manipulation Evaluator
+To run the EB-Manipulation evaluator with ESCA:
+```bash
+conda activate embench_man
+python -m embodiedbench.evaluator.eb_esca_manipulation_evaluator
+```
+
+All evaluators support various configuration options through command-line arguments or config files. Key parameters include:
 - `model_name`: The MLLM to use (e.g., 'gpt-4o', 'gemini-2.0-flash')
 - `n_shots`: Number of examples for few-shot learning
 - `detection_box`: Enable/disable detection box visualization

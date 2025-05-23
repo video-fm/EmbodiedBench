@@ -6,7 +6,10 @@ import torchvision
 import matplotlib.pyplot as plt
 
 import sys
-sys.path.append("/home/mkuo/research/EmbodiedBench/sam2")
+sam_lib_path = os.getenv('SAM_REPO_PATH')
+if not sam_lib_path:
+    raise ValueError("Please set the SAM_REPO_PATH environment variable to the path of your SAM repository installation")
+sys.path.append(sam_lib_path)
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
@@ -229,27 +232,6 @@ def extract_bboxes_from_auto_masks(masks):
         bbox = mask['bbox']
         bboxes.append([bbox[0], bbox[1], bbox[0] + bbox[2], bbox[1] + bbox[3]])
     return bboxes
-
-
-# def sam2_bbox(image_path, pixel_points_2D):
-#     image = Image.open(image_path)
-#     image = np.array(image.convert("RGB"))
-#     predictor.set_image(image)
-
-#     labels = np.ones((pixel_points_2D.shape[0], 1)) # Labels should be shape (num_points,)
-#     masks, scores, logits = predictor.predict(
-#         point_coords=pixel_points_2D,
-#         point_labels=labels,
-#         multimask_output=False
-#     )
-
-#     bounding_boxes = []
-#     for mask in masks:
-#         mask = mask.squeeze(0)
-#         bounding_boxes.append(mask_to_bbox(mask))
-
-#     masks_np = [m for m in masks]
-#     return bounding_boxes, masks_np
 
 def sam2_auto_bbox(image_path):
     image = Image.open(image_path)

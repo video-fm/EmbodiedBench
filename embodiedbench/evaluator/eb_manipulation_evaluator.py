@@ -212,7 +212,6 @@ class EB_ManipulationEvaluator():
             else:
                 self.log_path = 'running/eb_manipulation/{}/{}/{}'.format(real_model_name, self.config["exp_name"], self.eval_set)
             self.env = EBManEnv(eval_set=self.eval_set, img_size=(self.config['resolution'], self.config['resolution']), down_sample_ratio=self.config["down_sample_ratio"], log_path=self.log_path)
-            # self.env = EBManEnv(eval_set=self.eval_set, img_size=(self.config['resolution'], self.config['resolution']), down_sample_ratio=self.config["down_sample_ratio"], log_path=self.log_path, selected_indexes=self.config['selected_indexes'])
             ic_examples = self.load_demonstration()
             self.planner = ManipPlanner(model_name=self.model_name,
                                         model_type=self.config['model_type'],

@@ -263,13 +263,13 @@ def format_state_descriptions(sg_info, current_obj, current_attr, current_rel):
     current_sg_str = format_scene_graph(current_obj, current_attr, current_rel)
     
     sg_str = ""
-    if not current_sg_str == "":
-        sg_str += f"The current scene graph: {current_sg_str}\n"
-    if not target_sg_str == "":
-        sg_str += f"The target state: {target_sg_str}\n"
+    # if not current_sg_str == "":
+    #     sg_str += f"The current scene graph: {current_sg_str}\n"
+    # if not target_sg_str == "":
+    #     sg_str += f"The target state: {target_sg_str}\n"
         
     sg_str += (f"\n\n The target state: {target_desc}\n" f"The current state: {current_desc}\n")
-    sg_str += f"The explanation is: {sg_info['explanation']} \n\n"
+    # sg_str += f"The explanation is: {sg_info['explanation']} \n\n"
     
     return sg_str
     

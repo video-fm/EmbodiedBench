@@ -6,18 +6,13 @@ import torchvision
 import matplotlib.pyplot as plt
 
 import sys
-sam_lib_path = os.getenv('SAM_REPO_PATH')
-if not sam_lib_path:
-    raise ValueError("Please set the SAM_REPO_PATH environment variable to the path of your SAM repository installation")
-sys.path.append(sam_lib_path)
-from sam2.build_sam import build_sam2
-from sam2.sam2_image_predictor import SAM2ImagePredictor
-from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
+
 from pyrep.objects import VisionSensor
 from ultralytics import YOLO
 import cv2
 from PIL import Image
 from scipy.spatial.transform import Rotation
+
 
 SCENE_BOUNDS = np.array([-0.3, -0.5, 0.6, 0.7, 0.5, 1.6])
 ROTATION_RESOLUTION = 3
@@ -27,15 +22,24 @@ USE_GENERAL_OBJECT_NAMES = True
 object_detection_model = YOLO("yolo11n.pt")
 
 
-## SAM2 Setup
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-sam2_checkpoint = "sam2/checkpoints/sam2.1_hiera_large.pt"
-model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
-# model_cfg = "sam2.1/sam2.1_hiera_l.yaml"
-sam2_model = build_sam2(model_cfg, sam2_checkpoint, device=device)
-mask_generator = SAM2AutomaticMaskGenerator(model=sam2_model)
-predictor = SAM2ImagePredictor(sam2_model)
-print("Finished setting up SAM2")
+def setup_sam():
+    sam_lib_path = os.getenv('SAM_REPO_PATH')
+    if not sam_lib_path:
+        raise ValueError("Please set the SAM_REPO_PATH environment variable to the path of your SAM repository installation")
+    sys.path.append(sam_lib_path)
+    from sam2.build_sam import build_sam2
+    from sam2.sam2_image_predictor import SAM2ImagePredictor
+    from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
+        
+    ## SAM2 Setup
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    sam2_checkpoint = "sam2/checkpoints/sam2.1_hiera_large.pt"
+    model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
+    # model_cfg = "sam2.1/sam2.1_hiera_l.yaml"
+    sam2_model = build_sam2(model_cfg, sam2_checkpoint, device=device)
+    mask_generator = SAM2AutomaticMaskGenerator(model=sam2_model)
+    predictor = SAM2ImagePredictor(sam2_model)
+    print("Finished setting up SAM2")
 
 # From https://github.com/stepjam/RLBench/blob/master/rlbench/backend/utils.py
 def point_to_voxel_index(

@@ -33,7 +33,7 @@ ValidEvalSets = ['base', 'common_sense', 'complex', 'spatial', 'visual']
 class EBManEnv(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
-    def __init__(self, eval_set, render_mode='human', img_size=(500, 500), down_sample_ratio=1.0, log_path = None, selected_indexes=[]):
+    def __init__(self, eval_set, render_mode='human', img_size=(500, 500), down_sample_ratio=1.0, log_path = None, selected_indexes=[], is_vla=False):
         obs_config = ObservationConfig()
         obs_config.set_all(True)
         obs_config.set_image_size(img_size)
@@ -67,6 +67,7 @@ class EBManEnv(gym.Env):
         self._max_episode_steps = 15
         self._episode_start_time = 0
         self.episode_log = []
+        self.is_vla = is_vla
 
         # Task-related attributes
         self.episode_language_instruction = ''
@@ -170,7 +171,14 @@ class EBManEnv(gym.Env):
         self._current_step += 1
         action_success = False
         try:
-            action = get_continous_action_from_discrete(discrete_action)
+            # Note VLA generates the continous action directly, while MLLMs uses discrete action space
+            if not self.is_vla:
+                action = get_continous_action_from_discrete(discrete_action)
+            else:
+                # Make sure the robot model is the same by checking the action size
+                assert len(discrete_action) == self.env.action_size, "Robot model mismatch: action size does not match the environment's action size."
+                action = discrete_action
+                
             obs, reward, terminate = self.task.step(action)
             if self.current_task_variation.startswith('stack'):
                 if terminate:

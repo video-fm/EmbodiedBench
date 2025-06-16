@@ -1,4 +1,11 @@
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["remote_url"] = "http://0.0.0.0:15237/v1"
+os.environ["DISPLAY"] = "cherry:12.0"
+os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
+home_dir = "/home/asethi04/embody/EmbodiedBench"
+existing_path = os.environ.get("PYTHONPATH", "")
+os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 import numpy as np
 from tqdm import tqdm
 import time
@@ -189,7 +196,7 @@ if __name__ == '__main__':
 
 
     config = {
-        'model_name': 'gpt-4o',
+        'model_name': 'OpenGVLab/InternVL2_5-38B-MPO',
         'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
@@ -197,9 +204,9 @@ if __name__ == '__main__':
         'exp_name': 'baseline',
         'chat_history': 0, 
         'detection_box': 0,
-        'eval_sets': ['complex_instruction'],
+        'eval_sets': ['base'],
         # 'eval_sets': [ 'base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
-        'selected_indexes': [40, 31, 1, 38], 
+        'selected_indexes': list(range(0,10)), 
         'multistep':0, 
         'resolution': 500, 
         'env_feedback': 1,

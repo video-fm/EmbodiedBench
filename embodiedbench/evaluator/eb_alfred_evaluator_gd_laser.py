@@ -1,4 +1,11 @@
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["remote_url"] = "http://0.0.0.0:15236/v1"
+os.environ["DISPLAY"] = "cherry:12.0"
+os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
+home_dir = "/home/asethi04/embody/EmbodiedBench"
+existing_path = os.environ.get("PYTHONPATH", "")
+os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 import numpy as np
 from tqdm import tqdm
 import time
@@ -9,6 +16,8 @@ from embodiedbench.evaluator.summarize_result import average_json_values
 from embodiedbench.evaluator.evaluator_utils import load_saved_data, update_config_with_args
 from embodiedbench.evaluator.config.system_prompts import alfred_laser_system_prompt
 from embodiedbench.main import logger
+from alfred_examples import laser_sg_examples_pre_post, laser_sg_examples_no_revert
+
 import os
 
 example_path = os.path.join(os.path.dirname(__file__), 'config/alfred_examples.json')
@@ -126,7 +135,7 @@ def bbox_to_mask(bbox, frame_height, frame_width):
     mask[ymin:ymax+1, xmin:xmax+1, :] = True
     
     return mask
-
+                
 class EB_AlfredEvaluator():
     def __init__(self, config):
         self.model_name = config['model_name']
@@ -339,7 +348,7 @@ if __name__ == '__main__':
 
 
     config = {
-        'model_name': 'gpt-4o',  # 'Qwen/Qwen2-VL-7B-Instruct',
+        'model_name': 'OpenGVLab/InternVL2_5-38B-MPO',  # 'Qwen/Qwen2-VL-7B-Instruct',
         'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
@@ -350,7 +359,7 @@ if __name__ == '__main__':
         # 'eval_sets': ['base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
         # 'eval_sets': ['visual_appearance'],
         'eval_sets': ['base'],
-        'selected_indexes': [i - 1 for i in [33, 42, 43, 49, 50, 22, 26, 29]], 
+        'selected_indexes': list(range(0,10)), 
         # 'eval_sets': ['base'],
         # 'selected_indexes': list(range(5, 10)) + list(range(40,50)),
         'multistep':0, 

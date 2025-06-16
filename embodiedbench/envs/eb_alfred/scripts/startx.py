@@ -74,7 +74,6 @@ def startx(display):
                 and r['Class'] in ['VGA compatible controller', '3D controller']:
             bus_id = 'PCI:' + ':'.join(map(lambda x: str(int(x, 16)), re.split(r'[:\.]', r['Slot'])))
             devices.append(bus_id)
-            break
 
     if not devices:
         raise Exception("no nvidia cards found")

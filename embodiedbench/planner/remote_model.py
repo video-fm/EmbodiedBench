@@ -32,6 +32,32 @@ max_completion_tokens = 8192
 remote_url = os.environ.get('remote_url')
 client = OpenAI()
 import re
+import tiktoken
+
+# Token counting function
+def estimate_multimodal_token_count(messages, model="gpt-4o"):
+    enc = tiktoken.encoding_for_model(model)
+    tokens_per_message = 3
+    tokens_per_name = 1
+    image_token_cost = 850  # rough estimate per image
+    total_tokens = 0
+
+    for msg in messages:
+        total_tokens += tokens_per_message
+        if isinstance(msg["content"], list):
+            for part in msg["content"]:
+                if part["type"] == "text":
+                    total_tokens += len(enc.encode(part["text"]))
+                elif part["type"] == "image_url":
+                    total_tokens += image_token_cost
+        else:
+            total_tokens += len(enc.encode(msg["content"]))
+
+        if "name" in msg:
+            total_tokens += tokens_per_name
+
+    total_tokens += 3  # assistant priming
+    return total_tokens
 
 def extract_json_from_string(text):
     """
@@ -431,12 +457,14 @@ class RemoteModel:
                 response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide))
 
 
+        query_token = estimate_multimodal_token_count(message_history, model="gpt-4o")
+        
         response = self.model.chat.completions.create(
             model=self.model_name,
             messages=message_history,
             # response_format=response_format,
             temperature=temperature,
-            max_tokens=max_completion_tokens,
+            max_tokens=max_completion_tokens - query_token,
         )
 
         # easy to meet json errors

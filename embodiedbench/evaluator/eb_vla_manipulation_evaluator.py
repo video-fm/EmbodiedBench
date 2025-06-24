@@ -44,7 +44,8 @@ class EB_ManipulationEvaluator():
         return all_examples
 
     def save_episode_metric(self, episode_info):
-        filename = 'episode_{}_res.json'.format(self.env._current_episode_num)
+        current_episode_idx = self.env.selected_indexes[self.env._current_episode_num - 1] + 1
+        filename = 'episode_{}_res.json'.format(current_episode_idx)
         res_path = os.path.join(self.env.log_path, 'results')
         if not os.path.exists(res_path):
             os.makedirs(res_path)
@@ -52,13 +53,14 @@ class EB_ManipulationEvaluator():
             json.dump(episode_info, f, ensure_ascii=False)
     
     def save_planner_outputs(self, reasoning_list):
-        filename = 'planner_output_episode_{}.txt'.format(self.env._current_episode_num)
+        current_episode_idx = self.env.selected_indexes[self.env._current_episode_num - 1] + 1
+        filename = 'planner_output_episode_{}.txt'.format(current_episode_idx)
         res_path = os.path.join(self.env.log_path, 'results')
         if not os.path.exists(res_path):
             os.makedirs(res_path)
         with open(os.path.join(res_path, filename), 'w', encoding='utf-8') as f:
             for s in reasoning_list:
-                f.write(s + "\n")
+                f.write(str(s) + "\n")
     
     def print_task_eval_results(self, filename):
         folder_path = f"{self.log_path}/results"
@@ -99,15 +101,17 @@ class EB_ManipulationEvaluator():
     def evaluate(self):
         progress_bar = tqdm(total=self.env.number_of_episodes, desc="Episodes")
         while self.env._current_episode_num < self.env.number_of_episodes:
-            logger.info(f"Evaluating episode {self.env._current_episode_num} ...")
+            current_episode_idx = self.env.selected_indexes[self.env._current_episode_num - 1] + 1
+            logger.info(f"Evaluating episode {current_episode_idx} ...")
             episode_info = {'reward': [], 'action_success': []}
             image_history = []
 
             _, obs = self.env.reset()
             if self.config['multiview']:
-                camera_views = ['front_rgb', 'wrist_rgb']
+                camera_views = ["front_rgb", "wrist_rgb"]
             else:
                 camera_views = ['front_rgb']
+                
             img_path_list = self.env.save_image(camera_views)
 
             avg_obj_coord, all_avg_point_list, camera_extrinsics_list, camera_intrinsics_list = form_object_coord_for_input(vars(copy.deepcopy(obs)), self.env.task_class, camera_views)
@@ -120,6 +124,8 @@ class EB_ManipulationEvaluator():
             if self.config['multistep']:
                 image_history.append(img_path_list[0])
             user_instruction = self.env.episode_language_instruction
+            
+            position = {"joint_positions": obs.joint_positions, "gripper_position": obs.gripper_pose, "gib_pose": obs.gripper_open}
             print(f"Instruction: {user_instruction}")
             self.planner.reset()
             done = False
@@ -129,7 +135,7 @@ class EB_ManipulationEvaluator():
                 if self.config['multistep']:
                     action, reasoning = self.planner.act(image_history, user_instruction, str(avg_obj_coord), self.env.current_task_variation)
                 else:
-                    action, reasoning = self.planner.act(img_path_list, user_instruction, str(avg_obj_coord), self.env.current_task_variation)
+                    action, reasoning = self.planner.act(obs, user_instruction, str(avg_obj_coord), self.env.current_task_variation)
                 print(f"Planner Output Action: {action}")
                 reasoning_list.append(reasoning)
                 if len(action) == 0:
@@ -207,7 +213,13 @@ class EB_ManipulationEvaluator():
                                                                                                     self.eval_set)
             else:
                 self.log_path = 'running/eb_manipulation/{}/{}/{}'.format(real_model_name, self.config["exp_name"], self.eval_set)
-            self.env = EBManEnv(eval_set=self.eval_set, img_size=(self.config['resolution'], self.config['resolution']), down_sample_ratio=self.config["down_sample_ratio"], log_path=self.log_path, is_vla=True)
+            self.env = EBManEnv(eval_set=self.eval_set, 
+                                img_size=(self.config['resolution'], 
+                                          self.config['resolution']),
+                                down_sample_ratio=self.config["down_sample_ratio"], 
+                                log_path=self.log_path, 
+                                is_vla=True,
+                                selected_indexes=self.config['selected_indexes'],)
             ic_examples = self.load_demonstration()
             self.planner = ManipPlannerVLA(model_name=self.model_name,
                                         model_type=self.config['model_type'],
@@ -236,15 +248,15 @@ class EB_ManipulationEvaluator():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run evaluation with specified model name.")
-    parser.add_argument('--model_name', type=str, default="OpenGVLab/InternVL2_5-38B-MPO", help="Name of the model to evaluate.")
+    parser.add_argument('--model_name', type=str, default="pi0_droid", help="Name of the model to evaluate.")
     parser.add_argument('--down_sample_ratio', type=float, default=1.0, help="Down sample ratio for the eval set.")
     parser.add_argument('--model_type', type=str, default='remote', help="Type of the model to evaluate.")
     parser.add_argument('--language_only', type=int, default=0, help="Whether to use language only.")
     parser.add_argument('--eval_sets', default=["base"], type=lambda s: s.split(','), help='Comma-separated list of evaluation sets.')
     parser.add_argument('--chat_history', type=int, default=0, help='Whether to use chat history.')
     parser.add_argument('--n_shots', type=int, default=10)
-    parser.add_argument('--multiview', type=int, default=0)
-    parser.add_argument('--detection_box', type=int, default=1)
+    parser.add_argument('--multiview', default=1, type=lambda s: s.split(','), help='Comma-separated list of camera views.')
+    parser.add_argument('--detection_box', type=int, default=0)
     parser.add_argument('--multistep', type=int, default=0)
     parser.add_argument('--resolution', type=int, default=500)
     parser.add_argument('--exp_name', type=str)
@@ -268,7 +280,7 @@ if __name__ == '__main__':
         'visual_icl': args.visual_icl,
         'exp_name': args.exp_name,
         'tp': args.tp,
-        'selected_indexes': [0, 12]
+        'selected_indexes': list(range(2, 48))
     }
     print("printing config ...")
     for config_key in config:

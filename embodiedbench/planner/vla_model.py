@@ -1,19 +1,14 @@
 import dataclasses
-import jax
+# import jax
 import os
 
-from openpi.models import model
-from openpi.policies import droid_policy
-from openpi.policies import policy_config
-from openpi.shared import download
-from openpi.training import config
-from openpi.training import data_loader
 from openpi_client import websocket_client_policy
 
 remote_url = os.environ.get('remote_url')
 
 def parse_remote_url(remote_url: str) -> tuple[str, int]:
     try:
+        remote_url = remote_url.replace('http://', '')
         host, port_str = remote_url.split(":")
         port = int(port_str)
         return host, port
@@ -21,7 +16,8 @@ def parse_remote_url(remote_url: str) -> tuple[str, int]:
         raise ValueError(f"Invalid remote_url format: '{remote_url}'. Expected format 'host:port'.")
 
 class VLAModel():
-    def __init__(self, model_name, model_type="remote"):
+    def __init__(self, model_name, language_only, model_type="remote", task_type="manipulation"):
+    
         self.model_name = model_name
         self.model_type = model_type
 

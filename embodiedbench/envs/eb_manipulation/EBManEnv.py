@@ -14,11 +14,12 @@ import numpy as np
 from amsolver.backend.utils import task_file_to_task_class
 from pathlib import Path
 from amsolver.utils import name_to_task_class
-from embodiedbench.envs.eb_manipulation.eb_man_utils import get_continous_action_from_discrete
+from embodiedbench.envs.eb_manipulation.eb_man_utils import get_continous_action_from_discrete, get_vla_action_from_discrete
 import os
 import time
 from PIL import Image
 from embodiedbench.main import logger
+from scipy.spatial.transform import Rotation as R
 
 EVAL_SETS = {
     'base': ['pick_cube_shape', 'stack_cubes_color', 'place_into_shape_sorter_color', 'wipe_table_direction'],
@@ -33,12 +34,22 @@ ValidEvalSets = ['base', 'common_sense', 'complex', 'spatial', 'visual']
 class EBManEnv(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
-    def __init__(self, eval_set, render_mode='human', img_size=(500, 500), down_sample_ratio=1.0, log_path = None, selected_indexes=[], is_vla=False):
+    def __init__(self, 
+                 eval_set, 
+                 render_mode='human', 
+                 img_size=(500, 500), 
+                 down_sample_ratio=1.0, 
+                 log_path = None, 
+                 selected_indexes=[], 
+                 is_vla=False):
+        
         obs_config = ObservationConfig()
         obs_config.set_all(True)
         obs_config.set_image_size(img_size)
 
-        action_mode = ActionMode(ArmActionMode.ABS_EE_POSE_PLAN_WORLD_FRAME)        
+        # action_mode = ActionMode(ArmActionMode.ABS_EE_POSE_PLAN_WORLD_FRAME)
+        action_mode = ActionMode(ArmActionMode.ABS_JOINT_VELOCITY)
+
         self.env = Environment(
             action_mode, obs_config=obs_config, headless=True)
         self.env.launch()
@@ -48,6 +59,8 @@ class EBManEnv(gym.Env):
         assert eval_set in ValidEvalSets
         self.task_class = None
         self.task_files = EVAL_SETS[eval_set]
+        self.selected_indexes = selected_indexes
+        
         eval_tasks = [task_file_to_task_class(t, parent_folder = 'vlm') for t in self.task_files]
         data_folder = Path(os.path.join(TTMS_FOLDER, f'data/{eval_set}/eval'))
         self.dataset = self._load_dataset(eval_tasks, data_folder, self.task_files)
@@ -64,7 +77,7 @@ class EBManEnv(gym.Env):
         self._reset = False
         self._current_episode_num = 0
         self._current_step = 0
-        self._max_episode_steps = 15
+        self._max_episode_steps = 200
         self._episode_start_time = 0
         self.episode_log = []
         self.is_vla = is_vla
@@ -177,7 +190,9 @@ class EBManEnv(gym.Env):
             else:
                 # Make sure the robot model is the same by checking the action size
                 assert len(discrete_action) == self.env.action_size, "Robot model mismatch: action size does not match the environment's action size."
-                action = discrete_action
+                
+                action = get_vla_action_from_discrete(discrete_action)
+                
                 
             obs, reward, terminate = self.task.step(action)
             if self.current_task_variation.startswith('stack'):
@@ -229,15 +244,16 @@ class EBManEnv(gym.Env):
         self.env.shutdown()
     
     def save_image(self, key=['front_rgb']) -> str:
-        log_path = self.log_path + '/images/' + f"episode_{self._current_episode_num}"
+        current_idx = self.selected_indexes[self._current_episode_num - 1] + 1
+        log_path = self.log_path + '/images/' + f"episode_{current_idx}"
         if not os.path.exists(log_path):
             os.makedirs(log_path) 
         image_path_list=[]
         for cam_view in key:
             single_image = Image.fromarray(self.last_frame_obs[cam_view])
             time_stamp = time.strftime("%Y%m%d_%H%M%S", time.localtime()) 
-            image_path = 'episode_{}_step_{}_{}.png'.format(self._current_episode_num, self._current_step, cam_view)
-            image_path = os.path.join(log_path, 'episode_{}_step_{}_{}.png'.format(self._current_episode_num, self._current_step, cam_view))
+            image_path = 'episode_{}_step_{}_{}.png'.format(current_idx, self._current_step, cam_view)
+            image_path = os.path.join(log_path, 'episode_{}_step_{}_{}.png'.format(current_idx, self._current_step, cam_view))
             single_image.save(image_path)
             image_path_list.append(image_path)
         return image_path_list

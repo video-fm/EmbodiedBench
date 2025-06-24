@@ -9,8 +9,7 @@ import time
 import logging
 from mimetypes import guess_type
 from embodiedbench.envs.eb_manipulation.eb_man_utils import ROTATION_RESOLUTION, VOXEL_SIZE
-from embodiedbench.planner.remote_model import RemoteModel
-from embodiedbench.planner.custom_model import CustomModel
+from embodiedbench.planner.vla_model import VLAModel
 from embodiedbench.planner.planner_utils import local_image_to_data_url, template_manip, template_lang_manip
 from embodiedbench.main import logger
 
@@ -31,10 +30,7 @@ class ManipPlanner():
         self.examples = examples
         self.n_shot = n_shot
         self.chat_history = chat_history # whether to include all the chat history for prompting
-        if model_type == 'custom':
-            self.model = CustomModel(model_name, language_only)
-        else:
-            self.model = RemoteModel(model_name, model_type, language_only, tp=tp, task_type='manip')
+        self.model = VLAModel(model_name, model_type, language_only, tp=tp, task_type='manip')
 
         self.planner_steps = 0
         self.output_json_error = 0

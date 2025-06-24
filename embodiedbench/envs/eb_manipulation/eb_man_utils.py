@@ -48,6 +48,55 @@ def get_continous_action_from_discrete(discrete_action):
     ])
     return continuous_action
 
+
+# def scaled_to_world_coord(scaled_xyz):
+#     x = np.asarray(scaled_xyz)
+#     point = (x + 1) / 2 * 100
+#     print(point)
+#     bounds = SCENE_BOUNDS
+#     res = (bounds[3:] - bounds[:3]) / VOXEL_SIZE
+#     attention_coordinate = bounds[:3] + res * point + res / 2
+#     return attention_coordinate
+
+# def scaled_to_world_coord(scaled_xyz):
+#     bounds = SCENE_BOUNDS
+#     bounds = np.array(bounds)
+#     lower = bounds[:3]
+#     upper = bounds[3:]
+#     center = (lower + upper) / 2
+#     # extent = (upper - lower) / 2
+#     world_coord = center + scaled_xyz
+#     return world_coord
+
+def get_vla_action_from_discrete(discrete_action):
+    
+    return discrete_action
+
+    trans_indicies = np.array(discrete_action[:3])
+    rot_and_grip_indicies = np.array(discrete_action[3:7])
+    is_gripper_open = discrete_action[7]
+
+    # trans_indicies = scaled_to_world_coord(trans_indicies)
+    
+    # bounds = SCENE_BOUNDS
+    # res = (bounds[3:] - bounds[:3]) / VOXEL_SIZE
+    # attention_coordinate = bounds[:3] + res * trans_indicies + res / 2
+    attention_coordinate = trans_indicies 
+    if is_gripper_open > 0.5:
+        is_gripper_open = 1.0
+    else:
+        is_gripper_open = 0.0
+
+    quat = Rotation.from_quat(rot_and_grip_indicies).as_quat()
+    
+    continuous_action = np.concatenate([
+        attention_coordinate,
+        quat,
+        [is_gripper_open]
+    ])
+    
+    return continuous_action
+                
 def draw_xyz_coordinate(image_path, resolution):
     image = cv2.imread(image_path)
     # origin = (45, 172)  # Adjust based on the table's position in the image

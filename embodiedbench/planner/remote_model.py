@@ -457,7 +457,8 @@ class RemoteModel:
                 response_format=dict(type='json_schema',  json_schema=dict(name='embodied_planning',schema=llm_generation_guide))
 
 
-        query_token = estimate_multimodal_token_count(message_history, model="gpt-4o")
+        # query_token = estimate_multimodal_token_count(message_history, model="gpt-4o")
+        query_token = 0
         
         response = self.model.chat.completions.create(
             model=self.model_name,

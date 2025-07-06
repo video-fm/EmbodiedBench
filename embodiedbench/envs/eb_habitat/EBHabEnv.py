@@ -109,7 +109,8 @@ def transform_action_to_natural_language(skill_set):
 
 
 class EBHabEnv(gym.Env):
-    def __init__(self, eval_set='train', exp_name='', down_sample_ratio=1.0, start_epi_index=0, resolution=500, recording=False):
+    def __init__(self, eval_set='train', exp_name='', down_sample_ratio=1.0, start_epi_index=0,
+                 selected_indexes=[], resolution=500, recording=False):
         """
         Initialize the HabitatRearrange environment.
         """
@@ -127,13 +128,16 @@ class EBHabEnv(gym.Env):
 
         # modify config path to ease data loading
         self.dataset = make_dataset(self.config.habitat.dataset.type, config=self.config.habitat.dataset)
-
+        if len(selected_indexes):
+            self.dataset = [self.dataset[i] for i in selected_indexes]
+        
         # initilaize env
         self.env = habitat.gym.make_gym_from_config(self.config, self.dataset)
         self.observation_space = self.env.observation_space
         # action of LanguageRearangeEnv is discrete value from 0 to 69
         self.action_space = self.env.action_space
-
+        self.selected_indexes = selected_indexes
+        
         # Episode tracking
         self.down_sample_ratio = down_sample_ratio
         self.number_of_episodes = self.env.number_of_episodes * down_sample_ratio
@@ -285,12 +289,14 @@ class EBHabEnv(gym.Env):
 
     def save_image(self, obs, key='head_rgb'):
         """Save current agent observation as a PNG image."""
-        folder = self.log_path + '/images/episode_{}'.format(self._current_episode_num)
+        episode_idx = self._current_episode_num if not len(self.selected_indexes) else self.selected_indexes[self._current_episode_num - 1] + 1
+
+        folder = self.log_path + '/images/episode_{}'.format(episode_idx)
         if not os.path.exists(folder):
             os.makedirs(folder)
         img = Image.fromarray(observations_to_image(obs, key))
         # time_stamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
-        image_path = os.path.join(folder, 'episode_{}_step_{}.png'.format(self._current_episode_num, self._current_step)) #, time_stamp))
+        image_path = os.path.join(folder, 'episode_{}_step_{}.png'.format(episode_idx, self._current_step)) #, time_stamp))
         img.save(image_path)
         return image_path
 
@@ -298,7 +304,10 @@ class EBHabEnv(gym.Env):
         if not os.path.exists(self.log_path):
             os.makedirs(self.log_path)
         # time_stamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
-        filename = 'episode_{}_step_{}.json'.format(self._current_episode_num, self._current_step) #, time_stamp)
+        
+        episode_idx = self._current_episode_num if not len(self.selected_indexes) else self.selected_indexes[self._current_episode_num - 1] + 1
+
+        filename = 'episode_{}_step_{}.json'.format(episode_idx, self._current_step) #, time_stamp)
         if len(self.episode_log):
             with open(os.path.join(self.log_path, filename), 'w', encoding='utf-8') as f:
                 for item in self.episode_log:
@@ -309,7 +318,7 @@ class EBHabEnv(gym.Env):
             folder = self.log_path + '/video'
             if not os.path.exists(folder):
                 os.makedirs(folder)
-            video_writer = imageio.get_writer(os.path.join(folder, 'video_episode_{}_steps_{}.mp4'.format(self._current_episode_num, self._current_step)), fps=30)
+            video_writer = imageio.get_writer(os.path.join(folder, 'video_episode_{}_steps_{}.mp4'.format(episode_idx, self._current_step)), fps=30)
             for data in self.episode_video:
                 video_writer.append_data(data)
             video_writer.close()
@@ -329,7 +338,7 @@ if __name__ == '__main__':
     Example usage of the EBHabEnv environment.
     Demonstrates environment interaction with random actions.
     """
-    env = EBHabEnv(eval_set='base')
+    env = EBHabEnv(eval_set='base', selected_indexes=[])
     obs = env.reset()
     print([(i, name) for i, name in enumerate(env.language_skill_set)])
     for _ in range(30):

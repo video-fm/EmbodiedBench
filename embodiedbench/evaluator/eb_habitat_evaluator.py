@@ -30,6 +30,7 @@ class EB_HabitatEvaluator():
         self.env = None
         self.planner = None
         self.system_prompt = system_prompt
+        
 
     def check_config_valid(self):
         if self.config['multistep'] + self.config['chat_history'] > 1:

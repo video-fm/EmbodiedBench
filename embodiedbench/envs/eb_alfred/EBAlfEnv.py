@@ -94,7 +94,8 @@ class EBAlfEnv(gym.Env):
         action_space (gym.spaces.Discrete): Discrete action space 
         language_skill_set (list): Readable action descriptions
     """
-    def __init__(self, eval_set='base', exp_name='', down_sample_ratio=1.0, selected_indexes=[], detection_box=False, resolution=500):
+    def __init__(self, eval_set='base', exp_name='', down_sample_ratio=1.0, selected_indexes=[], 
+                 detection_box=False, resolution=500):
         """
         Initialize the AI2THOR environment.
         """

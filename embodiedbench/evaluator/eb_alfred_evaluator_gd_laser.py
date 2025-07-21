@@ -1,11 +1,4 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-os.environ["remote_url"] = "http://0.0.0.0:15236/v1"
-os.environ["DISPLAY"] = "cherry:12.0"
-os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
-home_dir = "/home/asethi04/embody/EmbodiedBench"
-existing_path = os.environ.get("PYTHONPATH", "")
-os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 import numpy as np
 from tqdm import tqdm
 import time
@@ -149,6 +142,11 @@ class EB_AlfredEvaluator():
         
         self.gd_checkpoint_path= "/home/asethi04/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth"
         self.gd_config_path = "/home/asethi04/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
+        
+        # Add SAM2 configuration
+        self.sam2_config_path = config.get('sam2_config_path', '')
+        self.sam2_checkpoint_path = config.get('sam2_checkpoint_path', '')
+        self.use_sam2 = config.get('use_sam2', False)
 
     def check_config_valid(self):
         if self.config['multistep'] + self.config['chat_history'] > 1:
@@ -204,7 +202,11 @@ class EB_AlfredEvaluator():
                                             blockingobj=self.config['block_objects'],
                                             gd_checkpoint_path=self.gd_checkpoint_path, gd_config_path=self.gd_config_path,
                                             top_k=self.config['top_k'], aggr_thres=self.config['aggr_thres'], 
-                                            gd_box_threshold=self.config['gd_box_threshold'], gd_text_threshold=self.config['gd_text_threshold'])
+                                            gd_box_threshold=self.config['gd_box_threshold'], gd_text_threshold=self.config['gd_text_threshold'],
+                                            # Add SAM2 parameters
+                                            use_sam2=self.use_sam2,
+                                            sam2_config_path=self.sam2_config_path,
+                                            sam2_checkpoint_path=self.sam2_checkpoint_path)
 
             self.evaluate()
             average_json_values(os.path.join(self.env.log_path, 'results'), output_file='summary.json')
@@ -348,18 +350,18 @@ if __name__ == '__main__':
 
 
     config = {
-        'model_name': 'OpenGVLab/InternVL2_5-38B-MPO',  # 'Qwen/Qwen2-VL-7B-Instruct',
+        'model_name': 'gemini-2.0-flash',  # 'Qwen/Qwen2-VL-7B-Instruct',
         'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'gd_laser_prompt_tuning_full_nl',
+        'exp_name': 'gd_laser_sam2_integratio_final_no_sam',
         'chat_history': 0, 
         'detection_box': True,
         # 'eval_sets': ['base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
         # 'eval_sets': ['visual_appearance'],
-        'eval_sets': ['base'],
-        'selected_indexes': list(range(0,10)), 
+        'eval_sets': ['base', 'common_sense', 'complex_instruction'],
+        'selected_indexes': list(range(7,50)), 
         # 'eval_sets': ['base'],
         # 'selected_indexes': list(range(5, 10)) + list(range(40,50)),
         'multistep':0, 
@@ -376,12 +378,16 @@ if __name__ == '__main__':
         'visual':0,
         'gd_only': False,
         'top_k': 3, 
-        'aggr_thres': 0.2,
-        'gd_config_path': '/home/asethi04/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
-        'gd_checkpoint_path': '/home/asethi04/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',
-        'gd_box_threshold': 0.25, 
-        'gd_text_threshold': 0.3,
+        'aggr_thres': 0.65,
+        # 'gd_config_path': '/home/asethi04/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
+        # 'gd_checkpoint_path': '/home/asethi04/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',
+        'gd_box_threshold': 0.35, 
+        'gd_text_threshold': 0.4,
         'max_test_ct': 5,
+        # SAM2 configuration
+        'use_sam2': False,  # Set to True to enable SAM2
+        'sam2_config_path': "configs/sam2.1/sam2.1_hiera_b+.yaml",
+        'sam2_checkpoint_path': "/home/asethi04/sam2/checkpoints/sam2.1_hiera_base_plus.pt",
     }
 
     # args = parse_arguments()

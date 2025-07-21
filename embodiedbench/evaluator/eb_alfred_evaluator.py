@@ -1,11 +1,11 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
-os.environ["remote_url"] = "http://0.0.0.0:15237/v1"
-os.environ["DISPLAY"] = "cherry:12.0"
-os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
-home_dir = "/home/asethi04/embody/EmbodiedBench"
-existing_path = os.environ.get("PYTHONPATH", "")
-os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1,2"
+# os.environ["remote_url"] = "http://0.0.0.0:15238/v1"
+# os.environ["DISPLAY"] = "cherry:11.0"
+# os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
+# home_dir = "/home/asethi04/embody/EmbodiedBench"
+# existing_path = os.environ.get("PYTHONPATH", "")
+# os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 import numpy as np
 from tqdm import tqdm
 import time
@@ -201,12 +201,12 @@ if __name__ == '__main__':
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'baseline',
+        'exp_name': 'baseline_long_horizon',
         'chat_history': 0, 
         'detection_box': 0,
-        'eval_sets': ['base'],
+        'eval_sets': ['long_horizon'],
         # 'eval_sets': [ 'base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
-        'selected_indexes': list(range(0,10)), 
+        'selected_indexes': list(range(0,50)), 
         'multistep':0, 
         'resolution': 500, 
         'env_feedback': 1,

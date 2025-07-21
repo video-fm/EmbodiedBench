@@ -23,6 +23,20 @@ from PIL import Image
 import copy
 import matplotlib.pyplot as plt
 
+# SAM2 imports
+import sys
+sam2_path = "/home/asethi04/sam2"
+if sam2_path not in sys.path:
+    sys.path.append(sam2_path)
+    
+try:
+    from sam2.build_sam import build_sam2
+    from sam2.sam2_image_predictor import SAM2ImagePredictor
+    SAM2_AVAILABLE = True
+except ImportError as e:
+    print(f"SAM2 not available: {e}")
+    SAM2_AVAILABLE = False
+
 
 template = laser_template
 
@@ -32,17 +46,22 @@ MESSAGE_WINDOW_LEN = 5
 
 import sys
 
-sys.path.append("/home/jianih/research/GroundingDINO")
-from groundingdino.util.inference import Model as gd_Model
-from groundingdino.util.inference import load_image as load_gd_image
-from groundingdino.util.utils import get_phrases_from_posmap
+# Use the pip-installed groundingdino-py package
+try:
+    from groundingdino.util.inference import load_model, load_image, predict, annotate
+    GROUNDINGDINO_AVAILABLE = True
+    print("Using pip-installed groundingdino-py")
+except ImportError as e:
+    print(f"groundingdino-py not available: {e}")
+    GROUNDINGDINO_AVAILABLE = False
+
 import torch
 import math
 
 import numpy as np
 
 
-model_lib_path = "/home/jianih/research/LASER/LASER-unified/src/models"
+model_lib_path = "/home/asethi04/LASER/LASER-unified/src/models"
 sys.path.append(model_lib_path)
 
 from llava_clip_model_v3 import PredicateModel as PredicateModel_v3
@@ -154,7 +173,7 @@ def robust_load_json(raw: str):
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-#  _sanitize  – escape the two big culprits:
+#  _sanitize  – escape the two big culprits:    
 #     • stray " inside strings      →   \"
 #     • bare control chars          →   \n / \r / \t
 # ──────────────────────────────────────────────────────────────────────────────
@@ -371,6 +390,26 @@ def bbox_to_mask(bbox, frame_height, frame_width):
 
     return mask
 
+def convert_gd_boxes_to_pixel(boxes, img_width, img_height):
+    """
+    Convert GroundingDINO boxes from normalized [cx, cy, w, h] to pixel [x1, y1, x2, y2]
+    """
+    if boxes is None or len(boxes) == 0:
+        return []
+    
+    converted = []
+    for box in boxes:
+        if hasattr(box, 'cpu'):
+            box = box.cpu().numpy()
+        cx, cy, w, h = box
+        # Convert from center format to corner format and denormalize
+        x1 = int((cx - w/2) * img_width)
+        y1 = int((cy - h/2) * img_height)
+        x2 = int((cx + w/2) * img_width)
+        y2 = int((cy + h/2) * img_height)
+        converted.append([x1, y1, x2, y2])
+    
+    return converted
 
 def preprocess_caption(caption: str) -> str:
     result = caption.lower().strip()
@@ -488,10 +527,14 @@ class VLMPlanner:
         scene_graph_text = False,
         gd_only = False,
         top_k=1,
-        aggr_thres=0.1,
+        aggr_thres=0.3,
         gd_box_threshold = 0.1,
         gd_text_threshold = 0.1,
         rel_thres=0.3,
+        # Add SAM2 parameters
+        use_sam2=False,
+        sam2_config_path="",
+        sam2_checkpoint_path="",
     ):
         
         self.last_visual_description = ""
@@ -534,11 +577,60 @@ class VLMPlanner:
         self.scene_graph_prompt_prefix = "\n A missing scene graph means the object is not clearly identifiable from the scene. It does not necessarily means this object is not in the scene. \n"
             
 
-        self.grounding_model = gd_Model(
-            model_config_path=gd_config_path, model_checkpoint_path=gd_checkpoint_path
-        )
-
-        self.grounding_model.model = self.grounding_model.model.to("cuda:0")
+        # Initialize GroundingDINO with groundingdino-py package
+        if GROUNDINGDINO_AVAILABLE:
+            try:
+                # For groundingdino-py, we need to download and load the model
+                # The model will be downloaded automatically if not present
+                from groundingdino.util.inference import load_model as load_grounding_model
+                import groundingdino
+                import os
+                
+                # Use the correct config path from the installed package
+                package_dir = os.path.dirname(groundingdino.__file__)
+                model_config_path = os.path.join(package_dir, "config", "GroundingDINO_SwinT_OGC.py")
+                
+                # Check if weights file exists, if not download it
+                model_checkpoint_path = "/home/asethi04/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth"
+                if not os.path.exists(model_checkpoint_path):
+                    print("Model weights not found. Please download them using:")
+                    print("wget https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth")
+                    self.grounding_model = None
+                    self.gd_available = False
+                else:
+                    # Try to load with groundingdino-py's load_model function
+                    self.grounding_model = load_grounding_model(model_config_path, model_checkpoint_path)
+                    print("GroundingDINO initialized successfully with groundingdino-py package")
+                    self.gd_available = True
+            except Exception as e:
+                print(f"Failed to initialize GroundingDINO: {e}")
+                print("This is expected if model weights are not downloaded. GroundingDINO will be disabled.")
+                print("To download weights, run: wget https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth")
+                self.grounding_model = None
+                self.gd_available = False
+        else:
+            self.grounding_model = None
+            self.gd_available = False
+            print("GroundingDINO not available - some functionality will be limited")
+        
+        # Add SAM2 initialization
+        self.use_sam2 = use_sam2 and SAM2_AVAILABLE
+        if self.use_sam2:
+            try:
+                # Don't mess with Hydra initialization - SAM2 already handles this in its __init__.py
+                # Just build the SAM2 model directly using the build_sam2 function
+                self.sam2_predictor = SAM2ImagePredictor(
+                    build_sam2(sam2_config_path, sam2_checkpoint_path, device="cuda:0", apply_postprocessing=False)
+                )
+                print("SAM2 initialized successfully")
+            except Exception as e:
+                print(f"SAM2 initialization failed: {e}")
+                self.use_sam2 = False
+                self.sam2_predictor = None
+        else:
+            self.sam2_predictor = None
+            if use_sam2 and not SAM2_AVAILABLE:
+                print("SAM2 requested but not available")
         
         self.boundingbox = boundingbox
         self.blockingobj = blockingobj
@@ -553,10 +645,15 @@ class VLMPlanner:
         epoch = 0
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        self.predicate_model = load_model(model_dir, model_name, epoch, device)
-        # clip_model_name = "openai/clip-vit-base-patch16"
-        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # self.predicate_model = PredicateModel_v3(hidden_dim = 128, num_top_pairs=1, device=device, model_name=clip_model_name).to(device)
+        # try:
+        #     self.predicate_model = load_model(model_dir, model_name, epoch, device)
+        # except Exception as e:
+        #     print(f"Warning: Failed to load predicate model: {e}")
+        #     print("Continuing without predicate model - some functionality may be limited")
+        #     self.predicate_model = None
+        clip_model_name = "openai/clip-vit-base-patch16"
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.predicate_model = PredicateModel_v3(hidden_dim = 128, num_top_pairs=1, device=device, model_name=clip_model_name).to(device)
         
         self.common_objects = ["wall", "door", "cabinet", "stove", "counter", "window", "other"]
 
@@ -932,252 +1029,402 @@ class VLMPlanner:
         return action, valid
 
     def predict_gd(self, image, classes, box_threshold=0.5, text_threshold=0.4):
+        if not self.gd_available or self.grounding_model is None:
+            print("GroundingDINO not available, returning empty results")
+            return [], []
+            
+        # Convert classes list to caption
         caption = ". ".join(classes)
         processed_caption = preprocess_caption(caption)
-        processed_image = self.grounding_model.preprocess_image(image_bgr=image).to(
-            self.grounding_model.device
-        )
-        with torch.no_grad():
-            outputs = self.grounding_model.model(
-                processed_image.unsqueeze(0), captions=processed_caption
-            )
-
-        prediction_logits = (
-            outputs["pred_logits"].cpu().sigmoid()[0]
-        )  # (batch_size, nq, 256)
-
-        prediction_boxes = outputs["pred_boxes"].cpu()[0]  # (batch_size, nq, 4)
-        detection_ls = []
-        tokenizer = self.grounding_model.model.tokenizer
-        mask = prediction_logits.max(dim=1)[0] > box_threshold
-        logits = prediction_logits[mask]  # (n, 256)
-        boxes = prediction_boxes[mask]  # (n, 4)
-        tokenized = tokenizer(caption)
-        phrases = [
-            get_phrases_from_posmap(
-                logit > text_threshold, tokenized, tokenizer
-            ).replace(".", "")
-            for logit in logits
-        ]
-        logits = logits.max(dim=1)[0]
-        source_h, source_w, _ = image.shape
-        detections = self.grounding_model.post_process_result(
-            source_h=source_h, source_w=source_w, boxes=boxes, logits=logits
-        )
-        class_id = self.grounding_model.phrases2classes(
-            phrases=phrases, classes=classes
-        )
-        detections.class_id = class_id
-        detection_ls.append(detections)
-
-        assert len(detection_ls) == 1
-        detections = detection_ls[0]
         
-        reformated = torch.tensor([(get_valid_bbox_val(x1, source_w), 
-                    get_valid_bbox_val(y1, source_h),
-                    get_valid_bbox_val(x2, source_w), 
-                    get_valid_bbox_val(y2, source_h))
-                    for x1, y1, x2, y2 in detections.xyxy])
-        
-        boxes = []
-        labels = []
-        
-        for ct, class_id in enumerate(detections.class_id):
-            if class_id is None:
-                continue
-            if ct == 0: 
-                class_id = 0
+        try:
+            # Use groundingdino-py API
+            # Convert image to the format expected by groundingdino-py
+            from PIL import Image as PILImage
+            import torchvision.transforms as T
+            
+           # After your RGB conversion
+            if len(image.shape) == 3 and image.shape[2] == 3:
+                rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            else:
+                rgb_image = image
+
+            # Convert to PIL Image if it's a numpy array
+            if isinstance(rgb_image, np.ndarray):
+                pil_image = PILImage.fromarray(rgb_image)
+            else:
+                pil_image = rgb_image  # Already a PIL Image
+
+            # Create the transform
+            transform = T.Compose([
+                T.ToTensor(),
+                T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])  # ImageNet normalization
+
+            ])
+
+            # Convert to tensor
+            image_tensor = transform(pil_image)
                 
-            elif class_id is None:
-                continue
+           
             
-            x1, y1, x2, y2 = reformated[ct]
-            if x2 - x1 < 5 or y2 - y1 < 5:
-                continue
+            # Use groundingdino-py's predict function
+            boxes, logits, phrases = predict(
+                model=self.grounding_model,
+                image=image_tensor,
+                caption=processed_caption,
+                box_threshold=box_threshold,
+                text_threshold=text_threshold,
+                device="cuda" if torch.cuda.is_available() else "cpu"
+            )
             
-            boxes.append(reformated[ct])
-            labels.append(classes[class_id])
+            # Convert results to the expected format
+            labels = phrases if phrases is not None else []
             
-        if len(boxes) == 0:
-            boxes = torch.tensor([])
-        else:
-            boxes = torch.stack(boxes)
+            # Convert boxes to tensor if they aren't already
+            if boxes is not None and len(boxes) > 0:
+                if not isinstance(boxes, torch.Tensor):
+                    boxes = torch.tensor(boxes)
+            else:
+                boxes = torch.tensor([])        
+        except Exception as e:
+            print(f"Error in GroundingDINO prediction: {e}")
+            return [], []
                 
         return labels, boxes
     
     
     
+    # def predict_laser(self, 
+    #               image, 
+    #               boxes,  # Now expects pixel coordinates as list of [x1, y1, x2, y2]
+    #               masks=None,  # Optional masks parameter
+    #               target_names=None,
+    #               target_relation_kws=None,
+    #               target_relation_preds=None,
+    #               query_names=None,
+    #               query_relations=None,
+    #               query_relation_kws=None,
+    #               query_attributes=None,
+    #               ):
+        
+    #     # Preprocess query attributes for the case where one object having multiple attribute
+    #     query_attribute_ls = [[attr, f"not {attr}"] for attr in query_attributes]
+    #     prob_labels, selected_object_bboxes, identified_rels = [], [], []
+        
+    #     if not len(boxes) == 0 and self.predicate_model is not None:
+    #         height, width = image.shape[0], image.shape[1]
+            
+    #         # Use provided masks or generate from bboxes
+    #         if masks is not None and len(masks) > 0:
+    #             # Ensure masks have the right shape
+    #             batched_pred_masks = []
+    #             for mask in masks:
+    #                 if isinstance(mask, torch.Tensor):
+    #                     mask = mask.cpu().numpy()
+    #                 # Add channel dimension if needed
+    #                 if mask.ndim == 2:
+    #                     mask = mask[:, :, np.newaxis]
+    #                 batched_pred_masks.append(mask)
+    #         else:
+    #             # Fall back to generating masks from bboxes
+    #             batched_pred_masks = [bbox_to_mask(bbox, height, width) for bbox in boxes]
+            
+    #         batched_object_ids = [[0, 0, i] for i in range(len(batched_pred_masks))]
+            
+    #         batched_image_cate_probs, _, _, _ = \
+    #             self.predicate_model(
+    #                 batched_video_ids=[0],
+    #                 batched_videos=[image],
+    #                 batched_masks=batched_pred_masks,  # batched_object_ids * video_height * video_width
+    #                 batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
+    #                 batched_names=[query_names],  # Dataset-wise categorical labels
+    #                 batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
+    #                 batched_unary_kws=[[]],  # Dataset-wise unary predicate labels
+    #                 batched_binary_kws=[[]],  # Dataset-wise binary predicate labels
+    #                 batched_obj_pairs=[],  # Ground truth binary relations
+    #                 batched_video_splits=[0],  # [number of videos]
+    #                 batched_binary_predicates=[[]],  # None indicates inference time
+    #             )
+                    
+    #         all_unary_res = []
+    #         for unary in query_attribute_ls:
+    #             _, batched_image_unary_probs, _, _ = \
+    #                 self.predicate_model(
+    #                     batched_video_ids=[0],
+    #                     batched_videos=[image],
+    #                     batched_masks=batched_pred_masks,  # batched_object_ids * video_height * video_width
+    #                     batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
+    #                     batched_names=[query_names],  # Dataset-wise categorical labels
+    #                     batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
+    #                     batched_unary_kws=[unary],  # Dataset-wise unary predicate labels
+    #                     batched_binary_kws=[[]],  # Dataset-wise binary predicate labels
+    #                     batched_obj_pairs=[],  # Ground truth binary relations
+    #                     batched_video_splits=[0],  # [number of videos]
+    #                     batched_binary_predicates=[None],  # None indicates inference time
+    #                 )
+    #             all_unary_res.append(batched_image_unary_probs)
+            
+    #         # Combine the unary and object name information together 
+    #         # Step 1: reformat the object name, attributes, and relations into better format
+    #         predicted_name = {}
+    #         for (oid, name) in batched_image_cate_probs[0]:
+    #             prob = batched_image_cate_probs[0][(oid, name)].item()
+    #             if not oid in predicted_name:
+    #                 predicted_name[oid] = []
+    #             predicted_name[oid].append((prob, name))
+            
+    #         for oid in predicted_name:
+    #             predicted_name[oid] = sorted(predicted_name[oid], reverse=True)   
+                    
+    #         reformatted_unary_res = {}
+    #         for unary_res in all_unary_res:
+    #             for  (fid, oid, kw) in unary_res[0].keys():
+    #                 if not oid in reformatted_unary_res:
+    #                     reformatted_unary_res[oid] = {}
+    #                 if kw in query_attributes:
+    #                     reformatted_unary_res[oid][kw] = unary_res[0][(fid, oid, kw)].item()
+            
+    #         topk_obj_pair_info = get_topk_per_relation(predicted_name, binary_predicates=query_relations, top_k=30)
+    #         top_obj_pairs = merge_object_pair_ids(topk_obj_pair_info)
+            
+    #         batched_image_rel_probs = {}
+    #         if len(top_obj_pairs) > 0:
+    #             _, _, batched_image_rel_probs, _ = \
+    #                 self.predicate_model(
+    #                     batched_video_ids=[0],
+    #                     batched_videos=[image],
+    #                     batched_masks=batched_pred_masks,  # batched_object_ids * video_height * video_width
+    #                     batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
+    #                     batched_names=[query_names],  # Dataset-wise categorical labels
+    #                     batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
+    #                     batched_unary_kws=[[]],  # Dataset-wise unary predicate labels
+    #                     batched_binary_kws=[query_relation_kws],  # Dataset-wise binary predicate labels
+    #                     batched_obj_pairs=top_obj_pairs,  # Ground truth binary relations
+    #                     batched_video_splits=[0],  # [number of videos]
+    #                     batched_binary_predicates=[query_relations],  # None indicates inference time
+    #                 )
+                
+    #         # Step 3: Aggregate the object name and attribute predictions together
+    #         aggr_res = {}            
+            
+    #         for oid in predicted_name:
+    #             top_prob, name = predicted_name[oid][0]
+    #             if not oid in aggr_res:
+    #                 aggr_res[oid] = {}
+                
+    #             if name in target_names:
+    #                 aggr_res[oid]['name'] = top_prob, name
+    #             else:
+    #                 # the top predicted name is not the target name
+    #                 aggr_res[oid]['name'] = 0, "other"
+                    
+    #         for oid in reformatted_unary_res: 
+                
+    #             if not oid in aggr_res:
+    #                 continue
+                
+    #             if not 'attr' in aggr_res[oid]:
+    #                 aggr_res[oid]['attr'] = []
+    #             for attr in reformatted_unary_res[oid]:
+    #                 aggr_res[oid]['attr'].append((reformatted_unary_res[oid][attr], attr))
+            
+    #         if len(batched_image_rel_probs) > 0:
+    #             rel_preds = batched_image_rel_probs[0]
+    #         else:
+    #             rel_preds = {}
+
+    #         identified_rels = []
+    #         for (_, (subj, obj), rel), p in rel_preds.items():
+    #             subj_prob, pred_subj_name = predicted_name[subj][0]
+    #             obj_prob, pred_obj_name = predicted_name[obj][0]
+    #             rel_prob = p
+    #             if (rel, pred_subj_name, pred_obj_name) in target_relation_preds:
+    #                 prob = subj_prob * obj_prob * rel_prob
+    #                 if prob > self.rel_thres:
+    #                     identified_rels.append((prob, (rel, subj, obj), (rel, pred_subj_name, pred_obj_name)))
+                
+    #         # Thresholding
+    #         avg_aggr_res = {}
+    #         for oid in aggr_res:
+    #             name_prob, name = aggr_res[oid]['name']
+                
+    #             # Target Name must rank at top 1
+    #             if name_prob == 0:
+    #                 continue
+                
+    #             # Attribute aggregation
+    #             probs = [name_prob]
+
+    #             if 'attr' in aggr_res[oid]:
+    #                 probs += [p for p, _ in aggr_res[oid]['attr']]
+                
+    #             avg_val = sum(probs) / len(probs)
+                    
+    #             if avg_val > self.aggr_thres:
+    #                 avg_aggr_res[oid] = avg_val
+            
+    #         # Relation aggregation
+                
+    #         # Only pick the top-k object according to the setup
+    #         top_objects_probs = get_topk_per_object_name(aggr_res, avg_aggr_res, k=self.k)
+            
+    #         selected_objects = list(top_objects_probs.keys())
+    #         # Handle pixel coordinate boxes (list of lists)
+    #         selected_object_bboxes = [boxes[idx] for idx in selected_objects]
+                                
+    #         prob_labels = []
+    #         for oid in top_objects_probs:
+    #             prob, label = predicted_name[oid][0]
+    #             prob_labels.append(f"{prob:.2f}::{label}")
+
+    #     return prob_labels, selected_object_bboxes, identified_rels
     def predict_laser(self, 
-                      image, 
-                      boxes, 
-                      target_names,
-                      target_relation_kws,
-                      target_relation_preds,
-                      query_names,
-                      query_relations,
-                      query_relation_kws,
-                      query_attributes,
-                      ):
+                  image, 
+                  boxes,  # Expects pixel coordinates as list of [x1, y1, x2, y2]
+                  masks=None,  # Optional masks parameter
+                  target_names=None,
+                  query_names=None,
+                  threshold=0.3,  # Probability threshold
+                  ):
+        prob_labels, selected_object_bboxes, selected_masks = [], [], []
         
-        # Preprocess query attributes for the case where one object having multiple attribute
-        query_attribute_ls = [[attr, f"not {attr}"] for attr in query_attributes]
-        prob_labels, selected_object_bboxes = [], []
-        
-        if not len(boxes) == 0:
+        if not len(boxes) == 0 and self.predicate_model is not None:
             height, width = image.shape[0], image.shape[1]
-            batched_pred_masks = [bbox_to_mask(bbox, height, width) for bbox in boxes]
+            
+            # Use provided masks or generate from bboxes
+            if masks is not None and len(masks) > 0:
+                batched_pred_masks = []
+                for mask in masks:
+                    if isinstance(mask, torch.Tensor):
+                        mask = mask.cpu().numpy()
+                    if mask.ndim == 2:
+                        mask = mask[:, :, np.newaxis]
+                    batched_pred_masks.append(mask)
+            else:
+                batched_pred_masks = [bbox_to_mask(bbox, height, width) for bbox in boxes]
+            
             batched_object_ids = [[0, 0, i] for i in range(len(batched_pred_masks))]
             
+            # Get categorical predictions only
             batched_image_cate_probs, _, _, _ = \
                 self.predicate_model(
                     batched_video_ids=[0],
                     batched_videos=[image],
-                    batched_masks=batched_pred_masks,  # batched_object_ids * video_height * video_width
-                    batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
-                    batched_names=[query_names],  # Dataset-wise categorical labels
-                    batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
-                    batched_unary_kws=[[]],  # Dataset-wise unary predicate labels
-                    batched_binary_kws=[[]],  # Dataset-wise binary predicate labels
-                    batched_obj_pairs=[],  # Ground truth binary relations
-                    batched_video_splits=[0],  # [number of videos]
-                    batched_binary_predicates=[[]],  # None indicates inference time
+                    batched_masks=batched_pred_masks,
+                    batched_bboxes=boxes,
+                    batched_names=[query_names],
+                    batched_object_ids=batched_object_ids,
+                    batched_unary_kws=[[]],
+                    batched_binary_kws=[[]],
+                    batched_obj_pairs=[],
+                    batched_video_splits=[0],
+                    batched_binary_predicates=[[]],
                 )
-                    
-            all_unary_res = []
-            for unary in query_attribute_ls:
-                _, batched_image_unary_probs, _, _ = \
-                    self.predicate_model(
-                        batched_video_ids=[0],
-                        batched_videos=[image],
-                        batched_masks=batched_pred_masks,  # batched_object_ids * video_height * video_width
-                        batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
-                        batched_names=[query_names],  # Dataset-wise categorical labels
-                        batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
-                        batched_unary_kws=[unary],  # Dataset-wise unary predicate labels
-                        batched_binary_kws=[[]],  # Dataset-wise binary predicate labels
-                        batched_obj_pairs=[],  # Ground truth binary relations
-                        batched_video_splits=[0],  # [number of videos]
-                        batched_binary_predicates=[None],  # None indicates inference time
-                    )
-                all_unary_res.append(batched_image_unary_probs)
             
-            # Combine the uanry and object name information together 
-            # Step 1: reformat the object name, attributes, and relations into better format
-            predicted_name = {}
-            for (oid, name) in batched_image_cate_probs[0]:
-                prob = batched_image_cate_probs[0][(oid, name)].item()
-                if not oid in predicted_name:
-                    predicted_name[oid] = []
-                predicted_name[oid].append((prob, name))
-            
-            for oid in predicted_name:
-                predicted_name[oid] = sorted(predicted_name[oid], reverse=True)   
+            # Process each object
+            for oid in range(len(boxes)):
+                # Find the best matching category for this object
+                best_prob = 0
+                best_name = None
                 
-            reformatted_unary_res = {}
-            for unary_res in all_unary_res:
-                for  (fid, oid, kw) in unary_res[0].keys():
-                    if not oid in reformatted_unary_res:
-                        reformatted_unary_res[oid] = {}
-                    if kw in query_attributes:
-                        reformatted_unary_res[oid][kw] = unary_res[0][(fid, oid, kw)].item()
-            
-            topk_obj_pair_info = get_topk_per_relation(predicted_name, binary_predicates=query_relations, top_k=30)
-            top_obj_pairs = merge_object_pair_ids(topk_obj_pair_info)
-            # my_list = range(len(boxes))
-            # pairs = [(0, 0, (a, b)) for a in my_list for b in my_list if a != b]
-            
-            batched_image_rel_probs = {}
-            if len(top_obj_pairs) > 0:
-                _, _, batched_image_rel_probs, _ = \
-                    self.predicate_model(
-                        batched_video_ids=[0],
-                        batched_videos=[image],
-                        batched_masks=batched_pred_masks,  # batched_object_ids * video_height * video_width
-                        batched_bboxes=boxes,  # batched_object_ids * dict<bboxes>
-                        batched_names=[query_names],  # Dataset-wise categorical labels
-                        batched_object_ids=batched_object_ids,  # [video_id, frame_id, object_id]
-                        batched_unary_kws=[[]],  # Dataset-wise unary predicate labels
-                        batched_binary_kws=[query_relation_kws],  # Dataset-wise binary predicate labels
-                        batched_obj_pairs=top_obj_pairs,  # Ground truth binary relations
-                        batched_video_splits=[0],  # [number of videos]
-                        batched_binary_predicates=[query_relations],  # None indicates inference time
-                    )
+                for (obj_id, name) in batched_image_cate_probs[0]:
+                    if obj_id == oid:
+                        prob = batched_image_cate_probs[0][(obj_id, name)].item()
+                        if prob > best_prob:
+                            best_prob = prob
+                            best_name = name
                 
-            # Step 3: Aggregate the object name and attribute predictions together
-            aggr_res = {}            
-            
-            for oid in predicted_name:
-                top_prob, name = predicted_name[oid][0]
-                if not oid in aggr_res:
-                    aggr_res[oid] = {}
-                
-                if name in target_names:
-                    aggr_res[oid]['name'] = top_prob, name
-                else:
-                    # the top predicted name is not the target name
-                    aggr_res[oid]['name'] = 0, "other"
-                    
-            for oid in reformatted_unary_res: 
-                
-                if not oid in aggr_res:
-                    continue
-                
-                if not 'attr' in aggr_res[oid]:
-                    aggr_res[oid]['attr'] = []
-                for attr in reformatted_unary_res[oid]:
-                    aggr_res[oid]['attr'].append((reformatted_unary_res[oid][attr], attr))
-            
-            if len(batched_image_rel_probs) > 0:
-                rel_preds = batched_image_rel_probs[0]
-            else:
-                rel_preds = {}
-
-            identified_rels = []
-            for (_, (subj, obj), rel), p in rel_preds.items():
-                subj_prob, pred_subj_name = predicted_name[subj][0]
-                obj_prob, pred_obj_name = predicted_name[obj][0]
-                rel_prob = p
-                if (rel, pred_subj_name, pred_obj_name) in target_relation_preds:
-                    prob = subj_prob * obj_prob * rel_prob
-                    if prob > self.rel_thres:
-                        identified_rels.append((prob, (rel, subj, obj), (rel, pred_subj_name, pred_obj_name)))
-                
-            # Thresholding
-            avg_aggr_res = {}
-            for oid in aggr_res:
-                name_prob, name = aggr_res[oid]['name']
-                
-                # Target Name must rank at top 1
-                if name_prob == 0:
-                    continue
-                
-                # Attribute aggregation
-                probs = [name_prob]
-
-                if 'attr' in aggr_res[oid]:
-                    probs += [p for p, _ in aggr_res[oid]['attr']]
-                
-                avg_val = sum(probs) / len(probs)
-                    
-                if avg_val > self.aggr_thres:
-                    avg_aggr_res[oid] = avg_val
-            
-            # Relation aggregation
-                
-            # Only pick the top-k object according to the setip
-            top_objects_probs = get_topk_per_object_name(aggr_res, avg_aggr_res, k=self.k)
-            # top_objects_probs = {oid: prob for prob, oid in top_objects}
-            
-            selected_objects = list(top_objects_probs.keys())
-            selected_object_bboxes = boxes[selected_objects]
-                                
-            prob_labels = []
-            for oid in top_objects_probs:
-                prob, label = predicted_name[oid][0]
-                prob_labels.append(f"{prob:.2f}::{label}")
-
-        return prob_labels, selected_object_bboxes, identified_rels
+                # Check if this object matches our criteria
+                if best_name in target_names and best_prob > threshold:
+                    prob_labels.append(f"{best_prob:.2f}::{best_name}")
+                    selected_object_bboxes.append(boxes[oid])
+                    # Also append the corresponding mask
+                    selected_masks.append(batched_pred_masks[oid])
+        
+        return prob_labels, selected_object_bboxes, selected_masks
     
+    def predict_sam2_masks(self, image, boxes):
+        """
+        Generate SAM2 masks from bounding boxes
+        Args:
+            image: RGB image array
+            boxes: tensor of bounding boxes [N, 4] in format [x1, y1, x2, y2]
+        Returns:
+            masks: list of binary masks
+        """
+        if not self.use_sam2 or self.sam2_predictor is None:
+            return []
+            
+        if len(boxes) == 0:
+            return []
+            
+        try:
+            # Set image for SAM2 predictor
+            self.sam2_predictor.set_image(np.array(image))
+            
+            # Convert boxes to numpy if needed
+            if isinstance(boxes, torch.Tensor):
+                boxes_np = boxes.cpu().numpy()
+            else:
+                boxes_np = np.array(boxes)
+                
+            # Generate masks for all boxes
+            masks, scores, _ = self.sam2_predictor.predict(
+                point_coords=None,
+                point_labels=None,
+                box=boxes_np,
+                multimask_output=False,
+            )
+            
+            # Squeeze masks if needed
+            masks = [masks[i].squeeze(0) if masks[i].shape[0] == 1 else masks[i] for i in range(len(masks))]
+            
+            return masks
+            
+        except Exception as e:
+            print(f"SAM2 prediction failed: {e}")
+            return []
+    
+    def save_mask_contours_and_boxes(self, frame_image, masks, boxes, labels, save_path):
+        """
+        Save image with mask contours and bounding boxes
+        """
+        if len(masks) == 0 or len(boxes) == 0:
+            return
+            
+        contour_img = frame_image.copy()
+        
+        # Draw mask contours
+        for mask in masks:
+            if isinstance(mask, torch.Tensor):
+                mask = mask.cpu().numpy()
+            
+            # Squeeze mask if needed
+            if mask.ndim == 3:
+                mask = mask.squeeze()
+                
+            segmentation = mask.astype(np.uint8)
+            contours, _ = cv2.findContours(segmentation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            
+            # Use thin red line for better visibility
+            cv2.drawContours(contour_img, contours, -1, color=(255, 0, 0), thickness=1)
+        
+        # Draw labels
+        for i, (box, label) in enumerate(zip(boxes, labels)):
+            if isinstance(box, torch.Tensor):
+                box = box.cpu().numpy()
+            x0, y0, x1, y1 = map(int, box)
+            
+            # Draw label with subtle shadow for visibility
+            # Shadow
+            cv2.putText(contour_img, label, (x0+1, y0-4), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 2, cv2.LINE_AA)
+            # Main text
+            cv2.putText(contour_img, label, (x0, y0-5), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
+        
+        # Save result
+        cv2.imwrite(save_path, cv2.cvtColor(contour_img, cv2.COLOR_RGB2BGR))
     
     def get_sg_kws(self, sg_info):
         
@@ -1285,14 +1532,44 @@ class VLMPlanner:
                 }""",
                 )
 
-        sg_info = json.loads(out)
+        # Parse scene graph JSON with error handling
+        try:
+            sg_info = robust_load_json_full(out)
+        except Exception as e:
+            print(f"Scene graph JSON parsing failed: {e}")
+            # Use default scene graph structure if parsing fails
+            sg_info = {
+                "target_state": "Unable to parse scene graph",
+                "current_state": "Unable to parse scene graph", 
+                "target_objects": [],
+                "target_attributes": [],
+                "target_relations": [],
+                "current_objects": [],
+                "current_attributes": [],
+                "current_relations": [],
+                "explanation": "JSON parsing failed, using default structure"
+            }
 
-        target_state = sg_info["target_state"]
-        current_state = sg_info["current_state"]
-        target_names, current_names, query_objects, \
-        target_attribute_kws, current_attribute_kws, \
-        target_relation_preds, current_relation_preds, \
-            target_relation_kws, query_relation_kws, query_relation_preds = self.get_sg_kws(sg_info)
+        target_state = sg_info.get("target_state", "No target state available")
+        current_state = sg_info.get("current_state", "No current state available")
+        try:
+            target_names, current_names, query_objects, \
+            target_attribute_kws, current_attribute_kws, \
+            target_relation_preds, current_relation_preds, \
+                target_relation_kws, query_relation_kws, query_relation_preds = self.get_sg_kws(sg_info)
+        except Exception as e:
+            print(f"Error processing scene graph keywords: {e}")
+            # Use empty defaults if scene graph processing fails
+            target_names = []
+            current_names = []
+            query_objects = self.common_objects.copy()
+            target_attribute_kws = []
+            current_attribute_kws = []
+            target_relation_preds = set()
+            current_relation_preds = set()
+            target_relation_kws = set()
+            query_relation_kws = []
+            query_relation_preds = []
         scene_graph_prompt = []
         sg_text = ""
          
@@ -1325,7 +1602,7 @@ class VLMPlanner:
             if self.gd_only:
                 
                 # Predict bounding box with grounding dino
-                labels, boxes = self.predict_gd(image, target_names, box_threshold=self.gd_box_threshold, text_threshold=self.text_box_threshold)
+                labels, boxes = self.predict_gd(image, target_names, box_threshold=self.gd_box_threshold, text_threshold=self.gd_text_threshold)
             
                 target_labels, target_bboxes = [], []
                 for label, box in zip(labels, boxes):
@@ -1337,44 +1614,93 @@ class VLMPlanner:
                     target_bboxes = torch.stack(target_bboxes)
             
             else:
-                # og_labels, og_boxes = self.predict_gd(image, gd_query_objects, box_threshold=0.4, text_threshold=0.4)
+                # og_laels, og_boxes = self.predict_gd(image, gd_query_objects, box_threshold=0.4, text_threshold=0.4)
                 labels, boxes = self.predict_gd(image, query_objects,
-                                                box_threshold=self.gd_box_threshold, 
-                                                text_threshold=self.gd_text_threshold)
+                                box_threshold=self.gd_box_threshold, 
+                                text_threshold=self.gd_text_threshold)
+
                 if len(boxes) != 0:
-                    target_labels, target_bboxes, identified_rels = self.predict_laser(
+                    # Get correct image dimensions
+                    img_height, img_width = image.shape[0], image.shape[1]
+                    
+                    # Convert boxes to pixel coordinates for LASER
+                    boxes_pixel = convert_gd_boxes_to_pixel(boxes, img_width, img_height)
+                    
+                    # Generate SAM2 masks if enabled (SAM2 expects pixel coordinates)
+                    sam2_masks = []
+                    if self.use_sam2 and len(boxes_pixel) > 0:
+                        # Convert to tensor for SAM2
+                        boxes_pixel_tensor = torch.tensor(boxes_pixel, dtype=torch.float32)
+                        sam2_masks = self.predict_sam2_masks(image, boxes_pixel_tensor)
+                    
+                    # # Call predict_laser with pixel coordinates and masks
+                    # target_labels, target_bboxes, identified_rels = self.predict_laser(
+                    #     image=image, 
+                    #     boxes=boxes_pixel,  # Pixel coordinates as list
+                    #     masks=sam2_masks if sam2_masks else None,  # Pass masks if available
+                    #     target_names=target_names,
+                    #     target_relation_kws=target_relation_kws,
+                    #     target_relation_preds=target_relation_preds,
+                    #     query_names=list(set(query_objects)),
+                    #     query_attributes=target_attribute_kws,
+                    #     query_relation_kws=query_relation_kws,
+                    #     query_relations=query_relation_preds,
+                    # )
+                    # Call predict_laser with pixel coordinates and masks
+                    target_labels, target_bboxes, identified_masks = self.predict_laser(
                         image=image, 
-                        boxes=boxes, 
+                        boxes=boxes_pixel,  # Pixel coordinates as list
+                        masks=sam2_masks if sam2_masks else None,  # Pass masks if available
                         target_names=target_names,
-                        target_relation_kws=target_relation_kws,
-                        target_relation_preds=target_relation_preds,
-                        query_names=list(set(query_objects)),
-                        query_attributes=target_attribute_kws,
-                        query_relation_kws=query_relation_kws,
-                        query_relations=query_relation_preds,
+                        query_names=list(set(query_objects)),  # All possible object names to check
+                        threshold=self.aggr_thres  # Use the existing threshold from self
                     )
                 else:
                     target_labels = []
                     target_bboxes = []
+                    identified_rels = []
+
+                # 4. Update visualization part:
+                # Save visualization with boxes and optionally masks
+                if not len(target_bboxes) == 0:
+                    # Convert list of lists to tensor for visualization functions
+                    target_bboxes_tensor = torch.tensor(target_bboxes, dtype=torch.float32)
+                    
+                    if self.use_sam2 and len(sam2_masks) > 0:
+                        # Save with both masks and boxes
+                        mask_bbox_path = bbox_path.replace('_bbox.png', '_mask_bbox.png')
+                        self.save_mask_contours_and_boxes(
+                            frame_image=image, 
+                            masks=identified_masks,
+                            boxes=target_bboxes_tensor, 
+                            labels=target_labels,
+                            save_path=mask_bbox_path
+                        )
+                        prompt_image_path = mask_bbox_path
+                    else:
+                        # Save with just boxes
+                        save_prompts_one_image(
+                            frame_image=image, 
+                            boxes=target_bboxes_tensor, 
+                            labels=["" for _ in target_bboxes], 
+                            points=[], 
+                            save_path=bbox_path
+                        )    
+                        prompt_image_path = bbox_path
                 
-            # if self.boundingbox:
-            if not len(target_bboxes) == 0:
-                save_prompts_one_image(frame_image=image, 
-                                        boxes=target_bboxes, 
-                                        labels=["" for _ in target_bboxes], 
-                                        points=[], 
-                                        save_path=bbox_path)    
-                prompt_image_path = bbox_path  
-                
-            else:
-                target_bboxes = []
-                target_labels = []
+                else:
+                    target_bboxes = []
+                    target_labels = []
             
             self.processed_images[image_path] = prompt_image_path
 
             # Arrange the prompt into vlm
             if self.scene_graph_text:
-                sg_text = format_state_descriptions(sg_info, target_labels, [], identified_rels)
+                try:
+                    sg_text = format_state_descriptions(sg_info, target_labels, [], [])
+                except Exception as e:
+                    print(f"Error formatting scene graph text: {e}")
+                    sg_text = f"Current state: {current_state}\nTarget state: {target_state}"
         
         if self.multistep:
             if not image_path == prompt_image_path:
@@ -1458,16 +1784,23 @@ class VLMPlanner:
         action, valid = self.json_to_action_alt(out)
         
         if valid:
-            plan = json.loads(out)
-            self.last_reasoning = plan.get(
-                    "reasoning_and_reflection", ""
-            )
-            self.last_visual_description = plan.get(
-                    "visual_state_description", ""
-            )
-            
-            plan['scene_graph'] = sg_info
-            out_str = json.dumps(plan)
+            try:
+                plan = json.loads(out)
+                self.last_reasoning = plan.get(
+                        "reasoning_and_reflection", ""
+                )
+                self.last_visual_description = plan.get(
+                        "visual_state_description", ""
+                )
+                
+                plan['scene_graph'] = sg_info
+                out_str = json.dumps(plan)
+            except Exception as e:
+                print(f"Error parsing final JSON output: {e}")
+                self.last_visual_description = ""
+                self.last_reasoning = ""
+                out_str = '''{"visual_state_description":"json parsing failed", "reasoning_and_reflection":"json parsing failed",
+                       "language_plan":"json parsing failed"}'''
         else:
             self.last_visual_description = ""
             self.last_reasoning = ""

@@ -280,7 +280,7 @@ if __name__ == '__main__':
         'visual_icl': args.visual_icl,
         'exp_name': args.exp_name,
         'tp': args.tp,
-        'selected_indexes': list(range(2, 48))
+        'selected_indexes': list(range(0, 2))
     }
     print("printing config ...")
     for config_key in config:

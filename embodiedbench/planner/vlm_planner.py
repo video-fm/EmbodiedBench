@@ -149,11 +149,37 @@ class VLMPlanner():
             print('random action')
             action = np.random.randint(len(self.actions))
         return action
-    
     def json_to_action(self, output_text, json_key='executable_plan'):
         try:
             json_object = json.loads(output_text)
-            action = [x[self.action_key] for x in json_object[json_key]]
+            
+            # Function to recursively search for the key in nested structures
+            def find_key_recursive(obj, target_key):
+                if isinstance(obj, dict):
+                    if target_key in obj:
+                        return obj[target_key]
+                    for value in obj.values():
+                        result = find_key_recursive(value, target_key)
+                        if result is not None:
+                            return result
+                elif isinstance(obj, list):
+                    for item in obj:
+                        result = find_key_recursive(item, target_key)
+                        if result is not None:
+                            return result
+                return None
+            
+            # Search for executable_plan recursively
+            executable_plan = find_key_recursive(json_object, json_key)
+            
+            if executable_plan is None:
+                print(f'Could not find {json_key} in JSON structure')
+                print(f'Available keys: {list(json_object.keys()) if isinstance(json_object, dict) else "Not a dict"}')
+                return -1
+            
+            # Extract action IDs from the executable plan
+            action = [x[self.action_key] for x in executable_plan]
+            
             if not len(action):
                 print('empty plan, stop here')
                 action = -2
@@ -161,14 +187,19 @@ class VLMPlanner():
                 # keep action valid
                 for i, act in enumerate(action):
                     if act >= len(self.actions) or act < 0:
-                        print('found invlid action')
+                        print('found invalid action')
                         if i == 0:
                             action = -1
                         else:
                             action = action[:i]
                         break
+                        
         except json.JSONDecodeError as e:
             print("Failed to decode JSON:", e)
+            self.output_json_error += 1
+            action = -1
+        except KeyError as e:
+            print(f"Key error - missing key {e} in action item")
             self.output_json_error += 1
             action = -1
         except Exception as e:
@@ -176,6 +207,7 @@ class VLMPlanner():
             print("An unexpected error occurred:", e)
             self.output_json_error += 1
             action = -1
+            
         return action
 
     

@@ -1,11 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-os.environ["remote_url"] = "http://0.0.0.0:15235/v1"
-os.environ["DISPLAY"] = "cherry:12.0"
-os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
-home_dir = "/home/asethi04/embody/EmbodiedBench"
-existing_path = os.environ.get("PYTHONPATH", "")
-os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
+
 import numpy as np
 from tqdm import tqdm
 import time
@@ -223,12 +217,12 @@ if __name__ == '__main__':
     import argparse
     def parse_arguments():
         parser = argparse.ArgumentParser(description='Change configuration parameters.')
-        parser.add_argument('--model_name', default='OpenGVLab/InternVL2_5-38B', type=str, help='Name of the model.')
+        parser.add_argument('--model_name', default='gemini-2.0-flash', type=str, help='Name of the model.')
         parser.add_argument('--n_shots', type=int, help='Number of examples')
         parser.add_argument('--down_sample_ratio', type=float, help='Down sample ratio.')
         parser.add_argument('--model_type', default='remote', type=str, help='Type of the model.')
         parser.add_argument('--language_only', type=int, help='Set to True for language only mode.')
-        parser.add_argument('--exp_name', default='gd', type=str, help='Name of the experiment.')
+        parser.add_argument('--exp_name', default='gd_gemini', type=str, help='Name of the experiment.')
         parser.add_argument('--chat_history', type=int, help='Set to True to enable chat history.')
         parser.add_argument('--detection_box', type=int, help='Set to True to enable detection.')
         parser.add_argument('--eval_sets', type=lambda s: s.split(','), help='Comma-separated list of evaluation sets.')
@@ -245,11 +239,11 @@ if __name__ == '__main__':
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'multistep_gd',
+        'exp_name': 'multistep_gd_gemini',
         'chat_history': 0, 
-        'detection_box': 0,
-        'eval_sets': ['common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'], 
-        'selected_indexes': [], 
+        'detection_box': 1,
+        'eval_sets': ['long_horizon', 'common_sense', 'visual_appearance'], 
+        'selected_indexes': list(range(4,50)), 
         'multistep':0, 
         'resolution': 500, 
         'env_feedback': 1,

@@ -196,16 +196,16 @@ if __name__ == '__main__':
 
 
     config = {
-        'model_name': 'OpenGVLab/InternVL2_5-38B-MPO',
+        'model_name': 'Qwen/Qwen2.5-VL-72B-Instruct',
         'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'baseline_long_horizon',
+        'exp_name': 'qwen_2.5_flash_base_common_sense_lh',
         'chat_history': 0, 
         'detection_box': 0,
-        'eval_sets': ['long_horizon'],
-        # 'eval_sets': [ 'base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
+        # 'eval_sets': ['long_horizon', 'common_sense', 'visual_appearance'],
+        'eval_sets': ['common_sense', 'long_horizon'],
         'selected_indexes': list(range(0,50)), 
         'multistep':0, 
         'resolution': 500, 

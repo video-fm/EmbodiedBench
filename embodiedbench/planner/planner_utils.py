@@ -25,7 +25,7 @@ The fields in above JSON follows the purpose below:
 3. language_plan is for describing a list of actions to achieve the user instruction. Each action is started by the step number and the action name, 
 4. executable_plan is a list of actions needed to achieve the user instruction, with each action having an action ID and a name.
 5. keep your plan efficient and concise.
-!!! When generating content for JSON strings, avoid using any contractions or abbreviated forms (like 's, 're, 've, 'll, 'd, n't) that use apostrophes. Instead, write out full forms (is, are, have, will, would, not) to prevent parsing errors in JSON. Please do not output any other thing more than the above-mentioned JSON, do not include ```json and ```. IMPORTANT: be sure to escape every double-quote that appears inside a string value with a backslash (\"), so the JSON remains valid. 
+!!! When generating content for JSON strings, avoid using any contractions or abbreviated forms (like 's, 're, 've, 'll, 'd, n't) that use apostrophes. Instead, write out full forms (is, are, have, will, would, not) to prevent parsing errors in JSON. Please do not output any other thing more than the above-mentioned JSON, do not include ```json and ```. IMPORTANT: Please make sure the action id you provide matches up with the index of the action name you provide in the executable_plan.
 
 '''
 

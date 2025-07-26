@@ -96,7 +96,7 @@ class RemoteModel:
                 return self._call_gpt(message_history, get_scene_graph)
             elif "Qwen2-VL-7B-Instruct" in self.model_name:
                 return self._call_qwen7b(message_history, get_scene_graph)
-            elif "Qwen2-VL-72B-Instruct" in self.model_name:
+            elif "VL-72B-Instruct" in self.model_name:
                 return self._call_qwen72b(message_history, get_scene_graph)
             elif "Llama-3.2-11B-Vision-Instruct" in self.model_name:
                 return self._call_llama11b(message_history, get_scene_graph)
@@ -363,9 +363,9 @@ class RemoteModel:
         response = self.model.chat.completions.create(
             model=self.model_name,
             messages=message_history,
-            response_format=response_format,
+            # response_format=response_format,
             temperature=temperature,
-            max_tokens=max_completion_tokens
+            # max_tokens=max_completion_tokens
         )
 
         # easy to meet json errors
@@ -373,7 +373,13 @@ class RemoteModel:
         out = out.replace("'",'"')
         out = out.replace('\"s ', "\'s ")
         out = out.replace('```json', '').replace('```', '')
-        return out
+        out = out.strip()
+        if out[0] != '{' and out[-1] != '}':
+            out = "{" + out + "}"
+        # if repair_json(out) != out:
+        #     print("Repaired JSON {} -> {}".format(out, repair_json(out)))
+        return repair_json(out)
+        # return out
     
     def _call_intern38b(self, message_history, get_scene_graph=False):
 

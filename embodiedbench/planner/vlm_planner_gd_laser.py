@@ -503,6 +503,67 @@ def save_prompts_one_image(frame_image, boxes, points, labels, save_path):
     plt.close()
 
 
+def check_device_status(self):
+    """Check and print device status for all models"""
+    print("\n" + "="*50)
+    print("DEVICE STATUS CHECK")
+    print("="*50)
+    
+    # Check CUDA availability
+    print(f"CUDA available: {torch.cuda.is_available()}")
+    if torch.cuda.is_available():
+        print(f"CUDA device count: {torch.cuda.device_count()}")
+        print(f"Current CUDA device: {torch.cuda.current_device()}")
+        print(f"CUDA device name: {torch.cuda.get_device_name()}")
+        print(f"CUDA memory allocated: {torch.cuda.memory_allocated() / 1024**3:.2f} GB")
+        print(f"CUDA memory reserved: {torch.cuda.memory_reserved() / 1024**3:.2f} GB")
+    
+    print("-" * 30)
+    
+    # Check GroundingDINO model device
+    if hasattr(self, 'grounding_model') and self.grounding_model is not None:
+        try:
+            # Get the device of the first parameter
+            device = next(self.grounding_model.parameters()).device
+            print(f"GroundingDINO model device: {device}")
+        except Exception as e:
+            print(f"GroundingDINO model device: Unable to determine ({e})")
+    else:
+        print("GroundingDINO model: Not available")
+    
+    # Check SAM2 model device
+    if hasattr(self, 'sam2_predictor') and self.sam2_predictor is not None:
+        try:
+            device = next(self.sam2_predictor.model.parameters()).device
+            print(f"SAM2 model device: {device}")
+        except Exception as e:
+            print(f"SAM2 model device: Unable to determine ({e})")
+    else:
+        print("SAM2 model: Not available")
+    
+    # Check LASER predicate model device
+    if hasattr(self, 'predicate_model') and self.predicate_model is not None:
+        try:
+            device = next(self.predicate_model.parameters()).device
+            print(f"LASER predicate model device: {device}")
+        except Exception as e:
+            print(f"LASER predicate model device: Unable to determine ({e})")
+    else:
+        print("LASER predicate model: Not available")
+    
+    # Check main VLM model (if it has device info)
+    if hasattr(self, 'model') and self.model is not None:
+        if hasattr(self.model, 'device'):
+            print(f"Main VLM model device: {self.model.device}")
+        elif hasattr(self.model, 'model') and hasattr(self.model.model, 'device'):
+            print(f"Main VLM model device: {self.model.model.device}")
+        else:
+            print("Main VLM model device: Unable to determine (likely remote/API)")
+    else:
+        print("Main VLM model: Not available")
+    
+    print("="*50)
+
 class VLMPlanner:
     def __init__(
         self,
@@ -975,8 +1036,16 @@ class VLMPlanner:
             # # quick sanitiser – remove any quote directly before a t in isn"t ➜ isn't
             # bad = re.sub(r'isn"t', "isn't", bad)
 
-            # obj = json.loads(bad)   
-            obj = json.loads(output_text)
+            # obj = json.loads(bad) 
+            def parse_json_with_fixes(json_str):
+                try:
+                    return json.loads(json_str)
+                except json.JSONDecodeError:
+                    # Try fixing common escape issues
+                    fixed_str = json_str.replace("\\'", "'")
+                    return json.loads(fixed_str)
+  
+            obj = parse_json_with_fixes(output_text)
 
             # locate a list plan (first key that exists & is a list)
             plan = next((obj[k] for k in json_keys if isinstance(obj.get(k), list)), None)
@@ -1006,7 +1075,7 @@ class VLMPlanner:
                     resolved = name2id[nm]
 
                 if resolved is None:      # could not resolve → invalid plan
-                    valid = False
+                    # valid = False
                     break
 
                 action_ids.append(resolved)
@@ -1785,7 +1854,14 @@ class VLMPlanner:
         
         if valid:
             try:
-                plan = json.loads(out)
+                def parse_json_with_fixes(json_str):
+                    try:
+                        return json.loads(json_str)
+                    except json.JSONDecodeError:
+                        # Try fixing common escape issues
+                        fixed_str = json_str.replace("\\'", "'")
+                        return json.loads(fixed_str) 
+                plan = parse_json_with_fixes(out)
                 self.last_reasoning = plan.get(
                         "reasoning_and_reflection", ""
                 )

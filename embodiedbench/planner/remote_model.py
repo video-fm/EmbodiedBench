@@ -22,6 +22,7 @@ from embodiedbench.planner.planner_utils import (
     TargetSG,
     convert_format_2gpt,
     TargetEntityName,
+    ActionPlan_SG_baseline,
 )
 from json_repair import repair_json
 
@@ -82,16 +83,16 @@ class RemoteModel:
                     raise ValueError(f"Unsupported model name: {model_name}")
 
 
-    def respond(self, message_history: list, get_scene_graph=False, get_entity_name=False):
+    def respond(self, message_history: list, get_scene_graph=False, get_entity_name=False, sg_baseline=False):
         if self.model_type == 'local':
             return self._call_local(message_history, get_scene_graph)
         else:
             if "claude" in self.model_name:
                 return self._call_claude(message_history, get_scene_graph)
             elif "gemini" in self.model_name:
-                return self._call_gemini(message_history, get_scene_graph=get_scene_graph, get_entity_name=get_entity_name)
+                return self._call_gemini(message_history, get_scene_graph=get_scene_graph, get_entity_name=get_entity_name, sg_baseline=sg_baseline)
             elif "gpt" in self.model_name:
-                return self._call_gpt(message_history, get_scene_graph)
+                return self._call_gpt(message_history, get_scene_graph, sg_baseline=sg_baseline)
             elif 'qwen' in self.model_name:
                 return self._call_gpt(message_history, get_scene_graph)
             elif "Qwen2-VL-7B-Instruct" in self.model_name:
@@ -187,7 +188,7 @@ class RemoteModel:
         
         return response.content[0].text 
 
-    def _call_gemini(self, message_history: list, get_scene_graph=False, get_entity_name=False):
+    def _call_gemini(self, message_history: list, get_scene_graph=False, get_entity_name=False, sg_baseline=False):
 
         if not self.language_only:
             message_history = convert_format_2gemini(message_history)
@@ -204,6 +205,8 @@ class RemoteModel:
                 response_format = ActionPlan
             elif get_entity_name:
                 response_format = TargetEntityName
+            elif sg_baseline:
+                response_format = ActionPlan_SG_baseline
             else:
                 response_format = ActionPlan_lang
             
@@ -230,7 +233,7 @@ class RemoteModel:
         return repair_json(out)
 
 
-    def _call_gpt(self, message_history: list, get_scene_graph=False):
+    def _call_gpt(self, message_history: list, get_scene_graph=False, sg_baseline=False):
 
         if not self.language_only:
             message_history = convert_format_2gpt(message_history)
@@ -258,6 +261,8 @@ class RemoteModel:
                 response_format = TargetSG
             elif self.language_only:
                 response_format = ActionPlan_lang 
+            elif sg_baseline:
+                response_format = ActionPlan_SG_baseline
             else:
                 response_format =  ActionPlan
                 
@@ -424,7 +429,7 @@ class RemoteModel:
 if __name__ == "__main__":
 
     model = RemoteModel(
-        'Qwen/Qwen2-VL-72B-Instruct', #'meta-llama/Llama-3.2-11B-Vision-Instruct',
+        'Qwen2-VL-72B-Instruct', #'meta-llama/Llama-3.2-11B-Vision-Instruct',
         True #False
     )#'claude-3-5-sonnet-20241022, Qwen/Qwen2-VL-72B-Instruct, meta-llama/Llama-3.2-11B-Vision-Instruct
 

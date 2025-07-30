@@ -48,7 +48,7 @@ class EBManEnv(gym.Env):
         obs_config.set_image_size(img_size)
 
         # action_mode = ActionMode(ArmActionMode.ABS_EE_POSE_PLAN_WORLD_FRAME)
-        action_mode = ActionMode(ArmActionMode.ABS_JOINT_VELOCITY)
+        action_mode = ActionMode(ArmActionMode.DELTA_JOINT_POSITION)
 
         self.env = Environment(
             action_mode, obs_config=obs_config, headless=True)

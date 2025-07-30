@@ -65,16 +65,16 @@ def analyze_folders(folder1, folder2):
 #'eval_sets': ['base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon'],
 
 # Example usage:
-path1 = "/home/asethi04/jiani/EmbodiedBench/running/eb_alfred/gpt-4o_gd_laser/long_horizon/results"
+path1 = "/home/jianih/research/EmbodiedBench/running/eb_nav/InternVL2_5-38B-MPO_baseline_sg/long_horizon/results"
 # path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/Qwen2.5-VL-72B-Instruct_gd_laser_topk_3/visual_appearance/results"
 
 # path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_3/base/results"
 # path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser/common_sense/results"
 # path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_1/long_horizon/results"
-path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser_topk_3/visual_appearance/results"
+path2 =  "/home/jianih/research/EmbodiedBench/running/eb_nav/InternVL2_5-38B-MPO_baseline_all/long_horizon/results"
 # path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gpt-4o_gd_laser/complex_instruction/results"
 
-path2 = "/home/asethi04/jiani/EmbodiedBench/running/eb_alfred/gpt-4o_baseline/long_horizon/results"
+# path2 = "/home/asethi04/jiani/EmbodiedBench/running/eb_alfred/gpt-4o_baseline/long_horizon/results"
 
 # path2 = "/home/jianih/research/EmbodiedBench/running/eb_nav/gemini-2.0-flash_gd_laser/complex_instruction/results"
 analyze_folders(path1, path2)

@@ -196,17 +196,17 @@ if __name__ == '__main__':
 
 
     config = {
-        'model_name': 'Qwen/Qwen2.5-VL-72B-Instruct',
+        'model_name': 'gpt-4o',
         'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'qwen_2.5_flash_base_common_sense_lh',
+        'exp_name': 'gpt_4o_base',
         'chat_history': 0, 
         'detection_box': 0,
         # 'eval_sets': ['long_horizon', 'common_sense', 'visual_appearance'],
-        'eval_sets': ['common_sense', 'long_horizon'],
-        'selected_indexes': list(range(0,50)), 
+        'eval_sets': ['base', "long_horizon", "spatial"],
+        'selected_indexes': list(range(29,32)), 
         'multistep':0, 
         'resolution': 500, 
         'env_feedback': 1,

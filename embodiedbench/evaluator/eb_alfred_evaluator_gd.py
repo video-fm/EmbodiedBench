@@ -217,12 +217,12 @@ if __name__ == '__main__':
     import argparse
     def parse_arguments():
         parser = argparse.ArgumentParser(description='Change configuration parameters.')
-        parser.add_argument('--model_name', default='gemini-2.0-flash', type=str, help='Name of the model.')
+        parser.add_argument('--model_name', default='gpt-4o', type=str, help='Name of the model.')
         parser.add_argument('--n_shots', type=int, help='Number of examples')
         parser.add_argument('--down_sample_ratio', type=float, help='Down sample ratio.')
         parser.add_argument('--model_type', default='remote', type=str, help='Type of the model.')
         parser.add_argument('--language_only', type=int, help='Set to True for language only mode.')
-        parser.add_argument('--exp_name', default='gd_gemini', type=str, help='Name of the experiment.')
+        parser.add_argument('--exp_name', default='FINAL_gpt_gd', type=str, help='Name of the experiment.')
         parser.add_argument('--chat_history', type=int, help='Set to True to enable chat history.')
         parser.add_argument('--detection_box', type=int, help='Set to True to enable detection.')
         parser.add_argument('--eval_sets', type=lambda s: s.split(','), help='Comma-separated list of evaluation sets.')
@@ -234,16 +234,17 @@ if __name__ == '__main__':
 
 
     config = {
-        'model_name': 'gemini-2.0-flash',  # 'Qwen/Qwen2-VL-7B-Instruct',
+        'model_name': 'gpt-4o',  # 'Qwen/Qwen2-VL-7B-Instruct',
         'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'multistep_gd_gemini',
+        'exp_name': 'FINAL_gpt_gd',
         'chat_history': 0, 
         'detection_box': 1,
-        'eval_sets': ['long_horizon', 'common_sense', 'visual_appearance'], 
-        'selected_indexes': list(range(4,50)), 
+        'eval_sets': ['base', 'common_sense'],
+        # 'base', 'common_sense', 'complex_instruction', 'spatial', 'visual_appearance', 'long_horizon' 
+        'selected_indexes': [], 
         'multistep':0, 
         'resolution': 500, 
         'env_feedback': 1,

@@ -80,13 +80,11 @@ def startx(display):
     
 
     try:
-        current_dir = os.getcwd()
         fd, path = tempfile.mkstemp(dir='')
         path = path.split('/')[-1]
         with open(path, "w") as f:
             f.write(generate_xorg_conf(devices))
         command = shlex.split("Xorg -noreset +extension GLX +extension RANDR +extension RENDER -config %s :%s" % (path, display))
-        print(command)
         subprocess.call(command)
     finally:
         os.close(fd)

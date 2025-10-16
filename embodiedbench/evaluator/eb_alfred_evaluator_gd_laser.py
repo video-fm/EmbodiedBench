@@ -270,12 +270,19 @@ class EB_AlfredEvaluator():
                     # mutiple actions
                     if type(action) == list:
                         current_frames = []
+                        # Limit plan length for long horizon tasks
+                        max_plan_length = self.config.get('max_plan_length', 10)
+                        if len(action) > max_plan_length:
+                            print(f"Plan too long ({len(action)} steps), truncating to {max_plan_length}")
+                            action = action[:max_plan_length]
+                            
                         for action_single in action[:min(self.env._max_episode_steps - self.env._current_step, len(action))]:
                             obs, reward, done, info = self.env.step(action_single, reasoning=reasoning)
                             action_str = action_single if type(action_single) == str else self.env.language_skill_set[action_single]
                             current_frames.append(obs['head_rgb'])
                             print(f"Executed action: {action_str}, Task success: {info['task_success']}")
                             print(f"Last action success: {info['last_action_success']}")
+                            print(f"Environmental feedback: {info['env_feedback']}")
                             logger.debug(f"reward: {reward}")
                             logger.debug(f"terminate: {done}\n")
                             self.planner.update_info(info)
@@ -291,6 +298,8 @@ class EB_AlfredEvaluator():
                         action_str = action if type(action) == str else self.env.language_skill_set[action]
                         current_frames = [obs['head_rgb']]
                         print(f"Executed action: {action_str}, Task success: {info['task_success']}")
+                        print(f"Last action success: {info['last_action_success']}")
+                        print(f"Environmental feedback: {info['env_feedback']}")
                         logger.debug(f"reward: {reward}")
                         logger.debug(f"terminate: {done}\n")
                         
@@ -350,18 +359,18 @@ if __name__ == '__main__':
 
 
     config = {
-        'model_name': 'Qwen/Qwen2.5-VL-72B-Instruct',  # 'Qwen/Qwen2-VL-7B-Instruct',
+        'model_name': 'gpt-4o',  # 'Qwen/Qwen2-VL-7B-Instruct',
         'n_shots': 10,
         'down_sample_ratio': 1.0,
         'model_type': 'remote', # 'local', 
         'language_only': 0,
-        'exp_name': 'gd_laser_integration_final_no_sam_10_shots',
+        'exp_name': 'gpt_4o_gd_laser_integration_final_no_sam_NEW_FINAL_spatial',
         'chat_history': 0, 
         'detection_box': True,
-        'eval_sets': ['long_horizon'],
+        'eval_sets': ['spatial'],
         # 'eval_sets': ['visual_appearance'],
         # 'eval_sets': ['long_horizon', 'common_sense', 'visual_appearance'],
-        'selected_indexes': list(range(29,50)), 
+        'selected_indexes': [], 
         # 'eval_sets': ['base'],
         # 'selected_indexes': list(range(5, 10)) + list(range(40,50)),
         'multistep':0, 
@@ -377,12 +386,14 @@ if __name__ == '__main__':
         'icl_abl':0, 
         'visual': 0,
         'gd_only': False,
-        'top_k': 3, 
-        'aggr_thres': 0.65,
+        'top_k': 1, 
+        'aggr_thres': 0.75,
+        'fallback_to_original': True,  # Fallback to original VLM if detection quality is poor
+        'max_plan_length': 20,  # Limit plan length for long horizon tasks
         # 'gd_config_path': '/home/asethi04/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py',
         # 'gd_checkpoint_path': '/home/asethi04/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth',
-        'gd_box_threshold': 0.35, 
-        'gd_text_threshold': 0.4,
+        'gd_box_threshold': 0.6,  # Increase to reduce false positives
+        'gd_text_threshold': 0.5,  # Increase for more confident detections
         'max_test_ct': 5,
         # SAM2 configuration
         'use_sam2': False,  # Set to True to enable SAM2

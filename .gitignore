@@ -54,3 +54,17 @@ embodiedbench/evaluator/running/
 REFACTORING_SUMMARY.md
 FOLDER_ORGANIZATION_SUMMARY.md
 embodiedbench/TASK_STRUCTURE.md
+
+# Duplicate files (use organized structure instead)
+embodiedbench/evaluator/eb_alfred_evaluator_esca.py
+embodiedbench/evaluator/eb_alfred_evaluator_gd_laser.py
+embodiedbench/evaluator/eb_esca_navigation_evaluator.py
+embodiedbench/evaluator/eb_gd_laser_navigation_evaluator.py
+embodiedbench/planner/vlm_planner_esca.py
+embodiedbench/planner/nav_planner_esca.py
+embodiedbench/planner/vlm_planner_gd_laser.py
+embodiedbench/planner/nav_planner_gd_laser.py
+
+# Large data files
+embodiedbench/envs/eb_alfred/data/alfred_prompt_examples.json
+embodiedbench/envs/*/data/*.json

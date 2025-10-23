@@ -76,3 +76,14 @@ embodiedbench/planner/vlm_planner_gd.py
 embodiedbench/planner/nav_planner_gd.py
 embodiedbench/planner/nav_planner_sg.py
 embodiedbench/evaluator/eb_navigation_evaluator_sg_baseline.py
+
+# Root-level evaluator/planner files (use organized folders instead)
+embodiedbench/evaluator/eb_alfred_evaluator.py
+embodiedbench/evaluator/eb_habitat_evaluator.py
+embodiedbench/evaluator/eb_navigation_evaluator.py
+embodiedbench/evaluator/eb_manipulation_evaluator.py
+embodiedbench/evaluator/eb_vla_manipulation_evaluator.py
+embodiedbench/planner/vlm_planner.py
+embodiedbench/planner/nav_planner.py
+embodiedbench/planner/manip_planner.py
+embodiedbench/planner/manip_planner_vla.py

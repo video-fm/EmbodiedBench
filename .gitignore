@@ -68,3 +68,11 @@ embodiedbench/planner/nav_planner_gd_laser.py
 # Large data files
 embodiedbench/envs/eb_alfred/data/alfred_prompt_examples.json
 embodiedbench/envs/*/data/*.json
+
+# Old duplicate evaluator/planner files (use organized folders instead)
+embodiedbench/evaluator/eb_alfred_evaluator_gd.py
+embodiedbench/evaluator/eb_gd_navigation_evaluator.py
+embodiedbench/planner/vlm_planner_gd.py
+embodiedbench/planner/nav_planner_gd.py
+embodiedbench/planner/nav_planner_sg.py
+embodiedbench/evaluator/eb_navigation_evaluator_sg_baseline.py

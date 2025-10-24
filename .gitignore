@@ -91,6 +91,3 @@ embodiedbench/planner/manip_planner_vla.py
 # Data symbolic links
 data
 embodiedbench/evaluator/data
-embodiedbench/data
-embodiedbench/envs/data
-embodiedbench/envs/*/data

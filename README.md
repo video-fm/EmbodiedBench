@@ -181,34 +181,81 @@ Please run startx.py script before running experiment on headless servers. The s
 python -m embodiedbench.envs.eb_alfred.scripts.startx 1
 ```
 
-## Running ESCA Evaluators
+## Running Evaluators
 
-### EB-ALFRED Evaluator
-To run the EB-ALFRED evaluator with ESCA:
+EmbodiedBench now uses an organized task-based structure. Evaluators are organized by task (alfred, navigation, habitat, manipulation) with three variants:
+- **base**: Baseline VLM implementation
+- **gd**: Grounding DINO integration  
+- **esca**: Enhanced Scene Context Awareness (LASER + Grounding DINO)
+
+### EB-ALFRED Evaluators
+
+Run the baseline evaluator:
+```bash
+conda activate embench
+python -m embodiedbench.evaluator.alfred.base
+```
+
+Run with Grounding DINO:
+```bash
+conda activate embench
+python -m embodiedbench.evaluator.alfred.gd
+```
+
+Run with ESCA (recommended):
+```bash
+conda activate embench
+python -m embodiedbench.evaluator.alfred.esca
+```
+
+### EB-Navigation Evaluators
+
+Run the baseline evaluator:
+```bash
+conda activate embench_nav
+python -m embodiedbench.evaluator.navigation.base
+```
+
+Run with Grounding DINO:
+```bash
+conda activate embench_nav
+python -m embodiedbench.evaluator.navigation.gd
+```
+
+Run with ESCA (recommended):
+```bash
+conda activate embench_nav
+python -m embodiedbench.evaluator.navigation.esca
+```
+
+### EB-Habitat Evaluator
 
 ```bash
 conda activate embench
-python -m embodiedbench.evaluator.eb_esca_alfred_evaluator
+python -m embodiedbench.evaluator.habitat.base
 ```
 
-### EB-Navigation Evaluator
-To run the EB-Navigation evaluator with ESCA:
+### EB-Manipulation Evaluators
 
+Run the baseline evaluator:
+```bash
+conda activate embench_man
+python -m embodiedbench.evaluator.manipulation.base
+```
+
+Run with VLA:
+```bash
+conda activate embench_man
+python -m embodiedbench.evaluator.manipulation.vla
+```
+
+### Alternative: Using main.py interface
+
+You can also use the unified main.py interface:
 ```bash
 conda activate embench
 python -m embodiedbench.main env=eb-alf model_name=Qwen/Qwen2-VL-7B-Instruct model_type=local exp_name='baseline' tp=1
 python -m embodiedbench.main env=eb-hab model_name=OpenGVLab/InternVL2_5-8B model_type=local exp_name='baseline' tp=1
-
-
-conda activate embench_nav
-python -m embodiedbench.evaluator.eb_gd_esca_navigation_evaluator
-```
-
-### EB-Manipulation Evaluator
-To run the EB-Manipulation evaluator with ESCA:
-```bash
-conda activate embench_man
-python -m embodiedbench.evaluator.eb_esca_manipulation_evaluator
 ```
 
 All evaluators support various configuration options through command-line arguments or config files. Key parameters include:

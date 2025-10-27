@@ -285,6 +285,18 @@ class TargetSG(BaseModel):
     target_attribute: list[str]
     target_relation: list[list[str]]
     related_objects: list[str]
+
+class SceneGraphAnalysis(BaseModel):
+    """Complete scene graph analysis with state descriptions and object counting"""
+    target_state: str
+    current_state: str
+    target_objects: list[str]
+    current_objects: list[str]
+    target_attributes: list[list[str]]
+    current_attributes: list[list[str]]
+    target_relations: list[list[str]]
+    current_relations: list[list[str]]
+    explanation: str
     
 class TargetStateCurrentState(BaseModel):
     Visual_Description: str

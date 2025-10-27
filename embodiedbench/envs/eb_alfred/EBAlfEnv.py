@@ -27,7 +27,7 @@ from embodiedbench.envs.eb_alfred.gen import constants
 from embodiedbench.main import logger
 
 # global information
-X_DISPLAY = "11.0"
+X_DISPLAY = '1'
 ALFRED_SPLIT_PATH = os.path.join(os.path.dirname(__file__), 'data/splits/splits.json')
 ALFRED_REWARD_PATH = os.path.join(os.path.dirname(__file__), 'models/config/rewards.json')
 ALFRED_DATASET_PATH = os.path.join(os.path.dirname(__file__), 'data/json_2.1.0')
@@ -94,8 +94,7 @@ class EBAlfEnv(gym.Env):
         action_space (gym.spaces.Discrete): Discrete action space 
         language_skill_set (list): Readable action descriptions
     """
-    def __init__(self, eval_set='base', exp_name='', down_sample_ratio=1.0, selected_indexes=[], 
-                 detection_box=False, resolution=500):
+    def __init__(self, eval_set='base', exp_name='', down_sample_ratio=1.0, selected_indexes=[], detection_box=False, resolution=500):
         """
         Initialize the AI2THOR environment.
         """

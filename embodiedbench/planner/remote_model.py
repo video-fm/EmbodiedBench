@@ -20,6 +20,7 @@ from embodiedbench.planner.planner_utils import (
     ActionPlan_manip,
     ActionPlan_lang_manip,
     TargetSG,
+    SceneGraphAnalysis,
     convert_format_2gpt,
     TargetEntityName,
     ActionPlan_SG_baseline,
@@ -200,7 +201,7 @@ class RemoteModel:
                 response_format = ActionPlan_manip
         else:
             if get_scene_graph:
-                response_format = TargetSG
+                response_format = SceneGraphAnalysis  # Use our complete scene graph model
             elif self.language_only:
                 response_format = ActionPlan
             elif get_entity_name:
@@ -258,7 +259,7 @@ class RemoteModel:
                 response_format = ActionPlan_manip
         else:
             if get_scene_graph:
-                response_format = TargetSG
+                response_format = SceneGraphAnalysis  # Use our complete scene graph model
             elif self.language_only:
                 response_format = ActionPlan_lang 
             elif sg_baseline:

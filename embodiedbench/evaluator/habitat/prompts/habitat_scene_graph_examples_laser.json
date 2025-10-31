@@ -1,0 +1,162 @@
+[
+    {
+      "Human instruction": "Put both a toy airplane and a bowl onto the black table.",
+      "output": {
+        "visual_state_description": "The image shows a room with several furniture items including a sofa, a black table, and a side shelf. A toy airplane is resting on the sofa. A bowl is not visible.",
+        "scene_graph_info": {
+          "target_state": "There is a toy airplane on the black table. The bowl is on the black table",
+          "target_entities": ["toy_airplane_1", "bowl_1", "table_1"],
+          "target_relations": [["toy_airplane_1", "on", "table_1"], ["bowl_1", "on", "table_1"]],
+          "current_state": "I see a toy airplane on the sofa. I do not see a bowl in the scene.",
+          "explanation": "Since I do not see a bowl in the scene, I need to pick up a toy airplane from the sofa first and place it on the black table. After that, I can look for a bowl to place it on the table.",
+          "current_entities": ["toy_airplane_1", "table_1", "cabinet_1", "sofa_1"],
+          "current_relations": [["toy_airplane_1", "on", "sofa_1"]]
+        }
+      }
+    },
+  
+    {
+      "Human instruction": "I made a mistake and left the fridge open. Can you assist me by closing it?",
+      "output": {
+        "visual_state_description": "The image shows a kitchen with several furniture items including a refrigerator (its door is open), a sink, and overhead cupboards. There are various objects present such as dish soap and a mug.",
+        "scene_graph_info": {
+          "target_state": "The refrigerator door is completely closed.",
+          "target_entities": ["refrigerator_1"],
+          "target_relations": [],
+          "current_state": "I see the refrigerator with its door open, exposing its interior. A sink and overhead cupboards are nearby, and there are small items like dish soap and a mug on the counter.",
+          "explanation": "To achieve the target state, I simply need to push the refrigerator door until it is shut.",
+          "current_entities": ["refrigerator_1", "sink_in_the_kitchen_1", "cabinet_1", "cleanser_1", "mug_1"],
+          "current_relations": []
+        }
+      }
+    },
+  
+    {
+      "Human instruction": "Displace the sponge from the left counter.",
+      "output": {
+        "visual_state_description": "The image shows a kitchen with several furniture items including a left counter, a dining table, and a cabinet. A sponge is on the left counter.",
+        "scene_graph_info": {
+          "target_state": "There is no sponge on the left counter.",
+          "target_entities": ["sponge_1", "left_counter_in_the_kitchen_1"],
+          "target_relations": [],
+          "current_state": "A sponge is resting on the left counter while the rest of the kitchen, including a dining table and cabinet, is visible.",
+          "explanation": "I need to pick up the sponge from the left counter and place it somewhere else so that it is no longer on the counter.",
+          "current_entities": ["sponge_1", "left_counter_in_the_kitchen_1", "table_1", "cabinet_1"],
+          "current_relations": [["sponge_1", "on", "left_counter_in_the_kitchen_1"]]
+        }
+      }
+    },
+  
+    {
+      "Human instruction": "Collect a yellow curved object from the sofa and place it in the right counter.",
+      "output": {
+        "visual_state_description": "The image shows a living area with several furniture items including a sofa and a coffee table. A banana is on the sofa.",
+        "scene_graph_info": {
+          "target_state": "The yellow curved object is placed on the right counter.",
+          "target_entities": ["banana_1", "right_counter_in_the_kitchen_1"],
+          "target_relations": [["banana_1", "on", "right_counter_in_the_kitchen_1"]],
+          "current_state": "The yellow curved object is lying on the sofa in the living area; the right counter is currently empty.",
+          "explanation": "I need to pick up the yellow curved object from the sofa and move it to the right counter.",
+          "current_entities": ["banana_1", "sofa_1", "table_1", "right_counter_in_the_kitchen_1"],
+          "current_relations": [["banana_1", "on", "sofa_1"]]
+        }
+      }
+    },
+  
+    {
+      "Human instruction": "Arrange an apple and a scissors on the left counter.",
+      "output": {
+        "visual_state_description": "The image shows a kitchen with several furniture items including a counter, a dining table, and a chair. An apple is on the dining table and a lemon is nearby. Scissors are on the right drawer.",
+        "scene_graph_info": {
+          "target_state": "Both the apple and the scissors are on the left counter.",
+          "target_entities": ["apple_1", "scissors_1", "left_counter_in_the_kitchen_1"],
+          "target_relations": [["apple_1", "on", "left_counter_in_the_kitchen_1"], ["scissors_1", "on", "left_counter_in_the_kitchen_1"]],
+          "current_state": "The apple is on the dining table while the scissors are inside the right drawer; the left counter is empty.",
+          "explanation": "I need to take the apple from the dining table and the scissors from the right drawer, then place both items on the left counter.",
+          "current_entities": ["apple_1", "scissors_1", "left_counter_in_the_kitchen_1", "table_1", "right_drawer_of_the_kitchen_counter_1", "chair_1"],
+          "current_relations": [["apple_1", "on", "table_1"], ["scissors_1", "in", "right_drawer_of_the_kitchen_counter_1"]]
+        }
+      }
+    },
+  
+    {
+      "Human instruction": "I need you to switch the places of lemon and pear in left counter and sofa.",
+      "output": {
+        "visual_state_description": "The image shows a combined space with several furniture items including a sofa, a left counter, and a bookshelf. The lemon is on the left counter and the pear is not visible.",
+        "scene_graph_info": {
+          "target_state": "The lemon is on the sofa and the pear is on the left counter.",
+          "target_entities": ["lemon_1", "pear_1", "sofa_1", "left_counter_in_the_kitchen_1"],
+          "target_relations": [["lemon_1", "on", "sofa_1"], ["pear_1", "on", "left_counter_in_the_kitchen_1"]],
+          "current_state": "At the moment, the lemon sits on the left counter, but the pear is not visible; the sofa is clear.",
+          "explanation": "I need to move the lemon from the left counter to the sofa, find the pear, and place it on the left counter.",
+          "current_entities": ["lemon_1", "left_counter_in_the_kitchen_1", "sofa_1", "cabinet_1"],
+          "current_relations": [["lemon_1", "on", "left_counter_in_the_kitchen_1"]]
+        }
+      }
+    },
+  
+    {
+      "Human instruction": "Relocate a sponge to its assigned brown table.",
+      "output": {
+        "visual_state_description": "The image shows a lounge with several furniture items including a TV stand, a brown table, and a side table. No sponge is visible.",
+        "scene_graph_info": {
+          "target_state": "The sponge is on the brown table.",
+          "target_entities": ["sponge_1", "table_1"],
+          "target_relations": [["sponge_1", "on", "table_1"]],
+          "current_state": "I see a lounge area with a TV stand, a brown table, and a side table, but no sponge is visible.",
+          "explanation": "I need to locate the sponge elsewhere in the environment and place it on the brown table.",
+          "current_entities": ["table_1", "TV_stand_1", "table_1"],
+          "current_relations": []
+        }
+      }
+    },
+  
+    {
+      "Human instruction": "Lay a can and a peach on the right counter.",
+      "output": {
+        "visual_state_description": "The image shows a kitchen-living area with several furniture items including a right counter, a TV stand, and a small dining table. A can is on the TV stand, and a peach is on the dining table. A spoon is also present.",
+        "scene_graph_info": {
+          "target_state": "The can and the peach are on the right counter.",
+          "target_entities": ["can_1", "peach_1", "right_counter_in_the_kitchen_1"],
+          "target_relations": [["can_1", "on", "right_counter_in_the_kitchen_1"], ["peach_1", "on", "right_counter_in_the_kitchen_1"]],
+          "current_state": "The can is resting on the TV stand and the peach is on the dining table; the right counter is empty.",
+          "explanation": "I need to pick up the can from the TV stand and the peach from the dining table, then set both items on the right counter.",
+          "current_entities": ["can_1", "peach_1", "right_counter_in_the_kitchen_1", "TV_stand_1", "table_1"],
+          "current_relations": [["can_1", "on", "TV_stand_1"], ["peach_1", "on", "table_1"]]
+        }
+      }
+    },
+  
+    {
+      "Human instruction": "In black table and right counter, could you swap the locations of scissors and pear?",
+      "output": {
+        "visual_state_description": "The image shows a room with several furniture items including a black table, a right counter, and a cabinet. Scissors are on the right counter. There are no pears visible.",
+        "scene_graph_info": {
+          "target_state": "The scissors are on the black table and the pear is on the right counter.",
+          "target_entities": ["scissors_1", "pear_1", "table_1", "right_counter_in_the_kitchen_1"],
+          "target_relations": [["scissors_1", "on", "table_1"], ["pear_1", "on", "right_counter_in_the_kitchen_1"]],
+          "current_state": "Scissors are on the right counter and no pear is visible; the black table is clear.",
+          "explanation": "I need to move the scissors from the right counter to the black table, locate a pear, and place it on the right counter.",
+          "current_entities": ["scissors_1", "table_1", "right_counter_in_the_kitchen_1", "cabinet_1"],
+          "current_relations": [["scissors_1", "on", "right_counter_in_the_kitchen_1"]]
+        }
+      }
+    },
+  
+    {
+      "Human instruction": "Move the spoon off the right counter.",
+      "output": {
+        "visual_state_description": "The image shows a kitchen with several furniture items including a right counter, a sink, and a cupboard. A spoon is on the right counter along with a screwdriver, a bottle, and a plate.",
+        "scene_graph_info": {
+          "target_state": "There is no spoon on the right counter.",
+          "target_entities": ["spoon_1", "right_counter_in_the_kitchen_1"],
+          "target_relations": [],
+          "current_state": "A spoon is lying on the right counter alongside a screwdriver, bottle, and plate.",
+          "explanation": "I need to pick up the spoon from the right counter and place it somewhere else so the counter no longer holds a spoon.",
+          "current_entities": ["spoon_1", "right_counter_in_the_kitchen_1", "sink_in_the_kitchen_1", "cabinet_1", "screwdriver_1", "cup_1", "plate_1"],
+          "current_relations": [["spoon_1", "on", "right_counter_in_the_kitchen_1"]]
+        }
+      }
+    }
+  ]
+  

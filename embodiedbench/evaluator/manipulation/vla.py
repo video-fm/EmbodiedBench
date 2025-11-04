@@ -12,7 +12,7 @@ from embodiedbench.envs.eb_manipulation.eb_man_utils import (
     draw_bounding_boxes,
     draw_xyz_coordinate,
 )
-from embodiedbench.planner.manip_planner_vla import ManipPlannerVLA
+from embodiedbench.planner.manipulation import VLA_ManipPlanner
 from embodiedbench.evaluator.config.eb_manipulation_example import (
     vlm_examples_baseline,
     llm_examples,
@@ -277,7 +277,7 @@ class EB_ManipulationEvaluator:
                 selected_indexes=self.config["selected_indexes"],
             )
             ic_examples = self.load_demonstration()
-            self.planner = ManipPlannerVLA(
+            self.planner = VLA_ManipPlanner(
                 model_name=self.model_name,
                 model_type=self.config["model_type"],
                 system_prompt=eb_manipulation_system_prompt,

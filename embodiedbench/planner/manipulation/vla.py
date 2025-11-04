@@ -69,7 +69,7 @@ def object_to_dict(obj):
     }
 
 
-class ManipPlannerVLA:
+class ManipPlanner:
     def __init__(
         self,
         model_name,

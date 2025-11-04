@@ -1,18 +1,10 @@
 import os
-
-# os.environ["CUDA_VISIBLE_DEVICES"] = "1,2"
-# os.environ["remote_url"] = "http://0.0.0.0:15238/v1"
-# os.environ["DISPLAY"] = "cherry:11.0"
-# os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
-# home_dir = "/home/asethi04/embody/EmbodiedBench"
-# existing_path = os.environ.get("PYTHONPATH", "")
-# os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 import numpy as np
 from tqdm import tqdm
 import time
 import json
 from embodiedbench.envs.eb_alfred.EBAlfEnv import EBAlfEnv, ValidEvalSets
-from embodiedbench.planner.vlm_planner import VLMPlanner
+from embodiedbench.planner.alfred import AlfredBASE_VLMPlanner
 from embodiedbench.evaluator.summarize_result import average_json_values
 from embodiedbench.evaluator.evaluator_utils import (
     load_saved_data,
@@ -90,7 +82,7 @@ class EB_AlfredEvaluator:
                 else json.load(open(exploration_example_path, "r+"))
             )
             model_type = self.config.get("model_type", "remote")
-            self.planner = VLMPlanner(
+            self.planner = AlfredBASE_VLMPlanner(
                 self.model_name,
                 model_type,
                 self.env.language_skill_set,

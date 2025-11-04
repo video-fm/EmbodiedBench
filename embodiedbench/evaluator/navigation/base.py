@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 import json
 from embodiedbench.envs.eb_navigation.EBNavEnv import EBNavigationEnv, ValidEvalSets
-from embodiedbench.planner.nav_planner import EBNavigationPlanner
+from embodiedbench.planner.navigation import BASE_EBNavigationPlanner
 from embodiedbench.evaluator.summarize_result import average_json_values
 import sys
 import warnings
@@ -77,7 +77,7 @@ class EB_NavigationEvaluator:
                 selected_indexes=selected_indexes,
             )
 
-            self.planner = EBNavigationPlanner(
+            self.planner = BASE_EBNavigationPlanner(
                 model_name=self.model_name,
                 model_type=self.config["model_type"],
                 actions=self.env.language_skill_set,

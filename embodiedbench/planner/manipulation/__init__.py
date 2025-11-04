@@ -1,5 +1,6 @@
 """Manipulation Task Planners"""
 
-from .base import ManipPlanner as ManipulationBasePlanner
+from .base import ManipPlanner as BASE_ManipPlanner
+from .vla import ManipPlanner as VLA_ManipPlanner
 
-__all__ = ["ManipulationBasePlanner"]
+__all__ = ["BASE_ManipPlanner", "VLA_ManipPlanner"]

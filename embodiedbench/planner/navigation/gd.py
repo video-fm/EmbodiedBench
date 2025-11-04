@@ -5,8 +5,6 @@ import numpy as np
 import cv2
 import json
 
-# import lmdeploy
-# from lmdeploy import pipeline, GenerationConfig, PytorchEngineConfig
 from openai import OpenAI
 from embodiedbench.planner.planner_config.generation_guide import (
     llm_generation_guide,
@@ -14,7 +12,6 @@ from embodiedbench.planner.planner_config.generation_guide import (
 )
 from embodiedbench.planner.planner_utils import local_image_to_data_url
 
-# from embodiedbench.planner.eb_navigation.RemoteModel_claude import RemoteModel
 from embodiedbench.planner.remote_model import RemoteModel
 from embodiedbench.planner.custom_model import CustomModel
 from embodiedbench.evaluator.config.visual_icl_examples.eb_navigation.ebnav_visual_icl import (

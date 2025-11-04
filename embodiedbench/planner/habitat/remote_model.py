@@ -480,32 +480,32 @@ class RemoteModel:
         return repair_json(out)
 
 
-if __name__ == "__main__":
-    model = RemoteModel(
-        "Qwen/Qwen2-VL-72B-Instruct",  #'meta-llama/Llama-3.2-11B-Vision-Instruct',
-        True,  # False
-    )  #'claude-3-5-sonnet-20241022, Qwen/Qwen2-VL-72B-Instruct, meta-llama/Llama-3.2-11B-Vision-Instruct
+# if __name__ == "__main__":
+#     model = RemoteModel(
+#         "Qwen/Qwen2-VL-72B-Instruct",  #'meta-llama/Llama-3.2-11B-Vision-Instruct',
+#         True,  # False
+#     )  #'claude-3-5-sonnet-20241022, Qwen/Qwen2-VL-72B-Instruct, meta-llama/Llama-3.2-11B-Vision-Instruct
 
-    def encode_image(image_path):
-        with open(image_path, "rb") as image_file:
-            return base64.b64encode(image_file.read()).decode("utf-8")
+#     def encode_image(image_path):
+#         with open(image_path, "rb") as image_file:
+#             return base64.b64encode(image_file.read()).decode("utf-8")
 
-    base64_image = encode_image("../../evaluator/midlevel/output.png")
+#     base64_image = encode_image("../../evaluator/midlevel/output.png")
 
-    messages = [
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/png;base64,{base64_image}",
-                    },
-                },
-                {"type": "text", "text": f"What do you think for this picture?? {template}?"},
-            ],
-        }
-    ]
+#     messages = [
+#         {
+#             "role": "user",
+#             "content": [
+#                 {
+#                     "type": "image_url",
+#                     "image_url": {
+#                         "url": f"data:image/png;base64,{base64_image}",
+#                     },
+#                 },
+#                 {"type": "text", "text": f"What do you think for this picture?? {template}?"},
+#             ],
+#         }
+#     ]
 
-    response = model.respond(messages)
-    print(response)
+#     response = model.respond(messages)
+#     print(response)

@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 import json
 from embodiedbench.envs.eb_navigation.EBNavEnv import EBNavigationEnv, ValidEvalSets
-from embodiedbench.planner.nav_planner_esca import EBNavigationPlanner
+from embodiedbench.planner.navigation import ESCA_EBNavigationPlanner
 from embodiedbench.evaluator.summarize_result import average_json_values
 import sys
 import warnings
@@ -59,7 +59,7 @@ def bbox_to_mask(bbox, frame_height, frame_width):
     return mask
 
 
-class EB_NavigationEvaluator:
+class ESCA_EBNavigationPlanner:
     def __init__(self, config):
         self.model_name = config["model_name"]
         self.eval_sets = config["eval_sets"]
@@ -131,7 +131,7 @@ class EB_NavigationEvaluator:
             else:
                 few_shot_examples = examples
 
-            self.planner = EBNavigationPlanner(
+            self.planner = ESCA_EBNavigationPlanner(
                 model_name=self.model_name,
                 model_type=self.config["model_type"],
                 actions=self.env.language_skill_set,
@@ -375,5 +375,5 @@ if __name__ == "__main__":
         "gd_checkpoint_path": "/home/jianih/research/GroundingDINO/checkpoints/groundingdino_swint_ogc.pth",
     }
 
-    evaluator = EB_NavigationEvaluator(config)
+    evaluator = ESCA_EBNavigationPlanner(config)
     evaluator.evaluate_main()

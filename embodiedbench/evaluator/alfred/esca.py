@@ -4,7 +4,7 @@ from tqdm import tqdm
 import time
 import json
 from embodiedbench.envs.eb_alfred.EBAlfEnv import EBAlfEnv, ValidEvalSets
-from embodiedbench.planner.vlm_planner_esca import VLMPlanner
+from embodiedbench.planner.alfred import AlfredESCA_VLMPlanner
 from embodiedbench.evaluator.summarize_result import average_json_values
 from embodiedbench.evaluator.evaluator_utils import load_saved_data, update_config_with_args
 from embodiedbench.evaluator.config.system_prompts import alfred_laser_system_prompt
@@ -216,7 +216,7 @@ class EB_AlfredEvaluator:
             else:
                 few_shot_examples = examples
             model_type = self.config.get("model_type", "remote")
-            self.planner = VLMPlanner(
+            self.planner = AlfredESCA_VLMPlanner(
                 self.model_name,
                 model_type,
                 self.env.language_skill_set,

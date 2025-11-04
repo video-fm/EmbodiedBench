@@ -94,9 +94,7 @@ class DatasetCollector:
         for env_i in range(self._n_envs):
             # Only save primitive types. Otherwise serialization will get messed up.
             filtered_infos = {
-                k: v
-                for k, v in infos[env_i].items()
-                if isinstance(v, (int, float, str))
+                k: v for k, v in infos[env_i].items() if isinstance(v, (int, float, str))
             }
             self._cur_traj_actions[env_i].append(action[env_i])
             for k, v in filtered_infos.items():
@@ -116,17 +114,14 @@ class DatasetCollector:
         if env_infos["env_success"]:
             traj_info = TrajInfo(
                 actions=torch.stack(self._cur_traj_actions[env_i], dim=0),
-                obs={
-                    k: torch.stack(v, dim=0)
-                    for k, v in self._cur_traj_obs[env_i].items()
-                },
+                obs={k: torch.stack(v, dim=0) for k, v in self._cur_traj_obs[env_i].items()},
                 infos=dict(self._cur_traj_infos[env_i]),
                 instruction=instruction,
             )
             for k, v in traj_info.obs.items():
-                assert (
-                    v.shape[0] == traj_info.actions.shape[0]
-                ), f"Traj info shapes don't match {k}: {v.shape}, {traj_info.actions.shape}"
+                assert v.shape[0] == traj_info.actions.shape[0], (
+                    f"Traj info shapes don't match {k}: {v.shape}, {traj_info.actions.shape}"
+                )
             self._all_trajs.append(traj_info)
 
         n_trajs = len(self._all_trajs)

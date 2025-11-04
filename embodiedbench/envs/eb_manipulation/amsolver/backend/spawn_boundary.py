@@ -1,4 +1,4 @@
-#Modified From the rlbench: https://github.com/stepjam/RLBench
+# Modified From the rlbench: https://github.com/stepjam/RLBench
 from typing import List
 import numpy as np
 import math
@@ -7,57 +7,80 @@ from pyrep.objects.object import Object
 
 
 class BoundingBox(object):
-    def __init__(self, min_x: float, max_x: float, min_y: float, max_y: float,
-                 min_z: float, max_z: float):
+    def __init__(
+        self, min_x: float, max_x: float, min_y: float, max_y: float, min_z: float, max_z: float
+    ):
         self.min_x = min_x
         self.max_x = max_x
         self.min_y = min_y
         self.max_y = max_y
         self.min_z = min_z
         self.max_z = max_z
-        self.points = [[min_x, min_y, min_z], [max_x, min_y, min_z],
-                       [min_x, max_y, min_z], [max_x, max_y, min_z],
-                       [min_x, min_y, max_z], [max_x, min_y, max_z],
-                       [min_x, max_y, max_z], [max_x, max_y, max_z]]
+        self.points = [
+            [min_x, min_y, min_z],
+            [max_x, min_y, min_z],
+            [min_x, max_y, min_z],
+            [max_x, max_y, min_z],
+            [min_x, min_y, max_z],
+            [max_x, min_y, max_z],
+            [min_x, max_y, max_z],
+            [max_x, max_y, max_z],
+        ]
 
-    def rotate(self, theta: np.ndarray) -> 'BoundingBox':
-        r_x = np.array([[1, 0, 0],
-                        [0, math.cos(theta[0]), -math.sin(theta[0])],
-                        [0, math.sin(theta[0]), math.cos(theta[0])]
-                        ])
-        r_y = np.array([[math.cos(theta[1]), 0, math.sin(theta[1])],
-                        [0, 1, 0],
-                        [-math.sin(theta[1]), 0, math.cos(theta[1])]
-                        ])
-        r_z = np.array([[math.cos(theta[2]), -math.sin(theta[2]), 0],
-                        [math.sin(theta[2]), math.cos(theta[2]), 0],
-                        [0, 0, 1]
-                        ])
+    def rotate(self, theta: np.ndarray) -> "BoundingBox":
+        r_x = np.array(
+            [
+                [1, 0, 0],
+                [0, math.cos(theta[0]), -math.sin(theta[0])],
+                [0, math.sin(theta[0]), math.cos(theta[0])],
+            ]
+        )
+        r_y = np.array(
+            [
+                [math.cos(theta[1]), 0, math.sin(theta[1])],
+                [0, 1, 0],
+                [-math.sin(theta[1]), 0, math.cos(theta[1])],
+            ]
+        )
+        r_z = np.array(
+            [
+                [math.cos(theta[2]), -math.sin(theta[2]), 0],
+                [math.sin(theta[2]), math.cos(theta[2]), 0],
+                [0, 0, 1],
+            ]
+        )
         r = np.dot(r_z, np.dot(r_y, r_x))
         new_points = np.dot(self.points, r)
-        return BoundingBox(np.amin(new_points[:, 0]), np.amax(new_points[:, 0]),
-                           np.amin(new_points[:, 1]), np.amax(new_points[:, 1]),
-                           np.amin(new_points[:, 2]), np.amax(new_points[:, 2]))
+        return BoundingBox(
+            np.amin(new_points[:, 0]),
+            np.amax(new_points[:, 0]),
+            np.amin(new_points[:, 1]),
+            np.amax(new_points[:, 1]),
+            np.amin(new_points[:, 2]),
+            np.amax(new_points[:, 2]),
+        )
 
-    def within_boundary(self, boundary: 'BoundingBox', is_plane: bool) -> bool:
+    def within_boundary(self, boundary: "BoundingBox", is_plane: bool) -> bool:
         z_cond = True
         if not is_plane:
             z_cond = self.min_z > boundary.min_z and self.max_z < boundary.max_z
-        return (self.min_x > boundary.min_x and self.max_x < boundary.max_x and
-                self.min_y > boundary.min_y and self.max_y < boundary.max_y and
-                z_cond)
+        return (
+            self.min_x > boundary.min_x
+            and self.max_x < boundary.max_x
+            and self.min_y > boundary.min_y
+            and self.max_y < boundary.max_y
+            and z_cond
+        )
 
 
 class BoundaryObject(object):
-
     def __init__(self, boundary: Object):
         self._boundary = boundary
         self._is_plane = False
         self._contained_objects = []
 
         if boundary.is_model():
-            (minx, maxx, miny,
-             maxy, minz, maxz) = boundary.get_model_bounding_box()
+            (minx, maxx, miny, maxy, minz, maxz) = boundary.get_model_bounding_box()
         else:
             minx, maxx, miny, maxy, minz, maxz = boundary.get_bounding_box()
         self._boundary_bbox = BoundingBox(minx, maxx, miny, maxy, minz, maxz)
@@ -70,34 +93,43 @@ class BoundaryObject(object):
             self._is_plane = True
         self._area = np.abs(maxx - minx) * np.abs(maxy - miny) * height
 
-    def _get_position_within_boundary(self, obj: Object, obj_bbox: BoundingBox,
-                                      place_above_plane=True) -> List[float]:
+    def _get_position_within_boundary(
+        self, obj: Object, obj_bbox: BoundingBox, place_above_plane=True
+    ) -> List[float]:
         x = np.random.uniform(
             self._boundary_bbox.min_x + np.abs(obj_bbox.min_x),
-            self._boundary_bbox.max_x - np.abs(obj_bbox.max_x))
+            self._boundary_bbox.max_x - np.abs(obj_bbox.max_x),
+        )
         y = np.random.uniform(
             self._boundary_bbox.min_y + np.abs(obj_bbox.min_y),
-            self._boundary_bbox.max_y - np.abs(obj_bbox.max_y))
+            self._boundary_bbox.max_y - np.abs(obj_bbox.max_y),
+        )
         if self._is_plane:
             # _, _, z = obj.get_position(self._boundary)
             if place_above_plane:
                 # z = (obj_bbox.max_z-obj_bbox.min_z)/2 + 0.001
-                z = (-obj_bbox.min_z)+self._boundary_bbox.max_z+0.005
+                z = (-obj_bbox.min_z) + self._boundary_bbox.max_z + 0.005
             else:
                 _, _, z = obj.get_position(self._boundary)
         else:
             z = np.random.uniform(
                 self._boundary_bbox.min_z + np.abs(obj_bbox.min_z),
-                self._boundary_bbox.max_z - np.abs(obj_bbox.max_z))
+                self._boundary_bbox.max_z - np.abs(obj_bbox.max_z),
+            )
         return [x, y, z]
 
     def get_area(self) -> float:
         return self._area
 
-    def add(self, obj: Object, ignore_collisions: bool = False,
-            min_rotation: tuple = (0.0, 0.0, -3.14),
-            max_rotation: tuple = (0.0, 0.0, 3.14),
-            min_distance: float = 0.01, place_above_plane=True) -> int:
+    def add(
+        self,
+        obj: Object,
+        ignore_collisions: bool = False,
+        min_rotation: tuple = (0.0, 0.0, -3.14),
+        max_rotation: tuple = (0.0, 0.0, 3.14),
+        min_distance: float = 0.01,
+        place_above_plane=True,
+    ) -> int:
         """Returns true if can add and adds it
         rotation_limits: how mush we allow it to rotate from its original
         position"""
@@ -114,7 +146,9 @@ class BoundaryObject(object):
         if not obj_bbox.within_boundary(self._boundary_bbox, self._is_plane):
             return -1
 
-        new_pos = self._get_position_within_boundary(obj, obj_bbox, place_above_plane = place_above_plane)
+        new_pos = self._get_position_within_boundary(
+            obj, obj_bbox, place_above_plane=place_above_plane
+        )
         obj.set_position(new_pos, self._boundary)
         obj.rotate(list(rotation))
         new_pos = np.array(new_pos)
@@ -122,15 +156,12 @@ class BoundaryObject(object):
         if not ignore_collisions:
             for contained_obj in self._contained_objects:
                 if contained_obj.still_exists():
-                # Check for collision between each child
-                    for cont_ob in contained_obj.get_objects_in_tree(
-                            exclude_base=False):
-                        for placing_ob in obj.get_objects_in_tree(
-                                exclude_base=False):
+                    # Check for collision between each child
+                    for cont_ob in contained_obj.get_objects_in_tree(exclude_base=False):
+                        for placing_ob in obj.get_objects_in_tree(exclude_base=False):
                             if placing_ob.check_collision(cont_ob):
                                 return -2
-                    dist = np.linalg.norm(
-                        new_pos - contained_obj.get_position(self._boundary))
+                    dist = np.linalg.norm(new_pos - contained_obj.get_position(self._boundary))
                     if dist < min_distance:
                         return -3
             self._contained_objects.append(obj)
@@ -141,7 +172,6 @@ class BoundaryObject(object):
 
 
 class SpawnBoundary(object):
-
     MAX_SAMPLES = 100
 
     def __init__(self, boundaries: List[Object]):
@@ -153,9 +183,15 @@ class SpawnBoundary(object):
             self._boundaries.append(bo)
         self._probabilities = np.array(areas) / np.sum(areas)
 
-    def sample(self, obj: Object, ignore_collisions=False,
-               min_rotation=(0.0, 0.0, -3.14), max_rotation=(0.0, 0.0, 3.14),
-               min_distance=0.01, place_above_plane=True) -> None:
+    def sample(
+        self,
+        obj: Object,
+        ignore_collisions=False,
+        min_rotation=(0.0, 0.0, -3.14),
+        max_rotation=(0.0, 0.0, 3.14),
+        min_distance=0.01,
+        place_above_plane=True,
+    ) -> None:
         """
         returns a position within the specified boundary. Calculated using a
             weighted percentage.
@@ -166,10 +202,10 @@ class SpawnBoundary(object):
         begin_pose = obj.get_pose()
         collision_fails = boundary_fails = self.MAX_SAMPLES
         while collision_fails > 0 and boundary_fails > 0:
-            sampled_boundary = np.random.choice(self._boundaries,
-                                                p=self._probabilities)
+            sampled_boundary = np.random.choice(self._boundaries, p=self._probabilities)
             result = sampled_boundary.add(
-                obj, ignore_collisions, min_rotation, max_rotation, min_distance, place_above_plane)
+                obj, ignore_collisions, min_rotation, max_rotation, min_distance, place_above_plane
+            )
             if result == -1:
                 boundary_fails -= 1
             elif result == -2:
@@ -180,12 +216,14 @@ class SpawnBoundary(object):
                 break
             obj.set_pose(begin_pose)
         if boundary_fails <= 0:
-            raise BoundaryError('Could not place within boundary.'
-                                'Perhaps the object is too big for it?')
+            raise BoundaryError(
+                "Could not place within boundary.Perhaps the object is too big for it?"
+            )
         elif collision_fails <= 0:
             raise BoundaryError(
-                'Could not place the object within the boundary due to '
-                'collision with other objects in the boundary.')
+                "Could not place the object within the boundary due to "
+                "collision with other objects in the boundary."
+            )
 
     def clear(self) -> None:
         [b.clear() for b in self._boundaries]

@@ -1,6 +1,6 @@
-vlm_generation_guide={
+vlm_generation_guide = {
     "type": "json_object",
-    'properties': {
+    "properties": {
         "visual_state_description": {
             "type": "string",
             "description": "Description of current state from the visual image",
@@ -26,18 +26,23 @@ vlm_generation_guide={
                     "action_name": {
                         "type": "string",
                         "description": "The name of the action",
-                    }
+                    },
                 },
                 "required": ["action_id", "action_name"],
-            }
+            },
         },
     },
-    "required": ["visual_state_description", "reasoning_and_reflection", "language_plan", "executable_plan"]
+    "required": [
+        "visual_state_description",
+        "reasoning_and_reflection",
+        "language_plan",
+        "executable_plan",
+    ],
 }
 
-vlm_sg_baseline_generation_guide={
+vlm_sg_baseline_generation_guide = {
     "type": "json_object",
-    'properties': {
+    "properties": {
         "visual_state_description": {
             "type": "string",
             "description": "Description of current state from the visual image",
@@ -67,18 +72,23 @@ vlm_sg_baseline_generation_guide={
                     "action_name": {
                         "type": "string",
                         "description": "The name of the action",
-                    }
+                    },
                 },
                 "required": ["action_id", "action_name"],
-            }
+            },
         },
     },
-    "required": ["visual_state_description", "reasoning_and_reflection", "language_plan", "executable_plan"]
+    "required": [
+        "visual_state_description",
+        "reasoning_and_reflection",
+        "language_plan",
+        "executable_plan",
+    ],
 }
 
-llm_generation_guide={
+llm_generation_guide = {
     "type": "json_object",
-    'properties': {
+    "properties": {
         "reasoning_and_reflection": {
             "type": "string",
             "description": "summarize the history of interactions and any available environmental feedback. Additionally, provide reasoning as to why the last action or plan failed and did not finish the task",
@@ -100,18 +110,18 @@ llm_generation_guide={
                     "action_name": {
                         "type": "string",
                         "description": "The name of the action",
-                    }
+                    },
                 },
-                "required": ["action_id", "action_name"]
-            }
+                "required": ["action_id", "action_name"],
+            },
         },
     },
-    "required": ["reasoning_and_reflection", "language_plan", "executable_plan"]
+    "required": ["reasoning_and_reflection", "language_plan", "executable_plan"],
 }
 
-vlm_sg_generation_guide={
+vlm_sg_generation_guide = {
     "type": "json_object",
-    'properties': {
+    "properties": {
         "scene_graph_entities": {
             "type": "array",
             "description": "A list of entities in the scene graph, each with a name",
@@ -119,67 +129,70 @@ vlm_sg_generation_guide={
                 "type": "string",
                 "description": "The name of the entity in the scene graph",
             },
-            }
-        },
+        }
+    },
     "required": ["scene_graph_entities"],
 }
 
 
 vlm_target_generation_guide = {
-        "type": "json_object",
-        "parameters": {
-            "target_name": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "description": "The main object(s) of interest"
-                },
-                "description": "List of names representing the target entity"
-            },
-            "blocking_name": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "description": "Names of objects that block or obscure the target"
-                },
-                "description": "List of object names that are considered blocking"
-            },
-            "target_attribute": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "description": "Attributes or spatial details about the target"
-                },
-                "description": "Attributes associated with the target entity"
-            },
-            "target_relation": {
-                "type": "array",
-                # "items": {
-                #     "type": "array",
-                #     "items": {
-                #         "type": "string"
-                #     },
-                #     "minItems": 3,
-                #     "maxItems": 3,
-                #     "description": "A relation in the form [subject, relation, object]"
-                # },
-                "items": {
-                    "type": "string",
-                    "description": "A relation in the form [subject, relation, object]"
-                },
-                "description": "Triplets describing relationships involving the target"
-            },
-            "related_objects": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "description": "Objects mentioned in relation to the target"
-                },
-                "description": "Other objects that co-occur with or are related to the target"
-            }
+    "type": "json_object",
+    "parameters": {
+        "target_name": {
+            "type": "array",
+            "items": {"type": "string", "description": "The main object(s) of interest"},
+            "description": "List of names representing the target entity",
         },
+        "blocking_name": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "description": "Names of objects that block or obscure the target",
+            },
+            "description": "List of object names that are considered blocking",
+        },
+        "target_attribute": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "description": "Attributes or spatial details about the target",
+            },
+            "description": "Attributes associated with the target entity",
+        },
+        "target_relation": {
+            "type": "array",
+            # "items": {
+            #     "type": "array",
+            #     "items": {
+            #         "type": "string"
+            #     },
+            #     "minItems": 3,
+            #     "maxItems": 3,
+            #     "description": "A relation in the form [subject, relation, object]"
+            # },
+            "items": {
+                "type": "string",
+                "description": "A relation in the form [subject, relation, object]",
+            },
+            "description": "Triplets describing relationships involving the target",
+        },
+        "related_objects": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "description": "Objects mentioned in relation to the target",
+            },
+            "description": "Other objects that co-occur with or are related to the target",
+        },
+    },
     "additionalProperties": False,
-    "required": ["target_name", "blocking_name", "target_attribute", "target_relation", "related_objects"]
+    "required": [
+        "target_name",
+        "blocking_name",
+        "target_attribute",
+        "target_relation",
+        "related_objects",
+    ],
 }
 
 # vlm_target_generation_guide = {

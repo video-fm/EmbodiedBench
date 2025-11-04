@@ -94,3 +94,5 @@ embodiedbench/evaluator/data
 embodiedbench/data
 embodiedbench/envs/data
 embodiedbench/envs/*/data
+
+embodiedbench/envs/eb_habitat/datasets

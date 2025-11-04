@@ -14,24 +14,28 @@ from amsolver.backend.utils import scale_object, select_color
 from vlm.tasks.stack_cubes import StackCubes
 from pyrep.const import ObjectType, PrimitiveShape
 
+
 class StackCubesShape(StackCubes):
     def init_task(self) -> None:
         self.class_num = len(object_shapes)
         self.model_num = 1
         return super().init_task()
+
     def modified_init_episode(self, index: int) -> List[str]:
         total = list(range(self.class_num))
         total.remove(index)
-        distractor_number = np.random.randint(1,len(total))
+        distractor_number = np.random.randint(1, len(total))
         selected_index = random.sample(total, distractor_number)
-        selected_index = [index]+selected_index
+        selected_index = [index] + selected_index
         self.cube_list = [self.cube_list[i] for i in selected_index]
 
         self.cube_num = len(self.cube_list)
         color_index = np.random.choice(len(colors), len(self.cube_list), replace=True)
         for i, obj in enumerate(self.cube_list):
             Shape(obj.manipulated_part.visual).set_color(colors[color_index[i]][1])
-            obj.manipulated_part.descriptions = "the {}".format(obj.manipulated_part.property["shape"])
+            obj.manipulated_part.descriptions = "the {}".format(
+                obj.manipulated_part.property["shape"]
+            )
         # color_names, rgbs = select_color(index, 3)
         # for i, cube in enumerate(self.cube_list):
         #     Shape(cube.manipulated_part.visual).set_color(rgbs[i])
@@ -40,8 +44,7 @@ class StackCubesShape(StackCubes):
 
     def variation_count(self) -> int:
         return len(object_shapes)
-    
-        
+
     # def import_objects(self, num):
     #     object_numbers = [1]*len(object_shapes)
     #     self.shape_lib = []

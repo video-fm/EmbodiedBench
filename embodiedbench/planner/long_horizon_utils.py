@@ -2,6 +2,7 @@
 Utilities for improving long horizon task performance
 """
 
+
 def create_long_horizon_prompt_addition():
     """Additional prompt guidance for long horizon tasks"""
     return """
@@ -26,6 +27,7 @@ def create_long_horizon_prompt_addition():
 3. Use only valid action IDs from the provided list
 """
 
+
 def simplify_long_horizon_plan(instruction):
     """Analyze instruction and provide simplified approach"""
     if "both" in instruction.lower() and "slice" in instruction.lower():
@@ -41,13 +43,14 @@ def simplify_long_horizon_plan(instruction):
 """
     return ""
 
+
 def validate_action_ids(plan, max_action_id):
     """Validate that all action IDs in plan are valid"""
     invalid_actions = []
     for step in plan:
-        if isinstance(step, dict) and 'action_id' in step:
-            aid = step['action_id']
+        if isinstance(step, dict) and "action_id" in step:
+            aid = step["action_id"]
             if aid >= max_action_id or aid < 0:
-                invalid_actions.append((aid, step.get('action_name', 'unknown')))
-    
+                invalid_actions.append((aid, step.get("action_name", "unknown")))
+
     return invalid_actions

@@ -1,6 +1,5 @@
 """Habitat Task Planners"""
 
-# Placeholder - implementation pending
+from .esca import VLMPlanner as HabitatESCA_VLMPlanner
 
-__all__ = []
-
+__all__ = ["HabitatESCA_VLMPlanner"]

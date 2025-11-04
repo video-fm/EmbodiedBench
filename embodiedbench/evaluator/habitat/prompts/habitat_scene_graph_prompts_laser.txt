@@ -1,0 +1,34 @@
+As a first step, you will observe the environment and identify objects in the image that are relevant to accomplishing the task. Your output should follow the format given at the end of this prompt.
+
+You will begin by summarizing what you see using natural language. This will be the "visual_state_description".
+
+Then, you will identify the target objects (entities) that are relevant to the task. The target objects MUST be from the list of objects given below. You should also specify if the object is currently visible in the image, the "current_location" of the object if it is visible and the "target_location" required to accomplish the task. Locations should be from the list of locations given below.
+
+Extract only the most visually identifiable features and ignore the subtle ones.
+
+List of objects: ['ball', 'clamp', 'hammer', 'screwdriver', 'padlock', 'scissors', 'block', 'drill', 'spatula', 'knife', 'spoon', 'plate', 'sponge', 'cleanser', 'plum', 'pear', 'peach', 'apple', 'lemon', 'can', 'box', 'banana', 'strawberry', 'lego', 'rubriks cube', 'book', 'bowl', 'cup', 'mug', 'orange', 'lid', 'toy airplane', 'wrench', 'refrigerator']
+List of locations: ['cabinet', 'refrigerator push point', 'chair', 'table', 'TV stand', 'sink in the kitchen', 'right counter in the kitchen', 'left counter in the kitchen', 'sofa', 'refrigerator', 'left drawer of the kitchen counter', 'right drawer of the kitchen counter']
+
+You should output in JSON of the following format:
+{
+    "visual_state_description": natural language description of what you see in the image,
+    "scene_graph_info": {
+        "target_state": natural language description of the desired target state of the scene, including what entities should be present and their relations,
+        "target_entities": [list of entities in the target state necessary to achieve the human instruction this entity MUST be from the list of objects above OR from the list of locations above, numbered from 1 to n depending on how many entities are needed],
+        "target_relations": [relations between the entities in the desired target state], 
+        "current_state": natural language description of the current state of the scene, including what entities are present and their relations,
+        "explanation": natural language explanation of the current state and why it is not the target state, including any actions that need to be taken to achieve the target state,
+        "current_entities": [list of entities currently visible in the scene this entity MUST be from the list of objects above OR from the list of locations above, numbered from 1 to n depending on how many entities are needed],
+        "current_relations": [relations between the entities currently visible in the scene], 
+    }
+}
+
+template for relations: [["entity_name_1", "relation", "entity_name_2"], ["entity_name_3", "relation", "entity_name_4"], ...]
+        a relation can be any spatial or functional relationship between entities, such as "on", "in", "next to", "closed", etc.
+
+Your "current_entities" should be in the observation YOU made in "current_state". You MUST NOT HAVE any entities in "current_entities" that are not in "current_state"
+Likewise, your "target_entities" should be in the "target_state" you stated. You MUST NOT HAVE any entities in "target_entities" that are not in "target_state"
+
+REMEMBER: ROBOT ARM IS NEVER YOUR TARGET NOR CURRENT ENTITY. DONT EVEN MENTION THE ROBOT ARM. NEVER MENTION THE ROBOT ARM. DONT TALK ABOUT THE ROBOT ARM. PRETEND THE ROBOT ARM DOES NOT EXIST. YOU SHOULD NEVER SPECIFY ROBOT ARM AS AN ENTITY.
+
+Next, you will be given a few examples of the output required from you. Note that these are examples without image refernce, so the content of your output should be based on the image given to you.

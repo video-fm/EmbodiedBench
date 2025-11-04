@@ -2,5 +2,4 @@
 
 from .base import VLMPlanner as AlfredBasePlanner
 
-__all__ = ['AlfredBasePlanner']
-
+__all__ = ["AlfredBasePlanner"]

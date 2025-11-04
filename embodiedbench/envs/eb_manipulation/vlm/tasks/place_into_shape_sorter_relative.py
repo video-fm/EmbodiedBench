@@ -8,12 +8,13 @@ from amsolver.backend.utils import get_relative_position_xy, select_color
 from vlm.tasks.place_into_shape_sorter import PlaceIntoShapeSorter
 
 relative_pos_list = ["left", "right", "front", "rear"]
-class PlaceIntoShapeSorterRelative(PlaceIntoShapeSorter):
 
+
+class PlaceIntoShapeSorterRelative(PlaceIntoShapeSorter):
     def init_task(self) -> None:
         self.object_numbers = [2 for _ in self.object_dict]
         return super().init_task()
-        
+
     def init_episode(self, index: int) -> List[str]:
         self.object_target_relative = relative_pos_list[index]
         for obj_name in self.objects:
@@ -25,26 +26,32 @@ class PlaceIntoShapeSorterRelative(PlaceIntoShapeSorter):
 
     def sample_method(self):
         self.pyrep.set_configuration_tree(self._task_init_states)
-        distractors = set(self.objects.keys())-set(self.pick_objs)
-        if len(distractors)>0 and self.need_distractors:
-            distractor_number = np.random.randint(1,len(distractors))
-            select_distractors = np.random.choice(list(distractors), distractor_number, replace=False).tolist()
+        distractors = set(self.objects.keys()) - set(self.pick_objs)
+        if len(distractors) > 0 and self.need_distractors:
+            distractor_number = np.random.randint(1, len(distractors))
+            select_distractors = np.random.choice(
+                list(distractors), distractor_number, replace=False
+            ).tolist()
         else:
             select_distractors = []
         while True:
             satisfied = True
             self.spawn_space.clear()
             self.spawn_space.sample(self.sorter)
-            for obj in (self.pick_objs+select_distractors):
+            for obj in self.pick_objs + select_distractors:
                 for instance in self.objects[obj]:
                     self.spawn_space.sample(instance)
                 if obj in self.pick_objs:
-                    object_relative_pose = get_relative_position_xy(self.objects[obj][1], self.objects[obj][0], self.robot.arm)
-                    if object_relative_pose!= self.object_target_relative:
+                    object_relative_pose = get_relative_position_xy(
+                        self.objects[obj][1], self.objects[obj][0], self.robot.arm
+                    )
+                    if object_relative_pose != self.object_target_relative:
                         satisfied = False
                         break
                     obj = self.objects[obj][0].manipulated_part
-                    obj.descriptions = "the {} {}".format(object_relative_pose, obj.property["shape"]) 
+                    obj.descriptions = "the {} {}".format(
+                        object_relative_pose, obj.property["shape"]
+                    )
             if satisfied:
                 break
 

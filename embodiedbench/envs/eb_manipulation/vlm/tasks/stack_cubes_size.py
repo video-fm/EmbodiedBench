@@ -14,8 +14,9 @@ from vlm.tasks.stack_cubes import StackCubes
 from pyrep.const import ObjectType, PrimitiveShape
 
 sequence = list(itertools.permutations(list(range(3)), 3))
-class StackCubesSize(StackCubes):
 
+
+class StackCubesSize(StackCubes):
     def init_task(self) -> None:
         self.model_num = 3
         super().init_task()
@@ -24,18 +25,24 @@ class StackCubesSize(StackCubes):
         assert self.model_num == 3
         for i in range(self.model_num):
             cube = self.cube_list[i]
-            if i==0:
-                cube.manipulated_part.descriptions = "the large {}".format(cube.manipulated_part.property["shape"])
+            if i == 0:
+                cube.manipulated_part.descriptions = "the large {}".format(
+                    cube.manipulated_part.property["shape"]
+                )
                 scale_factor = np.random.uniform(1.2, 1.4)
-            elif i==1:
-                cube.manipulated_part.descriptions = "the medium {}".format(cube.manipulated_part.property["shape"])
+            elif i == 1:
+                cube.manipulated_part.descriptions = "the medium {}".format(
+                    cube.manipulated_part.property["shape"]
+                )
                 scale_factor = np.random.uniform(0.9, 1.1)
-            elif i==2:
-                cube.manipulated_part.descriptions = "the small {}".format(cube.manipulated_part.property["shape"])
+            elif i == 2:
+                cube.manipulated_part.descriptions = "the small {}".format(
+                    cube.manipulated_part.property["shape"]
+                )
                 scale_factor = np.random.uniform(0.7, 0.9)
             relative_factor = scale_object(cube, scale_factor)
             scale_object(cube.target, scale_factor)
-            if abs(relative_factor-1)>1e-2:
+            if abs(relative_factor - 1) > 1e-2:
                 local_grasp_pose = cube.manipulated_part.local_grasp
                 local_grasp_pose[:, :3, 3] *= relative_factor
                 cube.manipulated_part.local_grasp = local_grasp_pose
@@ -49,7 +56,7 @@ class StackCubesSize(StackCubes):
     def variation_count(self) -> int:
         # TODO: The number of variations for this task.
         return len(sequence)
-    
+
     # def import_objects(self, number=4):
     #     large_model_path = self.model_dir+"cube/cube_large/cube_large.ttm"
     #     normal_model_path = self.model_dir+"cube/cube_normal/cube_normal.ttm"

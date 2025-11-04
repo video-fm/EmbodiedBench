@@ -10,14 +10,22 @@ from PIL import Image, ImageDraw, ImageFont
 import yaml
 from habitat.tasks.rearrange.multi_task.pddl_action import PddlAction
 from habitat.tasks.rearrange.multi_task.pddl_domain import PddlDomain
-from habitat.tasks.rearrange.multi_task.pddl_logical_expr import (
-    LogicalExpr, LogicalQuantifierType)
+from habitat.tasks.rearrange.multi_task.pddl_logical_expr import LogicalExpr, LogicalQuantifierType
 from habitat.tasks.rearrange.multi_task.rearrange_pddl import (
-    ExprType, PddlEntity, SimulatorObjectType)
-from transformers import (AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer,
-                          LlamaForCausalLM, LlamaModel, LlamaTokenizer,
-                          T5Model)
-from habitat.utils.visualizations.utils import (tile_images, draw_collision)
+    ExprType,
+    PddlEntity,
+    SimulatorObjectType,
+)
+from transformers import (
+    AutoConfig,
+    AutoModelForSeq2SeqLM,
+    AutoTokenizer,
+    LlamaForCausalLM,
+    LlamaModel,
+    LlamaTokenizer,
+    T5Model,
+)
+from habitat.utils.visualizations.utils import tile_images, draw_collision
 import embodiedbench.envs.eb_habitat.config
 import embodiedbench.envs.eb_habitat.dataset
 
@@ -31,20 +39,19 @@ def draw_text(img, text, position):
     font.size = 15
     text = str(text)
     # Draw the text onto the image
-    draw.text(position, text, font=font, fill="red")  
-    
+    draw.text(position, text, font=font, fill="red")
+
 
 def merge_to_file(img, image_path, draw_index=True, index=0):
     img_old = Image.open(image_path)
     total_width = img.width + img_old.width
     max_height = max(img.height, img_old.height)
-    img_merge = Image.new('RGB', (total_width, max_height))
+    img_merge = Image.new("RGB", (total_width, max_height))
     img_merge.paste(img_old, (0, 0))
     img_merge.paste(img, (img_old.width, 0))
     if draw_index:
-         draw_text(img_merge, index, position=(img_old.width+ 15, 15))
+        draw_text(img_merge, index, position=(img_old.width + 15, 15))
     img_merge.save(image_path)
-
 
 
 def process_image_array(obs_k):
@@ -57,6 +64,7 @@ def process_image_array(obs_k):
         obs_k = np.concatenate([obs_k for _ in range(3)], axis=2)
     return obs_k
 
+
 def observations_to_image(observation, info, key=None):
     render_obs_images = []
     if key is not None:
@@ -65,13 +73,14 @@ def observations_to_image(observation, info, key=None):
         render_obs_images.append(obs_k)
     else:
         for sensor_name in observation:
-            if hasattr(observation[sensor_name], 'shape') and len(observation[sensor_name].shape) > 1:
+            if (
+                hasattr(observation[sensor_name], "shape")
+                and len(observation[sensor_name].shape) > 1
+            ):
                 obs_k = observation[sensor_name]
                 obs_k = process_image_array(obs_k)
                 render_obs_images.append(obs_k)
-    assert (
-        len(render_obs_images) > 0
-    ), "Expected at least one visual sensor enabled."
+    assert len(render_obs_images) > 0, "Expected at least one visual sensor enabled."
 
     shapes_are_equal = len(set(x.shape for x in render_obs_images)) == 1
     if not shapes_are_equal:
@@ -91,7 +100,6 @@ def observations_to_image(observation, info, key=None):
         )
         render_frame = np.concatenate((render_frame, top_down_map), axis=1)
     return render_frame
-
 
 
 def get_allowed_actions(pddl, allowed_substrings):
@@ -168,10 +176,10 @@ def get_obj_type(cat, pddl):
 
 
 def get_pddl(task_config, all_cats, obj_cats) -> PddlDomain:
-    config_path = osp.dirname(__file__) 
+    config_path = osp.dirname(__file__)
     domain_file_path = osp.join(
         config_path,
-        'config',
+        "config",
         task_config.task_spec_base_path,
         task_config.pddl_domain_def + ".yaml",
     )

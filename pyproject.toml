@@ -1,0 +1,61 @@
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+src = ["src"]  # Helps Ruff treat src/ imports as first-party
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle
+  "F",   # Pyflakes
+  "UP",  # pyupgrade
+  "B",   # flake8-bugbear
+  "SIM", # flake8-simplify
+  "I",   # isort (import sorting)
+  "G",   # flake8-logging-format
+]
+ignore = [
+  "E731",  # allow lambda assignment (team preference)
+  "B905",  # zip without strict=
+  "B007",  # loop control var not used in body
+  "UP032", # prefer %/format over some f-string forms
+  # If you also use Black, you might ignore E203 to match its slicing style:
+  # "E203",
+]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+# ----------------------------
+# mypy (static typing)
+# ----------------------------
+[tool.mypy]
+# Add plugins only if you actually use them (e.g., 'pydantic.mypy')
+# plugins = ['pydantic.mypy']
+ignore_missing_imports = true
+check_untyped_defs = true
+follow_imports = "silent"
+python_version = "3.10"
+mypy_path = ["src"]
+
+# ----------------------------
+# pytest
+# ----------------------------
+[tool.pytest.ini_options]
+# Keep minimal; add markers as your repo needs them
+addopts = "-q"
+testpaths = ["tests"]
+
+# ----------------------------
+# Optional: typos (rust-based spell checker) — minimal, generic
+# ----------------------------
+[tool.typos.default]
+check-file = true
+unicode = true
+locale = "en"
+
+[tool.typos.files]
+ignore-hidden = true
+ignore-files = true
+ignore-dot = true
+ignore-vcs = true
+respect-ignore-files = true

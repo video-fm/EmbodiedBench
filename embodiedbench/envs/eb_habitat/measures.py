@@ -7,11 +7,13 @@ from collections import defaultdict
 import numpy as np
 from habitat.core.embodied_task import Measure
 from habitat.core.registry import registry
-from habitat.tasks.rearrange.multi_task.pddl_logical_expr import \
-    LogicalExprType
+from habitat.tasks.rearrange.multi_task.pddl_logical_expr import LogicalExprType
 from habitat.tasks.rearrange.multi_task.pddl_predicate import Predicate
 from habitat.tasks.rearrange.rearrange_sensors import (
-    DoesWantTerminate, EndEffectorToRestDistance, RearrangeReward)
+    DoesWantTerminate,
+    EndEffectorToRestDistance,
+    RearrangeReward,
+)
 
 from embodiedbench.envs.eb_habitat.dataset.utils import get_all_instruct_ids
 from embodiedbench.envs.eb_habitat.sensors import SimpleTargetSensor
@@ -92,9 +94,7 @@ class TaskProgressMonitor(Measure):
         for i, subgoal in enumerate(task.subgoals):
             if self._achieved[i]:
                 continue
-            self._achieved[i] = all(
-                pred.is_true(task.pddl.sim_info) for pred in subgoal
-            )
+            self._achieved[i] = all(pred.is_true(task.pddl.sim_info) for pred in subgoal)
 
         self._metric = sum(self._achieved.values()) / max(self._total_count, 1)
 
@@ -147,16 +147,12 @@ class NumInvalidActions(Measure):
         return "num_invalid_actions"
 
     def reset_metric(self, *args, task, **kwargs):
-        task.measurements.check_measure_dependencies(
-            self.uuid, [WasPrevActionInvalid._get_uuid()]
-        )
+        task.measurements.check_measure_dependencies(self.uuid, [WasPrevActionInvalid._get_uuid()])
         self._metric = 0
         self.update_metric(*args, task=task, **kwargs)
 
     def update_metric(self, *args, task, **kwargs):
-        was_prev_invalid = task.measurements.measures[
-            WasPrevActionInvalid._get_uuid()
-        ].get_metric()
+        was_prev_invalid = task.measurements.measures[WasPrevActionInvalid._get_uuid()].get_metric()
         self._metric += int(was_prev_invalid)
 
 
@@ -182,13 +178,9 @@ class SubgoalReward(Measure):
 
     def update_metric(self, *args, task, **kwargs):
         self._metric = 0.0
-        was_prev_invalid = task.measurements.measures[
-            WasPrevActionInvalid._get_uuid()
-        ].get_metric()
+        was_prev_invalid = task.measurements.measures[WasPrevActionInvalid._get_uuid()].get_metric()
 
-        progress = task.measurements.measures[
-            TaskProgressMonitor._get_uuid()
-        ].get_metric()
+        progress = task.measurements.measures[TaskProgressMonitor._get_uuid()].get_metric()
         if was_prev_invalid:
             self._metric -= self.invalid_ac_pen
 
@@ -212,13 +204,9 @@ class PredicateTaskSuccess(Measure):
 
     def reset_metric(self, *args, task, **kwargs):
         if self._must_call_stop:
-            task.measurements.check_measure_dependencies(
-                self.uuid, [DoesWantTerminate.cls_uuid]
-            )
+            task.measurements.check_measure_dependencies(self.uuid, [DoesWantTerminate.cls_uuid])
         if not self._allows_invalid_actions:
-            task.measurements.check_measure_dependencies(
-                self.uuid, [WasPrevActionInvalid.cls_uuid]
-            )
+            task.measurements.check_measure_dependencies(self.uuid, [WasPrevActionInvalid.cls_uuid])
 
         self.update_metric(*args, task=task, **kwargs)
 
@@ -262,13 +250,9 @@ class WaitPredicateTaskSuccess(Measure):
     def reset_metric(self, *args, task, **kwargs):
         self._steps_after_succ = 0
         if self._must_call_stop:
-            task.measurements.check_measure_dependencies(
-                self.uuid, [DoesWantTerminate.cls_uuid]
-            )
+            task.measurements.check_measure_dependencies(self.uuid, [DoesWantTerminate.cls_uuid])
         if not self._allows_invalid_actions:
-            task.measurements.check_measure_dependencies(
-                self.uuid, [WasPrevActionInvalid.cls_uuid]
-            )
+            task.measurements.check_measure_dependencies(self.uuid, [WasPrevActionInvalid.cls_uuid])
 
         self.update_metric(*args, task=task, **kwargs)
 
@@ -309,9 +293,7 @@ class TaskCondSuccess(Measure):
         return "cond_success"
 
     def reset_metric(self, *args, task, **kwargs):
-        task.measurements.check_measure_dependencies(
-            self.uuid, [PredicateTaskSuccess._get_uuid()]
-        )
+        task.measurements.check_measure_dependencies(self.uuid, [PredicateTaskSuccess._get_uuid()])
         self.update_metric(*args, task=task, **kwargs)
 
     def update_metric(self, *args, task, **kwargs):
@@ -346,9 +328,7 @@ class EEToClosestTargetDist(Measure):
     def update_metric(self, *args, task, **kwargs):
         targ_type = task.get_sampled()[0]
         matches = list(task.pddl.find_entities(targ_type.expr_type))
-        obj_pos = np.array(
-            [task.pddl.sim_info.get_entity_pos(match) for match in matches]
-        )
+        obj_pos = np.array([task.pddl.sim_info.get_entity_pos(match) for match in matches])
 
         ee_pos = self._sim.articulated_agent.ee_transform().translation
 
@@ -488,9 +468,7 @@ class BreakdownMeasure(Measure):
         self._metric = {}
         use_instruct_id = self._parse_instruct_id(task.instruct_id)
         for name in self._other_measures:
-            self._metric[name] = {
-                use_instruct_id: task.measurements.measures[name].get_metric()
-            }
+            self._metric[name] = {use_instruct_id: task.measurements.measures[name].get_metric()}
         if self._log_counts:
             self._metric["count"] = self._cur_counts
 
@@ -551,9 +529,7 @@ class PddlGoalDistanceMeasure(Measure):
                 for sub_expr in expr.sub_exprs:
                     assert len(sub_expr.sub_exprs) == 1
                     assert isinstance(sub_expr.sub_exprs[0], Predicate)
-                    pred_dist = self._get_pred_distance(
-                        sub_expr.sub_exprs[0], task.pddl.sim_info
-                    )
+                    pred_dist = self._get_pred_distance(sub_expr.sub_exprs[0], task.pddl.sim_info)
                     if dist is None:
                         dist = pred_dist
                     else:
@@ -701,9 +677,7 @@ class ObjPickReward(RearrangeReward):
             observations=observations,
             **kwargs,
         )
-        ee_to_closest_meas = task.measurements.measures[
-            EEToClosestTargetDist._get_uuid()
-        ]
+        ee_to_closest_meas = task.measurements.measures[EEToClosestTargetDist._get_uuid()]
         ee_to_object_distance = ee_to_closest_meas.get_metric()
         ee_to_rest_distance = task.measurements.measures[
             EndEffectorToRestDistance.cls_uuid

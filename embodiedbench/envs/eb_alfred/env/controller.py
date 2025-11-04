@@ -6,6 +6,7 @@ Primary entrypoint into the Thor API. Provides all the high-level functions
 needed to control the in-game agent through ai2thor.server.
 
 """
+
 import atexit
 import copy
 import json
@@ -437,12 +438,10 @@ class Controller(object):
         )
 
         if self.gpu_device is not None:
-
             # numbers.Integral works for numpy.int32/64 and Python int
             if not isinstance(self.gpu_device, numbers.Integral) or self.gpu_device < 0:
                 raise ValueError(
-                    "Invalid gpu_device: '%s'. gpu_device must be >= 0"
-                    % self.gpu_device
+                    "Invalid gpu_device: '%s'. gpu_device must be >= 0" % self.gpu_device
                 )
             elif cuda_visible_devices:
                 if self.gpu_device >= len(cuda_visible_devices):
@@ -465,9 +464,7 @@ class Controller(object):
 
         if quality not in QUALITY_SETTINGS:
             valid_qualities = [
-                q
-                for q, v in sorted(QUALITY_SETTINGS.items(), key=lambda qv: qv[1])
-                if v > 0
+                q for q, v in sorted(QUALITY_SETTINGS.items(), key=lambda qv: qv[1]) if v > 0
             ]
 
             raise ValueError(
@@ -479,9 +476,7 @@ class Controller(object):
         elif QUALITY_SETTINGS[quality] == 0:
             raise ValueError(
                 "Quality {} is associated with an index of 0. "
-                "Due to a bug in unity, this quality setting would be ignored.".format(
-                    quality
-                )
+                "Due to a bug in unity, this quality setting would be ignored.".format(quality)
             )
 
         if server_class is None and platform_system() == "Windows":
@@ -595,7 +590,6 @@ class Controller(object):
                 logging.info(f"Initialize return: {init_return}")
 
     def _build_server(self, host, port, width, height):
-
         if self.server is not None:
             return
 
@@ -680,8 +674,7 @@ class Controller(object):
 
             if (
                 scene in self.robothor_scenes()
-                and self.initialization_parameters.get("agentMode", "default").lower()
-                != "locobot"
+                and self.initialization_parameters.get("agentMode", "default").lower() != "locobot"
             ):
                 warnings.warn(
                     "You are using a RoboTHOR scene without using the standard LoCoBot.\n"
@@ -749,7 +742,6 @@ class Controller(object):
         max_num_repeats=1,
         remove_prob=0.5,
     ):
-
         raise Exception(
             "RandomInitialize has been removed.  Use InitialRandomSpawn - https://ai2thor.allenai.org/ithor/documentation/actions/initialization/#object-position-randomization"
         )
@@ -846,9 +838,7 @@ class Controller(object):
 
         # sort my mtime ascending, keeping the 3 most recent, attempt to prune anything older
         all_dirs = list(
-            filter(
-                os.path.isdir, map(lambda x: os.path.join(rdir, x), os.listdir(rdir))
-            )
+            filter(os.path.isdir, map(lambda x: os.path.join(rdir, x), os.listdir(rdir)))
         )
         dir_stats = defaultdict(lambda: 0)
         for d in all_dirs:
@@ -909,13 +899,13 @@ class Controller(object):
 
     def multi_step_physics(self, action, timeStep=0.05, max_steps=20):
         events = []
-        self.step(action=dict(action="PausePhysicsAutoSim")) #raise_for_failure=True)
+        self.step(action=dict(action="PausePhysicsAutoSim"))  # raise_for_failure=True)
         events.append(self.step(action))
         while not self.last_event.metadata["isSceneAtRest"]:
             events.append(
                 self.step(
                     action=dict(action="AdvancePhysicsStep", timeStep=timeStep),
-                    #raise_for_failure=True,
+                    # raise_for_failure=True,
                 )
             )
 
@@ -923,15 +913,14 @@ class Controller(object):
                 events.append(
                     self.step(
                         action=dict(action="UnpausePhysicsAutoSim"),
-                        #raise_for_failure=True,
+                        # raise_for_failure=True,
                     )
                 )
                 break
 
         return events
 
-    def step(self, action: Union[str, Dict[str, Any]]=None, **action_args):
-
+    def step(self, action: Union[str, Dict[str, Any]] = None, **action_args):
         if isinstance(action, Dict):
             action = copy.deepcopy(action)  # prevent changes from leaking
         else:
@@ -948,9 +937,7 @@ class Controller(object):
 
         # XXX should be able to get rid of this with some sort of deprecation warning
         if "AI2THOR_VISIBILITY_DISTANCE" in os.environ:
-            action["visibilityDistance"] = float(
-                os.environ["AI2THOR_VISIBILITY_DISTANCE"]
-            )
+            action["visibilityDistance"] = float(os.environ["AI2THOR_VISIBILITY_DISTANCE"])
 
         self.last_action = action
 
@@ -1008,9 +995,7 @@ class Controller(object):
             ]:
                 raise ValueError(self.last_event.metadata["errorMessage"])
             elif raise_for_failure:
-                raise RuntimeError(
-                    self.last_event.metadata.get("errorMessage", f"{action} failed")
-                )
+                raise RuntimeError(self.last_event.metadata.get("errorMessage", f"{action} failed"))
 
         return self.last_event
 
@@ -1042,7 +1027,7 @@ class Controller(object):
                             ["vulkaninfo"],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.DEVNULL,
-                            universal_newlines=True
+                            universal_newlines=True,
                         )
                     except FileNotFoundError:
                         pass
@@ -1072,7 +1057,7 @@ class Controller(object):
                             ["nvidia-smi", "-L"],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.DEVNULL,
-                            universal_newlines=True
+                            universal_newlines=True,
                         )
                     except FileNotFoundError:
                         pass
@@ -1099,14 +1084,16 @@ class Controller(object):
                                 f"Could not find a Vulkan device corresponding"
                                 f" to the CUDA device with UUID {device_uuid}."
                             )
-                        cuda_vulkan_mapping[cuda_gpu_index] = device_uuid_to_vulkan_gpu_index[device_uuid]
+                        cuda_vulkan_mapping[cuda_gpu_index] = device_uuid_to_vulkan_gpu_index[
+                            device_uuid
+                        ]
 
                     with open(cuda_vulkan_mapping_path, "w") as f:
                         json.dump(cuda_vulkan_mapping, f)
                 else:
                     with open(cuda_vulkan_mapping_path, "r") as f:
                         # JSON dictionaries always have strings as keys, need to re-map here
-                        cuda_vulkan_mapping = {int(k):v for k, v in json.load(f).items()}
+                        cuda_vulkan_mapping = {int(k): v for k, v in json.load(f).items()}
 
             command += f" -force-device-index {cuda_vulkan_mapping[self.gpu_device]}"
 
@@ -1124,9 +1111,7 @@ class Controller(object):
         # print("Viewer: http://%s:%s/viewer" % (host, port))
 
         command = self.unity_command(width, height, self.headless)
-        env.update(
-            self._build.platform.launch_env(self.width, self.height, self.x_display)
-        )
+        env.update(self._build.platform.launch_env(self.width, self.height, self.x_display))
 
         makedirs(self.log_dir)
         self.server.unity_proc = proc = subprocess.Popen(
@@ -1218,8 +1203,7 @@ class Controller(object):
             else:
                 try:
                     res = requests.get(
-                        "https://api.github.com/repos/allenai/ai2thor/commits?sha=%s"
-                        % branch
+                        "https://api.github.com/repos/allenai/ai2thor/commits?sha=%s" % branch
                     )
                     if res.status_code == 404:
                         raise ValueError("Invalid branch name: %s" % branch)
@@ -1253,10 +1237,7 @@ class Controller(object):
         return [c["sha"] for c in payload]
 
     def local_commits(self):
-
-        git_dir = os.path.normpath(
-            os.path.dirname(os.path.realpath(__file__)) + "/../.git"
-        )
+        git_dir = os.path.normpath(os.path.dirname(os.path.realpath(__file__)) + "/../.git")
         commits = (
             subprocess.check_output(
                 "git --git-dir=" + git_dir + " log -n 10 --format=%H", shell=True
@@ -1280,7 +1261,6 @@ class Controller(object):
             commits = self.local_commits()
 
         if local_build:
-
             releases_dir = os.path.normpath(
                 os.path.dirname(os.path.realpath(__file__)) + "/../unity/builds"
             )
@@ -1338,12 +1318,9 @@ class Controller(object):
         ]
         for build in builds:
             errors = build.platform.validate(request)
-            message = (
-                "Platform %s failed validation with the following errors: %s\n  "
-                % (
-                    build.platform.name(),
-                    "\t\n".join(errors),
-                )
+            message = "Platform %s failed validation with the following errors: %s\n  " % (
+                build.platform.name(),
+                "\t\n".join(errors),
             )
             instructions = build.platform.dependency_instructions(request)
             if instructions:
@@ -1388,7 +1365,6 @@ class Controller(object):
         self._build_server(host, port, width, height)
 
         if "AI2THOR_VISIBILITY_DISTANCE" in os.environ:
-
             warnings.warn(
                 "AI2THOR_VISIBILITY_DISTANCE environment variable is deprecated, use \
                 the parameter visibilityDistance parameter with the Initialize action instead"
@@ -1396,8 +1372,7 @@ class Controller(object):
 
         if player_screen_width is not None:
             warnings.warn(
-                "'player_screen_width' parameter is deprecated, use the 'width'"
-                " parameter instead."
+                "'player_screen_width' parameter is deprecated, use the 'width' parameter instead."
             )
             width = player_screen_width
 
@@ -1412,7 +1387,6 @@ class Controller(object):
             raise Exception("Screen resolution must be > 0x0")
 
         if self.server.started:
-
             warnings.warn(
                 "start method depreciated. The server started when the Controller was initialized."
             )
@@ -1428,7 +1402,6 @@ class Controller(object):
         self.server.start()
 
         if start_unity:
-
             self._build.lock_sh()
             self.prune_releases()
 
@@ -1464,9 +1437,7 @@ class Controller(object):
 
 
 class BFSSearchPoint:
-    def __init__(
-        self, start_position, move_vector, heading_angle=0.0, horizon_angle=0.0
-    ):
+    def __init__(self, start_position, move_vector, heading_angle=0.0, horizon_angle=0.0):
         self.start_position = start_position
         self.move_vector = defaultdict(lambda: 0.0)
         self.move_vector.update(move_vector)
@@ -1547,8 +1518,7 @@ class BFSController(Controller):
             point_to_find = queue.pop()
             for p in self.grid_points:
                 dist = math.sqrt(
-                    ((point_to_find["x"] - p["x"]) ** 2)
-                    + ((point_to_find["z"] - p["z"]) ** 2)
+                    ((point_to_find["x"] - p["x"]) ** 2) + ((point_to_find["z"] - p["z"]) ** 2)
                 )
 
                 if dist < 0.05:
@@ -1570,14 +1540,11 @@ class BFSController(Controller):
 
     def _build_graph_point(self, graph, point):
         for p in self.grid_points:
-            dist = math.sqrt(
-                ((point["x"] - p["x"]) ** 2) + ((point["z"] - p["z"]) ** 2)
-            )
+            dist = math.sqrt(((point["x"] - p["x"]) ** 2) + ((point["z"] - p["z"]) ** 2))
             if dist <= (self.grid_size + 0.01) and dist > 0:
                 graph.add_edge(self.key_for_point(point), self.key_for_point(p))
 
     def move_relative_points(self, all_points, graph, position, rotation):
-
         action_orientation = {
             0: dict(x=0, z=1, action="MoveAhead"),
             90: dict(x=1, z=0, action="MoveRight"),
@@ -1604,9 +1571,7 @@ class BFSController(Controller):
     def plan_horizons(self, agent_horizon, target_horizon):
         actions = []
         horizon_step_map = {330: 3, 0: 2, 30: 1, 60: 0}
-        look_diff = (
-            horizon_step_map[int(agent_horizon)] - horizon_step_map[int(target_horizon)]
-        )
+        look_diff = horizon_step_map[int(agent_horizon)] - horizon_step_map[int(target_horizon)]
         if look_diff > 0:
             for i in range(look_diff):
                 actions.append(dict(action="LookDown"))
@@ -1673,7 +1638,6 @@ class BFSController(Controller):
         return actions
 
     def enqueue_point(self, point):
-
         # ensure there are no points near the new point
         if self._check_visited or not any(
             map(
@@ -1685,7 +1649,6 @@ class BFSController(Controller):
             self.queue.append(point)
 
     def enqueue_points(self, agent_position):
-
         if not self.allow_enqueue:
             return
 
@@ -1695,16 +1658,10 @@ class BFSController(Controller):
                 self.visited_seen_points,
             )
         ):
-            self.enqueue_point(
-                BFSSearchPoint(agent_position, dict(x=-1 * self.grid_size))
-            )
+            self.enqueue_point(BFSSearchPoint(agent_position, dict(x=-1 * self.grid_size)))
             self.enqueue_point(BFSSearchPoint(agent_position, dict(x=self.grid_size)))
-            self.enqueue_point(
-                BFSSearchPoint(agent_position, dict(z=-1 * self.grid_size))
-            )
-            self.enqueue_point(
-                BFSSearchPoint(agent_position, dict(z=1 * self.grid_size))
-            )
+            self.enqueue_point(BFSSearchPoint(agent_position, dict(z=-1 * self.grid_size)))
+            self.enqueue_point(BFSSearchPoint(agent_position, dict(z=1 * self.grid_size)))
             self.visited_seen_points.append(agent_position)
 
     def search_all_closed(self, scene_name):
@@ -1728,7 +1685,6 @@ class BFSController(Controller):
         current_receptacle_object_pairs,
         randomize=True,
     ):
-
         self.seen_points = []
         self.visited_seen_points = []
         self.queue = deque()
@@ -1784,16 +1740,10 @@ class BFSController(Controller):
         for gp in self.grid_points:
             found = False
             for x in [1, -1]:
-                found |= (
-                    key_for_point(gp["x"] + (self.grid_size * x), gp["z"])
-                    in final_grid_points
-                )
+                found |= key_for_point(gp["x"] + (self.grid_size * x), gp["z"]) in final_grid_points
 
             for z in [1, -1]:
-                found |= (
-                    key_for_point(gp["x"], (self.grid_size * z) + gp["z"])
-                    in final_grid_points
-                )
+                found |= key_for_point(gp["x"], (self.grid_size * z) + gp["z"]) in final_grid_points
 
             if found:
                 pruned_grid_points.append(gp)
@@ -1822,22 +1772,19 @@ class BFSController(Controller):
                         forceVisible=True,
                     )
                 )
-            if (
-                visibility_object_id is None
-                and obj["objectType"] in visibility_object_types
-            ):
+            if visibility_object_id is None and obj["objectType"] in visibility_object_types:
                 visibility_object_id = obj["objectId"]
 
         for point in self.grid_points:
             self.step(
                 dict(action="Teleport", x=point["x"], y=point["y"], z=point["z"]),
-                #raise_for_failure=True,
+                # raise_for_failure=True,
             )
 
             for rot, hor in product(self.rotations, self.horizons):
                 event = self.step(
                     dict(action="RotateLook", rotation=rot, horizon=hor),
-                    #raise_for_failure=True,
+                    # raise_for_failure=True,
                 )
                 for j in event.metadata["objects"]:
                     if j["receptacle"] and j["visible"]:
@@ -1866,7 +1813,7 @@ class BFSController(Controller):
                                     forceVisible=True,
                                     objectId=j["objectId"],
                                 ),
-                                #raise_for_failure=True,
+                                # raise_for_failure=True,
                             )
                         for pivot_id in range(j["receptacleCount"]):
                             self.step(
@@ -1877,7 +1824,7 @@ class BFSController(Controller):
                                     objectId=visibility_object_id,
                                     pivot=pivot_id,
                                 ),
-                                #raise_for_failure=True,
+                                # raise_for_failure=True,
                             )
                             if self.is_object_visible(visibility_object_id):
                                 receptacle_pivot_points.append(
@@ -1905,25 +1852,24 @@ class BFSController(Controller):
                                     forceVisible=True,
                                     objectId=j["objectId"],
                                 ),
-                                #raise_for_failure=True,
+                                # raise_for_failure=True,
                             )
 
         return receptacle_pivot_points, receptacle_points
 
     def find_visible_objects(self):
-
         seen_target_objects = defaultdict(list)
 
         for point in self.grid_points:
             self.step(
                 dict(action="Teleport", x=point["x"], y=point["y"], z=point["z"]),
-                #raise_for_failure=True,
+                # raise_for_failure=True,
             )
 
             for rot, hor in product(self.rotations, self.horizons):
                 event = self.step(
                     dict(action="RotateLook", rotation=rot, horizon=hor),
-                    #raise_for_failure=True,
+                    # raise_for_failure=True,
                 )
 
                 object_receptacle = dict()
@@ -1936,7 +1882,6 @@ class BFSController(Controller):
                     lambda x: x["visible"] and x["pickupable"],
                     event.metadata["objects"],
                 ):
-
                     # if obj['objectId'] in object_receptacle and\
                     #        object_receptacle[obj['objectId']]['openable'] and not \
                     #        object_receptacle[obj['objectId']]['isopen']:
@@ -1959,23 +1904,18 @@ class BFSController(Controller):
         pickupable = {}
         is_open = {}
 
-        for obj in filter(
-            lambda x: x["receptacle"], self.last_event.metadata["objects"]
-        ):
+        for obj in filter(lambda x: x["receptacle"], self.last_event.metadata["objects"]):
             for oid in obj["receptacleObjectIds"]:
                 self.object_receptacle[oid] = obj
 
             is_open[obj["objectId"]] = obj["openable"] and obj["isOpen"]
 
-        for obj in filter(
-            lambda x: x["receptacle"], self.last_event.metadata["objects"]
-        ):
+        for obj in filter(lambda x: x["receptacle"], self.last_event.metadata["objects"]):
             for oid in obj["receptacleObjectIds"]:
                 if obj["openable"] or (
                     obj["objectId"] in self.object_receptacle
                     and self.object_receptacle[obj["objectId"]]["openable"]
                 ):
-
                     open_pickupable[oid] = obj["objectId"]
                 else:
                     pickupable[oid] = obj["objectId"]
@@ -1985,9 +1925,7 @@ class BFSController(Controller):
             shuffled_keys = list(open_pickupable.keys())
             random.shuffle(shuffled_keys)
             for oid in shuffled_keys:
-                position_target = self.object_receptacle[self.target_objects[0]][
-                    "position"
-                ]
+                position_target = self.object_receptacle[self.target_objects[0]]["position"]
                 position_candidate = self.object_receptacle[oid]["position"]
                 dist = math.sqrt(
                     (position_target["x"] - position_candidate["x"]) ** 2
@@ -2004,7 +1942,7 @@ class BFSController(Controller):
             self.open_receptacles.append(roid)
             self.step(
                 dict(action="OpenObject", objectId=roid, forceVisible=True),
-                #raise_for_failure=True,
+                # raise_for_failure=True,
             )
 
     def queue_step(self):

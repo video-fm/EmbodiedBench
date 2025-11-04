@@ -4,9 +4,10 @@ import cv2
 from collections import defaultdict
 from glob import glob
 
+
 def generate_videos_from_pngs(input_dir, output_dir, fps=10):
     os.makedirs(output_dir, exist_ok=True)
-    
+
     pattern = re.compile(r"episode_(\d+)_step_(\d+)_([^_]+)_rgb\.png")
     frames_dict = defaultdict(list)
 
@@ -28,7 +29,7 @@ def generate_videos_from_pngs(input_dir, output_dir, fps=10):
         height, width, _ = first_img.shape
 
         output_path = os.path.join(output_dir, f"episode_{episode}_{config}_rgb.mp4")
-        writer = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (width, height))
+        writer = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
 
         for _, img_path in step_files:
             img = cv2.imread(img_path)

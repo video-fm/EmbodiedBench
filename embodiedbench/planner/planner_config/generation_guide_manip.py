@@ -1,6 +1,6 @@
-vlm_generation_guide_manip={
+vlm_generation_guide_manip = {
     "type": "object",
-    'properties': {
+    "properties": {
         "visual_state_description": {
             "type": "string",
             "description": "Describe the color and shape of each object in the detection box in the numerical order in the image. Then provide the 3D coordinates of the objects chosen from input.",
@@ -24,16 +24,21 @@ vlm_generation_guide_manip={
                         "description": "The 7-dimensional discrete action in the format of a list given by the prompt",
                     }
                 },
-                "required": ["action"]
-            }
+                "required": ["action"],
+            },
         },
     },
-    "required": ["visual_state_description", "reasoning_and_reflection", "language_plan", "executable_plan"]
+    "required": [
+        "visual_state_description",
+        "reasoning_and_reflection",
+        "language_plan",
+        "executable_plan",
+    ],
 }
 
-llm_generation_guide_manip={
+llm_generation_guide_manip = {
     "type": "object",
-    'properties': {
+    "properties": {
         "reasoning_and_reflection": {
             "type": "string",
             "description": "Reason about the overall plan that needs to be taken on the target objects, and reflect on the previous actions taken if available.",
@@ -53,9 +58,9 @@ llm_generation_guide_manip={
                         "description": "The 7-dimensional discrete action in the format of a list given by the prompt",
                     }
                 },
-                "required": ["action"]
-            }
+                "required": ["action"],
+            },
         },
     },
-    "required": ["reasoning_and_reflection", "language_plan", "executable_plan"]
+    "required": ["reasoning_and_reflection", "language_plan", "executable_plan"],
 }

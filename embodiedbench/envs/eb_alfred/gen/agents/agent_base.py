@@ -5,7 +5,7 @@ import numpy as np
 
 class AgentBase(object):
     def __init__(self, thread_id=0, game_state=None):
-        assert(game_state is not None)
+        assert game_state is not None
         self.game_state = game_state
         self.thread_id = thread_id
         self.timers = np.zeros((2, 2))
@@ -42,19 +42,19 @@ class AgentBase(object):
         self.current_frame_count += 1
         t_start = time.time()
         self.game_state.step(action)
-        if not self.game_state.event.metadata['lastActionSuccess']:
+        if not self.game_state.event.metadata["lastActionSuccess"]:
             self.num_invalid_actions += 1
             self.total_num_invalid_actions += 1
         self.timers[0, 0] += time.time() - t_start
         self.timers[0, 1] += 1
         if self.timers[0, 1] % 100 == 0:
-            print('game state step time %.3f' % (self.timers[0, 0] / self.timers[0, 1]))
+            print("game state step time %.3f" % (self.timers[0, 0] / self.timers[0, 1]))
             self.timers[0, :] = 0
         self.pose = self.game_state.pose
 
     def get_action(self, action_ind):
         action = copy.deepcopy(self.game_state.action_space[action_ind])
-        if action['action'] == 'End':
+        if action["action"] == "End":
             # Remove other arguments
-            action = {'action': 'End'}
+            action = {"action": "End"}
         return action

@@ -1,20 +1,22 @@
-#Copy From the rlbench: https://github.com/stepjam/RLBench
+# Copy From the rlbench: https://github.com/stepjam/RLBench
 from pyrep.const import RenderMode
 from amsolver.noise_model import NoiseModel, Identity
 
 
 class CameraConfig(object):
-    def __init__(self,
-                 rgb=True,
-                 rgb_noise: NoiseModel=Identity(),
-                 depth=True,
-                 depth_noise: NoiseModel=Identity(),
-                 point_cloud=True,
-                 mask=True,
-                 image_size=(128, 128),
-                 render_mode=RenderMode.OPENGL3,
-                 masks_as_one_channel=True,
-                 depth_in_meters=False):
+    def __init__(
+        self,
+        rgb=True,
+        rgb_noise: NoiseModel = Identity(),
+        depth=True,
+        depth_noise: NoiseModel = Identity(),
+        point_cloud=True,
+        mask=True,
+        image_size=(128, 128),
+        render_mode=RenderMode.OPENGL3,
+        masks_as_one_channel=True,
+        depth_in_meters=False,
+    ):
         self.rgb = rgb
         self.rgb_noise = rgb_noise
         self.depth = depth
@@ -42,42 +44,37 @@ class CameraConfig(object):
 
 
 class ObservationConfig(object):
-    def __init__(self,
-                 left_shoulder_camera: CameraConfig = None,
-                 right_shoulder_camera: CameraConfig = None,
-                 overhead_camera: CameraConfig = None,
-                 wrist_camera: CameraConfig = None,
-                 front_camera: CameraConfig = None,
-                 joint_velocities=True,
-                 joint_velocities_noise: NoiseModel=Identity(),
-                 joint_positions=True,
-                 joint_positions_noise: NoiseModel=Identity(),
-                 joint_forces=True,
-                 joint_forces_noise: NoiseModel=Identity(),
-                 gripper_open=True,
-                 gripper_pose=True,
-                 gripper_matrix=False,
-                 gripper_joint_positions=False,
-                 gripper_touch_forces=False,
-                 wrist_camera_matrix=False,
-                 record_gripper_closing=False,
-                 task_low_dim_state=False,
-                 ):
+    def __init__(
+        self,
+        left_shoulder_camera: CameraConfig = None,
+        right_shoulder_camera: CameraConfig = None,
+        overhead_camera: CameraConfig = None,
+        wrist_camera: CameraConfig = None,
+        front_camera: CameraConfig = None,
+        joint_velocities=True,
+        joint_velocities_noise: NoiseModel = Identity(),
+        joint_positions=True,
+        joint_positions_noise: NoiseModel = Identity(),
+        joint_forces=True,
+        joint_forces_noise: NoiseModel = Identity(),
+        gripper_open=True,
+        gripper_pose=True,
+        gripper_matrix=False,
+        gripper_joint_positions=False,
+        gripper_touch_forces=False,
+        wrist_camera_matrix=False,
+        record_gripper_closing=False,
+        task_low_dim_state=False,
+    ):
         self.left_shoulder_camera = (
-            CameraConfig() if left_shoulder_camera is None
-            else left_shoulder_camera)
+            CameraConfig() if left_shoulder_camera is None else left_shoulder_camera
+        )
         self.right_shoulder_camera = (
-            CameraConfig() if right_shoulder_camera is None
-            else right_shoulder_camera)
-        self.overhead_camera = (
-            CameraConfig() if overhead_camera is None
-            else overhead_camera)
-        self.wrist_camera = (
-            CameraConfig() if wrist_camera is None
-            else wrist_camera)
-        self.front_camera = (
-            CameraConfig() if front_camera is None
-            else front_camera)
+            CameraConfig() if right_shoulder_camera is None else right_shoulder_camera
+        )
+        self.overhead_camera = CameraConfig() if overhead_camera is None else overhead_camera
+        self.wrist_camera = CameraConfig() if wrist_camera is None else wrist_camera
+        self.front_camera = CameraConfig() if front_camera is None else front_camera
         self.joint_velocities = joint_velocities
         self.joint_velocities_noise = joint_velocities_noise
         self.joint_positions = joint_positions
@@ -115,25 +112,25 @@ class ObservationConfig(object):
         self.gripper_touch_forces = value
         self.wrist_camera_matrix = value
         self.task_low_dim_state = value
-    
+
     def set_image_size(self, image_size):
         self.left_shoulder_camera.image_size = image_size
         self.right_shoulder_camera.image_size = image_size
         self.overhead_camera.image_size = image_size
         self.wrist_camera.image_size = image_size
         self.front_camera.image_size = image_size
-    
+
     def set_render_mode(self, render_mode):
         self.left_shoulder_camera.render_mode = render_mode
         self.right_shoulder_camera.render_mode = render_mode
         self.overhead_camera.render_mode = render_mode
         self.wrist_camera.render_mode = render_mode
         self.front_camera.render_mode = render_mode
-        
+
     def __eq__(self, o: object) -> bool:
         is_equal = True
         for attribute in self.__dict__:
-            if 'noise' in attribute:
+            if "noise" in attribute:
                 continue
             if self.__dict__[attribute] != o.__dict__[attribute]:
                 is_equal = False

@@ -2,5 +2,4 @@
 
 from .base import EB_HabitatEvaluator as HabitatBaseEvaluator
 
-__all__ = ['HabitatBaseEvaluator']
-
+__all__ = ["HabitatBaseEvaluator"]

@@ -1,4 +1,4 @@
-#Modified From the rlbench: https://github.com/stepjam/RLBench
+# Modified From the rlbench: https://github.com/stepjam/RLBench
 import os
 import re
 from os.path import dirname, abspath, join
@@ -22,11 +22,10 @@ from amsolver.backend.robot import Robot
 from amsolver.backend.utils import ReadCustomDataBlock, WriteCustomDataBlock
 from amsolver.backend.waypoints import Point, PredefinedPath, Waypoint
 
-TASKS_PATH = join(dirname(abspath(__file__)), '../../vlm/tasks')
+TASKS_PATH = join(dirname(abspath(__file__)), "../../vlm/tasks")
 
 
 class Task(object):
-
     def __init__(self, pyrep: PyRep, robot: Robot):
         """Constructor.
 
@@ -48,6 +47,7 @@ class Task(object):
         self._stop_at_waypoint_index = -1
         self._need_remove_objects = []
         self.temporary_waypoints = []
+
     ########################
     # Overriding functions #
     ########################
@@ -60,8 +60,7 @@ class Task(object):
         set success conditions for the task as well as register what objects
         can be grasped.
         """
-        raise NotImplementedError(
-            "'init_task' is almost always necessary.")
+        raise NotImplementedError("'init_task' is almost always necessary.")
 
     def init_episode(self, index: int) -> List[str]:
         """Initialises the episode. Called each time the scene is reset.
@@ -72,23 +71,21 @@ class Task(object):
         :param index: The variation index.
         :return: A list of strings describing the task.
         """
-        raise NotImplementedError(
-            "'init_episode' must be defined and return a list of strings.")
+        raise NotImplementedError("'init_episode' must be defined and return a list of strings.")
 
     def variation_count(self) -> int:
         """Number of variations for the task. Can be determined dynamically.
 
         :return: Number of variations for this task.
         """
-        raise NotImplementedError(
-            "'variation_count' must be defined and return an int.")
+        raise NotImplementedError("'variation_count' must be defined and return an int.")
 
     def modified_init_episode(self, index) -> None:
         """
         Used for the children tasks of the task temples.
         """
         pass
-    
+
     def get_low_dim_state(self) -> np.ndarray:
         """Gets the pose and various other properties of objects in the task.
 
@@ -124,49 +121,50 @@ class Task(object):
         for obj, objtype in self._initial_objs_in_scene:
             if obj.still_exists():
                 info = {
-                    'id': obj.get_handle(),
-                    'pose': obj.get_pose(),
-                    'bbox':obj.get_bounding_box()
+                    "id": obj.get_handle(),
+                    "pose": obj.get_pose(),
+                    "bbox": obj.get_bounding_box(),
                 }
                 if obj.get_type() == ObjectType.JOINT:
-                    info['joint_position']= obj.get_joint_position()
+                    info["joint_position"] = obj.get_joint_position()
                 elif obj.get_type() == ObjectType.FORCE_SENSOR:
                     forces, torques = obj.read()
-                    info['forces'] = forces
-                    info['torques'] = torques
-                information[obj.get_name()]=info
+                    info["forces"] = forces
+                    info["torques"] = torques
+                information[obj.get_name()] = info
 
         for obj in self._need_remove_objects:
             if obj.still_exists():
-                childrens = obj.get_objects_in_tree(
-                        exclude_base=False, first_generation_only=False)
+                childrens = obj.get_objects_in_tree(exclude_base=False, first_generation_only=False)
                 for child in childrens:
                     info = {
-                        'id': child.get_handle(),
-                        'pose': child.get_pose(),
-                        'bbox':child.get_bounding_box()
+                        "id": child.get_handle(),
+                        "pose": child.get_pose(),
+                        "bbox": child.get_bounding_box(),
                     }
                     if child.get_type() == ObjectType.JOINT:
-                        info['joint_position']= child.get_joint_position()
+                        info["joint_position"] = child.get_joint_position()
                     elif child.get_type() == ObjectType.FORCE_SENSOR:
                         forces, torques = child.read()
-                        info['forces'] = forces
-                        info['torques'] = torques
-                    information[child.get_name()]=info
+                        info["forces"] = forces
+                        info["torques"] = torques
+                    information[child.get_name()] = info
 
         for i, waypoint in enumerate(self.get_waypoints(need_feasible=False)):
             if waypoint._waypoint.get_type() == ObjectType.DUMMY:
-                info = {'pose': [waypoint.pose]}
+                info = {"pose": [waypoint.pose]}
             elif waypoint._waypoint.get_type() == ObjectType.PATH:
-                info = {'pose': [waypoint.end_pose, waypoint.start_pose]}
-            info.update({
-                'target_obj':waypoint.focus_obj_id,
-                'target_obj_name':waypoint.focus_obj_name,
-                'gripper_control':waypoint.gripper_control,
-                'low_level_descriptions':waypoint.low_level_descriptions,
-                'waypoint_type':waypoint.waypoint_type
-            })
-            information[waypoint.name]=info
+                info = {"pose": [waypoint.end_pose, waypoint.start_pose]}
+            info.update(
+                {
+                    "target_obj": waypoint.focus_obj_id,
+                    "target_obj_name": waypoint.focus_obj_name,
+                    "gripper_control": waypoint.gripper_control,
+                    "low_level_descriptions": waypoint.low_level_descriptions,
+                    "waypoint_type": waypoint.waypoint_type,
+                }
+            )
+            information[waypoint.name] = info
         return information
 
     def step(self) -> None:
@@ -175,21 +173,24 @@ class Task(object):
 
     def reward(self, steps) -> Union[float, None]:
         """Allows the user to customise the task and add reward shaping."""
+
         def angle_distance(q1, q2):
             # same as rad2deg(2arccos(theta)), here qw = cos(theta/2). need to select min of (x, 2pi - x)
             # reference: https://math.stackexchange.com/questions/90081/quaternion-distance
             v = 2 * np.arccos(np.clip(2 * np.dot(q1, q2) ** 2 - 1, -1, 1))
-            return min(v, 2*np.pi - v)
+            return min(v, 2 * np.pi - v)
+
         def get_errors(point, robot):
             target_pose = point._waypoint.get_pose()
             current_ee_pose = np.array(robot.arm.get_tip().get_pose())
             # angle_error = angle_distance(target_pose[3:], current_ee_pose[3:])
-            translate_error = ((target_pose[:3]-current_ee_pose[:3])**2).sum()**(1/2)
+            translate_error = ((target_pose[:3] - current_ee_pose[:3]) ** 2).sum() ** (1 / 2)
             target_matrix = point._waypoint.get_matrix()
             current_ee_matix = robot.arm.get_tip().get_matrix()
             # angle_error = angle_distance(target_pose[3:], current_ee_pose[3:])
-            angle_error = (1-np.dot(target_matrix[:3,2], current_ee_matix[:3,2]))/2
+            angle_error = (1 - np.dot(target_matrix[:3, 2], current_ee_matix[:3, 2])) / 2
             return translate_error, angle_error
+
         waypoints = self.get_waypoints()
         if steps == 0:
             self.idx = 0
@@ -202,20 +203,20 @@ class Task(object):
         t_error, r_error = get_errors(point, self.robot)
         open_condition = all(x > 0.9 for x in self.robot.gripper.get_open_amount())
         current_gipper = 1.0 if open_condition else 0.0
-        if t_error<0.05 and r_error<0.1:
+        if t_error < 0.05 and r_error < 0.1:
             if current_gipper == self.target_gipper_state:
-                if self.idx+1<len(waypoints):
-                    self.idx+=1
+                if self.idx + 1 < len(waypoints):
+                    self.idx += 1
                     # next_point = waypoints[self.idx]
                     # self.last_t_error, self.last_r_error = get_errors(next_point, self.robot)
                 else:
                     if self.should_repeat_waypoints():
-                        self.idx=0
+                        self.idx = 0
                         # next_point = waypoints[self.idx]
                 return 1
             else:
                 return -1
-        if t_error>0.1:
+        if t_error > 0.1:
             delta_t = self.last_t_error - t_error
             delta_r = 0
         else:
@@ -226,11 +227,13 @@ class Task(object):
 
         self.last_t_error = t_error
         self.last_r_error = r_error
-        reward = 10*(2*delta_t+delta_r/np.pi)-0.01*np.abs(self.target_gipper_state-current_gipper)
+        reward = 10 * (2 * delta_t + delta_r / np.pi) - 0.01 * np.abs(
+            self.target_gipper_state - current_gipper
+        )
         reward = np.clip(reward, -1, 1)
-        success,_ = self.success()
+        success, _ = self.success()
         if success:
-            reward=2
+            reward = 2
         return reward
 
     def cleanup(self) -> None:
@@ -238,20 +241,19 @@ class Task(object):
 
         Can be used for complex tasks that spawn many objects.
         """
-        if len(self._need_remove_objects)!=0:
+        if len(self._need_remove_objects) != 0:
             for obj in self._need_remove_objects:
                 if obj.still_exists():
                     obj.remove()
             self._need_remove_objects = []
         if hasattr(self, "temporary_waypoints"):
-            if len(self.temporary_waypoints)!=0:
+            if len(self.temporary_waypoints) != 0:
                 for waypoint in self.temporary_waypoints:
                     if waypoint.still_exists():
                         waypoint.remove()
-                self.temporary_waypoints=[]
+                self.temporary_waypoints = []
 
-    def base_rotation_bounds(self) -> Tuple[Tuple[float, float, float],
-                                            Tuple[float, float, float]]:
+    def base_rotation_bounds(self) -> Tuple[Tuple[float, float, float], Tuple[float, float, float]]:
         """Defines how much the task base can rotate during episode placement.
 
         Default is set such that it can rotate any amount on the z axis.
@@ -291,11 +293,9 @@ class Task(object):
         return False
 
     def set_initial_objects_in_scene(self):
-        objs = self.get_base().get_objects_in_tree(
-            exclude_base=True, first_generation_only=False)
+        objs = self.get_base().get_objects_in_tree(exclude_base=True, first_generation_only=False)
         types = [ob.get_type() for ob in objs]
         self._initial_objs_in_scene = list(zip(objs, types))
-
 
     #########################
     # Registering functions #
@@ -328,8 +328,9 @@ class Task(object):
             obj.graspable = True
             # WriteCustomDataBlock(obj.get_handle(), "graspable", "True")
 
-    def register_waypoint_ability_start(self, waypoint_index: int,
-                                        func: Callable[[Waypoint], None]):
+    def register_waypoint_ability_start(
+        self, waypoint_index: int, func: Callable[[Waypoint], None]
+    ):
         """Register a function to be called before moving to waypoint.
 
         The registered function should take in a Waypoint object and is called
@@ -341,8 +342,7 @@ class Task(object):
         """
         self._waypoint_abilities_start[waypoint_index] = func
 
-    def register_waypoint_ability_end(self, waypoint_index: int,
-                                        func: Callable[[Waypoint], None]):
+    def register_waypoint_ability_end(self, waypoint_index: int, func: Callable[[Waypoint], None]):
         """Register a function to be called after moving to waypoint.
 
         The registered function should take in a Waypoint object and is called
@@ -383,10 +383,10 @@ class Task(object):
 
         :return: The name of the task.
         """
-        return re.sub('(?<!^)(?=[A-Z])', '_', self.__class__.__name__).lower()
+        return re.sub("(?<!^)(?=[A-Z])", "_", self.__class__.__name__).lower()
 
     def validate(self):
-        """If the task placement is valid. """
+        """If the task placement is valid."""
         self._waypoints = self._get_waypoints()
 
     def get_waypoints(self, need_feasible=True):
@@ -425,14 +425,12 @@ class Task(object):
             return Dummy(self.get_name())
         if ttms_folder is None:
             ttm_file = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                '../task_ttms/%s.ttm' % self.name)
+                os.path.dirname(os.path.abspath(__file__)), "../task_ttms/%s.ttm" % self.name
+            )
         else:
-            ttm_file = os.path.join(ttms_folder,
-                '%s.ttm' % self.name)
+            ttm_file = os.path.join(ttms_folder, "%s.ttm" % self.name)
         if not os.path.isfile(ttm_file):
-            raise FileNotFoundError(
-                'The following is not a valid task .ttm file: %s' % ttm_file)
+            raise FileNotFoundError("The following is not a valid task .ttm file: %s" % ttm_file)
         self._base_object = self.pyrep.import_model(ttm_file)
         return self._base_object
 
@@ -467,10 +465,10 @@ class Task(object):
         objs = self.get_base().get_objects_in_tree(exclude_base=False)
         if len(objs) != state[1]:
             raise RuntimeError(
-                'Expected to be resetting %d objects, but there were %d.' %
-                (state[1], len(objs)))
+                "Expected to be resetting %d objects, but there were %d." % (state[1], len(objs))
+            )
         self.pyrep.set_configuration_tree(state[0])
-    
+
     def reset_robot(self):
         arm, gripper = self.robot._initial_robot_state
         self.pyrep.set_configuration_tree(arm)
@@ -500,7 +498,7 @@ class Task(object):
         return True, -1
 
     def _get_waypoints(self, validating=False, need_feasible=True) -> List[Waypoint]:
-        waypoint_name = 'waypoint%d'
+        waypoint_name = "waypoint%d"
         waypoints = []
         additional_waypoint_inits = []
         i = 0
@@ -519,20 +517,17 @@ class Task(object):
                     start_func = self._waypoint_abilities_start[i]
                 if i in self._waypoint_abilities_end:
                     end_func = self._waypoint_abilities_end[i]
-                way = Point(waypoint, self.robot,
-                            start_of_path_func=start_func,
-                            end_of_path_func=end_func)
+                way = Point(
+                    waypoint, self.robot, start_of_path_func=start_func, end_of_path_func=end_func
+                )
             elif ob_type == ObjectType.PATH:
                 cartestian_path = CartesianPath(name)
                 way = PredefinedPath(cartestian_path, self.robot)
             else:
-                raise WaypointError(
-                    '%s is an unsupported waypoint type %s' % (
-                        name, ob_type), self)
+                raise WaypointError("%s is an unsupported waypoint type %s" % (name, ob_type), self)
 
             if name in self._waypoint_additional_inits and not validating:
-                additional_waypoint_inits.append(
-                    (self._waypoint_additional_inits[name], way))
+                additional_waypoint_inits.append((self._waypoint_additional_inits[name], way))
             waypoints.append(way)
             i += 1
 
@@ -540,8 +535,7 @@ class Task(object):
         if need_feasible:
             feasible, way_i = self._feasible(waypoints)
             if not feasible:
-                raise WaypointError(
-                    "Infeasible episode. Can't reach waypoint %d." % way_i, self)
+                raise WaypointError("Infeasible episode. Can't reach waypoint %d." % way_i, self)
         for func, way in additional_waypoint_inits:
             func(way)
         return waypoints

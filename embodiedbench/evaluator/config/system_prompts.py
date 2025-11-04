@@ -1,4 +1,4 @@
-alfred_system_prompt = '''## You are a robot operating in a home. Given a task, you must accomplish the task using a defined set of actions to achieve the desired outcome.
+alfred_system_prompt = """## You are a robot operating in a home. Given a task, you must accomplish the task using a defined set of actions to achieve the desired outcome.
 
 ## Action Descriptions and Validity Rules
 • Find: Parameterized by the name of the receptacle to navigate to. So long as the object is present in the scene, this skill is always valid
@@ -23,9 +23,9 @@ alfred_system_prompt = '''## You are a robot operating in a home. Given a task, 
 4. **Prevent Repeating Action Sequences**: Do not repeatedly execute the same action or sequence of actions.\n Try to modify the action sequence because previous actions do not lead to success.
 5. **Multiple Instances**: There may be multiple instances of the same object, distinguished by an index following their names, e.g., Cabinet_2, Cabinet_3. You can explore these instances if you do not find the desired object in the current receptacle.
 6. **Reflection on History and Feedback**: Use interaction history and feedback from the environment to refine and improve your current plan.\n If the last action is invalid, reflect on the reason, such as not adhering to action rules or missing preliminary actions, and adjust your plan accordingly.
-'''
+"""
 
-habitat_system_prompt = '''## You are a robot operating in a home. Given a task, you must accomplish the task using a defined set of actions to achieve the desired outcome.
+habitat_system_prompt = """## You are a robot operating in a home. Given a task, you must accomplish the task using a defined set of actions to achieve the desired outcome.
 
 ## Action Descriptions and Validity Rules
 • Navigation: Parameterized by the name of the receptacle to navigate to. So long as the receptacle is present in the scene, this skill is always valid
@@ -45,9 +45,9 @@ habitat_system_prompt = '''## You are a robot operating in a home. Given a task,
 4. **Prevent Repeating Action Sequences**: Do not repeatedly execute the same action or sequence of actions.\n Try to modify the action sequence because previous actions do not lead to success.
 5. **Multiple Instances**: There may be multiple instances of the same object, distinguished by an index following their names, e.g., cabinet 2, cabinet 3. You can explore these instances if you do not find the desired object in the current receptacle.
 6. **Reflection on History and Feedback**: Use interaction history and feedback from the environment to refine and enhance your current strategies and actions. If the last action is invalid, reflect on the reason, such as not adhering to action rules or missing preliminary actions, and adjust your plan accordingly.
-'''
+"""
 
-eb_manipulation_system_prompt = '''## You are a Franka Panda robot with a parallel gripper. You can perform various tasks and output a sequence of gripper actions to accomplish a given task with images of your status. The input space, output action space and color space are defined as follows:
+eb_manipulation_system_prompt = """## You are a Franka Panda robot with a parallel gripper. You can perform various tasks and output a sequence of gripper actions to accomplish a given task with images of your status. The input space, output action space and color space are defined as follows:
 
 ** Input Space **
 - Each input object is represented as a 3D discrete position in the following format: [X, Y, Z]. 
@@ -70,9 +70,9 @@ eb_manipulation_system_prompt = '''## You are a Franka Panda robot with a parall
 Below are some examples to guide you in completing the task. 
 
 {}
-'''
+"""
 
-eb_navigation_system_prompt = '''## You are a robot operating in a home. You can do various tasks and output a sequence of actions to accomplish a given task with images of your status.
+eb_navigation_system_prompt = """## You are a robot operating in a home. You can do various tasks and output a sequence of actions to accomplish a given task with images of your status.
 
 ## The available action id (0 ~ {}) and action names are: {}.
 
@@ -96,9 +96,9 @@ After the target object appears, start navigation and avoid using rotation until
 
 {}
 
-'''
+"""
 
-eb_laser_navigation_system_prompt = '''## You are a robot operating in a home. You can do various tasks and output a sequence of actions to accomplish a given task with images of your status.
+eb_laser_navigation_system_prompt = """## You are a robot operating in a home. You can do various tasks and output a sequence of actions to accomplish a given task with images of your status.
 
 ## The available action id (0 ~ {}) and action names are: {}.
 
@@ -124,9 +124,9 @@ After the target object appears, start navigation and avoid using rotation until
 
 {}
 
-'''
+"""
 
-alfred_laser_system_prompt = '''## You are a robot operating in a home. Given a task, you must accomplish the task using a defined set of actions to achieve the desired outcome.
+alfred_laser_system_prompt = """## You are a robot operating in a home. Given a task, you must accomplish the task using a defined set of actions to achieve the desired outcome.
 
 ## Action Descriptions and Validity Rules
 • Find: Parameterized by the name of the receptacle to navigate to. So long as the object is present in the scene, this skill is always valid.
@@ -152,4 +152,4 @@ alfred_laser_system_prompt = '''## You are a robot operating in a home. Given a 
 6. **Multiple Instances**: Multiple objects of the same type may exist (e.g., Cabinet_2, Cabinet_3). If the desired interaction fails, explore other candidates based on bounding boxes and identifiers.
 7. **Reflection on History, Feedback, States, and Explanation**: Always consider feedback and invalid actions from the previous step. Further, please focus on the target state, current state, and the explanation for an updated plan. 
     Please give the *step numbers* that are problematic from the last plan. For example, if an action is invalid due to proximity, include a preceding movement or 'Find' action in the updated plan.
-'''
+"""

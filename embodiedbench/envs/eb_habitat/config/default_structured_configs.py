@@ -7,8 +7,13 @@ from typing import Any, Dict, List, Optional
 
 import attr
 from habitat.config.default_structured_configs import (
-    ActionConfig, ArmActionConfig, HabitatSimRGBSensorConfig, LabSensorConfig,
-    MeasurementConfig, TaskConfig)
+    ActionConfig,
+    ArmActionConfig,
+    HabitatSimRGBSensorConfig,
+    LabSensorConfig,
+    MeasurementConfig,
+    TaskConfig,
+)
 from hydra.core.config_store import ConfigStore
 from omegaconf import MISSING
 
@@ -173,8 +178,8 @@ class TopDownRGBSensorConfig(HabitatSimRGBSensorConfig):
 class ThirdRGBSensorConfig(HabitatSimRGBSensorConfig):
     type: str = "HabitatSimRGBSensor"
     uuid: str = "third_rgb"
-    width: int = 500 
-    height: int = 500 
+    width: int = 500
+    height: int = 500
 
 
 cs.store(

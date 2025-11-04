@@ -1,4 +1,6 @@
-from embodiedbench.envs.eb_alfred.gen.agents.semantic_map_planner_agent import SemanticMapPlannerAgent
+from embodiedbench.envs.eb_alfred.gen.agents.semantic_map_planner_agent import (
+    SemanticMapPlannerAgent,
+)
 
 
 class DeterministicPlannerAgent(SemanticMapPlannerAgent):
@@ -9,7 +11,7 @@ class DeterministicPlannerAgent(SemanticMapPlannerAgent):
 
     def reset(self, seed=None, info=None, scene=None, objs=None):
         info = super(DeterministicPlannerAgent, self).reset(seed, info, scene=scene, objs=objs)
-        self.action_sequence = ['Plan', 'End']
+        self.action_sequence = ["Plan", "End"]
         return info
 
     def step(self, action, executing_plan=False):
@@ -18,9 +20,8 @@ class DeterministicPlannerAgent(SemanticMapPlannerAgent):
         super(DeterministicPlannerAgent, self).step(action)
 
     def get_action(self, action_ind=None):
-        assert(action_ind is None)
-        return {'action': self.action_sequence[0]}
+        assert action_ind is None
+        return {"action": self.action_sequence[0]}
 
     def get_reward(self):
         return 0, self.terminal
-

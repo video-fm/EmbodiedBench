@@ -19,17 +19,18 @@ import torch
 from habitat.dataset import make_dataset
 from habitat.tasks.rearrange.multi_task.pddl_action import PddlAction
 from habitat.tasks.rearrange.multi_task.pddl_predicate import Predicate
-from habitat.tasks.rearrange.multi_task.rearrange_pddl import (
-    PddlEntity, SimulatorObjectType)
+from habitat.tasks.rearrange.multi_task.rearrange_pddl import PddlEntity, SimulatorObjectType
 from PIL import Image
 from torch import multiprocessing as mp
 from tqdm import tqdm
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, T5Model
 
 import sys
-sys.path.append('../')
+
+sys.path.append("../")
 import config
 import dataset
+
 # import llarp.task
 from create_episodes import summarize_episodes
 from utils import get_instruct_data
@@ -160,9 +161,7 @@ class DataValidator:
         return ret
 
     def _filter_relevant_actions(self, actions):
-        recep_type = self._pddl.expr_types[
-            SimulatorObjectType.ARTICULATED_RECEPTACLE_ENTITY.value
-        ]
+        recep_type = self._pddl.expr_types[SimulatorObjectType.ARTICULATED_RECEPTACLE_ENTITY.value]
         relevant_obj_names = set(x.expr_type.name for x in self._relevant_entities)
         for action in actions:
             if action.name in RECEP_ACTIONS and not self._has_recep_entity:
@@ -188,9 +187,7 @@ class DataValidator:
                 yield action
 
     def _get_preds(self):
-        recep_type = self._pddl.expr_types[
-            SimulatorObjectType.ARTICULATED_RECEPTACLE_ENTITY.value
-        ]
+        recep_type = self._pddl.expr_types[SimulatorObjectType.ARTICULATED_RECEPTACLE_ENTITY.value]
         new_preds = self._pddl.get_true_predicates()
         ret_preds = []
         for pred in new_preds:
@@ -222,9 +219,7 @@ class DataValidator:
         return ret_preds
 
     def _setup_core_preds(self):
-        recep_type = self._pddl.expr_types[
-            SimulatorObjectType.ARTICULATED_RECEPTACLE_ENTITY.value
-        ]
+        recep_type = self._pddl.expr_types[SimulatorObjectType.ARTICULATED_RECEPTACLE_ENTITY.value]
         self._has_recep_entity = any(
             x.expr_type.is_subtype_of(recep_type) for x in self._relevant_entities
         )
@@ -252,9 +247,7 @@ class DataValidator:
 
         if node.prev_action is not None and node.prev_action.name == "nav":
             # No need to navigate again because we could have just navigated directly to the target.
-            ret_acs = [
-                ac for ac in self._all_actions if ac.name != node.prev_action.name
-            ]
+            ret_acs = [ac for ac in self._all_actions if ac.name != node.prev_action.name]
 
         if is_holding:
             # If we are holding an object, no picking actions.
@@ -338,9 +331,7 @@ class DataValidator:
                 new_preds = self._get_preds()
 
                 im_obs = {k: np.copy(v) for k, v in get_obs(env).items()}
-                new_node = SearchNode(
-                    new_preds, action, node, sim_state, node.depth + 1, im_obs
-                )
+                new_node = SearchNode(new_preds, action, node, sim_state, node.depth + 1, im_obs)
                 new_pred_hash = get_pred_hash(new_preds)
 
                 if goal_expr.is_true_from_predicates(new_preds):
@@ -393,9 +384,7 @@ class DataValidator:
 
     def _print_stats(self):
         print(f"Average search time: {np.mean(self._avg_times)} seconds")
-        print(
-            f"Ac len {np.mean(self._ac_lens)}, Subgoal len {np.mean(self._subgoal_lens)}"
-        )
+        print(f"Ac len {np.mean(self._ac_lens)}, Subgoal len {np.mean(self._subgoal_lens)}")
         print(f"Bad/Good episodes: {len(self._bad_ep_ids)}/{len(self._good_idxs)}")
         for k, v in self._bad_causes.items():
             print(f"{k}: {v}")
@@ -446,9 +435,7 @@ class DataValidator:
 
             all_obs.append({k: np.copy(v) for k, v in get_obs(env).items()})
 
-            subgoal_preds = [
-                pred_to_str(pred) for pred in pred_state if pred not in start_preds
-            ]
+            subgoal_preds = [pred_to_str(pred) for pred in pred_state if pred not in start_preds]
             if len(subgoal_preds) != 0:
                 pred_subgoals.append(subgoal_preds)
 
@@ -482,9 +469,7 @@ class DataValidator:
         ordered_actions = [
             x.compact_str for x in get_allowed_actions(env.task.pddl, ALLOWED_ACTIONS)
         ]
-        possible_preds: List[str] = [
-            x.compact_str for x in env.task.pddl.get_possible_predicates()
-        ]
+        possible_preds: List[str] = [x.compact_str for x in env.task.pddl.get_possible_predicates()]
 
         n_eps = env.number_of_episodes
         ret_eps = []

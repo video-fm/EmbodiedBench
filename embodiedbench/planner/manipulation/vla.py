@@ -11,7 +11,11 @@ from mimetypes import guess_type
 from embodiedbench.envs.eb_manipulation.eb_man_utils import ROTATION_RESOLUTION, VOXEL_SIZE
 from embodiedbench.planner.vla_model import VLAModel
 from embodiedbench.planner.custom_model import CustomModel
-from embodiedbench.planner.planner_utils import local_image_to_data_url, template_manip, template_lang_manip
+from embodiedbench.planner.planner_utils import (
+    local_image_to_data_url,
+    template_manip,
+    template_lang_manip,
+)
 from embodiedbench.main import logger
 
 VISUAL_ICL_EXAMPLES_PATH = "embodiedbench/evaluator/config/visual_icl_examples/eb_manipulation"
@@ -19,7 +23,7 @@ VISUAL_ICL_EXAMPLE_CATEGORY = {
     "pick": "pick_cube_shape",
     "place": "place_into_shape_sorter_color",
     "stack": "stack_cubes_color",
-    "wipe": "wipe_table_direction"
+    "wipe": "wipe_table_direction",
 }
 
 
@@ -38,7 +42,9 @@ def _random_observation_aloha() -> dict:
 
 def _random_observation_droid() -> dict:
     return {
-        "observation/exterior_image_1_left": np.random.randint(256, size=(224, 224, 3), dtype=np.uint8),
+        "observation/exterior_image_1_left": np.random.randint(
+            256, size=(224, 224, 3), dtype=np.uint8
+        ),
         "observation/wrist_image_left": np.random.randint(256, size=(224, 224, 3), dtype=np.uint8),
         "observation/joint_position": np.random.rand(7),
         "observation/gripper_position": np.random.rand(1),
@@ -54,26 +60,43 @@ def _random_observation_libero() -> dict:
         "prompt": "do something",
     }
 
+
 def object_to_dict(obj):
     return {
         key: getattr(obj, key)
         for key in dir(obj)
-        if not key.startswith('_') and not callable(getattr(obj, key))
+        if not key.startswith("_") and not callable(getattr(obj, key))
     }
 
-class ManipPlannerVLA():
-    def __init__(self, model_name, model_type, system_prompt, examples, n_shot=0, obs_key='front_rgb', chat_history=False, language_only=False, multiview=False, multistep=False, visual_icl=False, tp=1, kwargs={}):
+
+class ManipPlannerVLA:
+    def __init__(
+        self,
+        model_name,
+        model_type,
+        system_prompt,
+        examples,
+        n_shot=0,
+        obs_key="front_rgb",
+        chat_history=False,
+        language_only=False,
+        multiview=False,
+        multistep=False,
+        visual_icl=False,
+        tp=1,
+        kwargs={},
+    ):
         self.model_name = model_name
         self.model_type = model_type
         self.obs_key = obs_key
         self.system_prompt = system_prompt
         self.examples = examples
         self.n_shot = n_shot
-        self.chat_history = chat_history # whether to include all the chat history for prompting
-        if model_type == 'custom':
+        self.chat_history = chat_history  # whether to include all the chat history for prompting
+        if model_type == "custom":
             self.model = CustomModel(model_name, language_only)
-        elif model_type == 'remote':  
-            self.model = VLAModel(model_name, model_type, language_only, task_type='manip')
+        elif model_type == "remote":
+            self.model = VLAModel(model_name, model_type, language_only, task_type="manip")
 
         self.planner_steps = 0
         self.output_json_error = 0
@@ -83,16 +106,17 @@ class ManipPlannerVLA():
         self.multi_step_image = multistep
         self.visual_icl = visual_icl
         self.episode_act_feedback = []
-        
-        self.sleep_time_local=20
-        self.sleep_time_remote=60
+
+        self.sleep_time_local = 20
+        self.sleep_time_remote = 60
         self.max_retries = 5
-    
-    def process_prompt(self, user_instruction, avg_obj_coord, task_variation, obs, prev_act_feedback=[]):
-        
+
+    def process_prompt(
+        self, user_instruction, avg_obj_coord, task_variation, obs, prev_act_feedback=[]
+    ):
         assert len(obs["joint_positions"]) == 7
         assert len([obs["gripper_open"]]) == 1
-        
+
         return {
             "observation/exterior_image_1_left": obs["left_shoulder_rgb"].astype(np.uint8),
             "observation/exterior_image_2_left": obs["front_rgb"].astype(np.uint8),
@@ -101,11 +125,11 @@ class ManipPlannerVLA():
             "observation/gripper_position": np.array([obs["gripper_open"]]),
             "prompt": user_instruction,
         }
-    
+
     #     user_instruction = user_instruction.rstrip('.')
     #     if len(prev_act_feedback) == 0:
     #         if self.n_shot >= 1:
-    #             general_prompt = self.system_prompt.format(VOXEL_SIZE, VOXEL_SIZE, int(360 / ROTATION_RESOLUTION), ROTATION_RESOLUTION, '\n'.join([f'Example {i}: \n{x}' for i, x in enumerate(self.examples[task_variation][:self.n_shot])])) 
+    #             general_prompt = self.system_prompt.format(VOXEL_SIZE, VOXEL_SIZE, int(360 / ROTATION_RESOLUTION), ROTATION_RESOLUTION, '\n'.join([f'Example {i}: \n{x}' for i, x in enumerate(self.examples[task_variation][:self.n_shot])]))
     #         else:
     #             general_prompt = self.system_prompt.format(VOXEL_SIZE, VOXEL_SIZE, int(360 / ROTATION_RESOLUTION), ROTATION_RESOLUTION, '')
     #         task_prompt = f"\n## Now you are supposed to follow the above examples to generate a sequence of discrete gripper actions that completes the below human instruction. \nHuman Instruction: {user_instruction}.\nInput: {avg_obj_coord}\nOutput gripper actions: "
@@ -117,7 +141,7 @@ class ManipPlannerVLA():
     #         task_prompt = f'''\n\n Considering the above interaction history and the current image state, to achieve the human instruction: '{user_instruction}', you are supposed to output in json. You need to describe current visual state from the image, summarize interaction history and environment feedback and reason why the last action or plan failed and did not finish the task, output your new plan to achieve the goal from current state. At the end, output the executable plan with the 7-dimsension action.'''
     #     else:
     #         if self.n_shot >= 1:
-    #             general_prompt = self.system_prompt.format(VOXEL_SIZE, VOXEL_SIZE, int(360 / ROTATION_RESOLUTION), ROTATION_RESOLUTION, '\n'.join([f'Example {i}: \n{x}' for i, x in enumerate(self.examples[task_variation][:self.n_shot])])) 
+    #             general_prompt = self.system_prompt.format(VOXEL_SIZE, VOXEL_SIZE, int(360 / ROTATION_RESOLUTION), ROTATION_RESOLUTION, '\n'.join([f'Example {i}: \n{x}' for i, x in enumerate(self.examples[task_variation][:self.n_shot])]))
     #         else:
     #             general_prompt = self.system_prompt.format(VOXEL_SIZE, VOXEL_SIZE, int(360 / ROTATION_RESOLUTION), ROTATION_RESOLUTION, '')
     #         task_prompt = f"\n## Now you are supposed to follow the above examples to generate a sequence of discrete gripper actions that completes the below human instruction. \nHuman Instruction: {user_instruction}.\nInput: {avg_obj_coord}\nOutput gripper actions: "
@@ -129,7 +153,7 @@ class ManipPlannerVLA():
     #     user_instruction = user_instruction.rstrip('.')
     #     if len(prev_act_feedback) == 0:
     #         if self.n_shot >= 1:
-    #             general_prompt = self.system_prompt.format(VOXEL_SIZE, VOXEL_SIZE, int(360 / ROTATION_RESOLUTION), ROTATION_RESOLUTION, '') 
+    #             general_prompt = self.system_prompt.format(VOXEL_SIZE, VOXEL_SIZE, int(360 / ROTATION_RESOLUTION), ROTATION_RESOLUTION, '')
     #         else:
     #             general_prompt = self.system_prompt.format(VOXEL_SIZE, VOXEL_SIZE, int(360 / ROTATION_RESOLUTION), ROTATION_RESOLUTION, '')
     #         task_prompt = f"## Now you are supposed to follow the above examples to generate a sequence of discrete gripper actions that completes the below human instruction. \nHuman Instruction: {user_instruction}.\nInput: {avg_obj_coord}\nOutput gripper actions: "
@@ -141,14 +165,14 @@ class ManipPlannerVLA():
     #         task_prompt = f'''\n\n Considering the above interaction history and the current image state, to achieve the human instruction: '{user_instruction}', you are supposed to output in json. You need to describe current visual state from the image, summarize interaction history and environment feedback and reason why the last action or plan failed and did not finish the task, output your new plan to achieve the goal from current state. At the end, output the executable plan with the 7-dimsension action.'''
     #     else:
     #         if self.n_shot >= 1:
-    #             general_prompt = self.system_prompt.format(VOXEL_SIZE, VOXEL_SIZE, int(360 / ROTATION_RESOLUTION), ROTATION_RESOLUTION, '') 
+    #             general_prompt = self.system_prompt.format(VOXEL_SIZE, VOXEL_SIZE, int(360 / ROTATION_RESOLUTION), ROTATION_RESOLUTION, '')
     #         else:
     #             general_prompt = self.system_prompt.format(VOXEL_SIZE, VOXEL_SIZE, int(360 / ROTATION_RESOLUTION), ROTATION_RESOLUTION, '')
     #         task_prompt = f"## Now you are supposed to follow the above examples to generate a sequence of discrete gripper actions that completes the below human instruction. \nHuman Instruction: {user_instruction}.\nInput: {avg_obj_coord}\nOutput gripper actions: "
     #         for i, action_feedback in enumerate(prev_act_feedback):
     #             task_prompt += f"{action_feedback}, "
     #     return general_prompt, task_prompt
-    
+
     # def get_message(self, images, prompt, task_prompt, messages=[]):
     #     if self.language_only and not self.visual_icl:
     #         return messages + [
@@ -171,7 +195,7 @@ class ManipPlannerVLA():
     #             # use the last three imags as multi-step images
     #             if len(images) >= 3:
     #                 multi_step_images = images[-3:-1]
-    #                 current_message[0]["content"].append(  
+    #                 current_message[0]["content"].append(
     #                     {
     #                         "type": "text",
     #                         "text": "You are given the scene observations from the last two steps:",
@@ -179,7 +203,7 @@ class ManipPlannerVLA():
     #                 )
     #                 for image in multi_step_images:
     #                     if type(image) == str:
-    #                         image_path = image 
+    #                         image_path = image
     #                     else:
     #                         image_path = './evaluation/tmp_{}.png'.format(len(messages)//2)
     #                         cv2.imwrite(image_path, image)
@@ -192,7 +216,7 @@ class ManipPlannerVLA():
     #                             }
     #                         }
     #                     )
-                
+
     #                 # add the current task prompt and input image
     #                 current_message[0]["content"].append(
     #                     {
@@ -204,7 +228,7 @@ class ManipPlannerVLA():
     #                 # add the current step image
     #                 current_step_image = images[-1]
     #                 if type(current_step_image) == str:
-    #                     image_path = current_step_image 
+    #                     image_path = current_step_image
     #                 else:
     #                     image_path = './evaluation/tmp_{}.png'.format(len(messages)//2)
     #                     cv2.imwrite(image_path, current_step_image)
@@ -229,7 +253,7 @@ class ManipPlannerVLA():
 
     #                 for image in images:
     #                     if type(image) == str:
-    #                         image_path = image 
+    #                         image_path = image
     #                     else:
     #                         image_path = './evaluation/tmp_{}.png'.format(len(messages)//2)
     #                         cv2.imwrite(image_path, image)
@@ -256,7 +280,7 @@ class ManipPlannerVLA():
 
     #             for image in images:
     #                 if type(image) == str:
-    #                     image_path = image 
+    #                     image_path = image
     #                 else:
     #                     image_path = './evaluation/tmp_{}.png'.format(len(messages)//2)
     #                     cv2.imwrite(image_path, image)
@@ -270,9 +294,9 @@ class ManipPlannerVLA():
     #                         }
     #                     }
     #                 )
-        
+
     #         return current_message
-    
+
     # def get_message_visual_icl(self, images, first_prompt, task_prompt, task_variation, messages=[]):
     #     current_message = [
     #         {
@@ -300,7 +324,7 @@ class ManipPlannerVLA():
     #                 "text": example,
     #             }
     #         )
-    #         current_message[0]["content"].append(  
+    #         current_message[0]["content"].append(
     #             {
     #                 "type": "image_url",
     #                 "image_url": {
@@ -318,7 +342,7 @@ class ManipPlannerVLA():
 
     #     for image in images:
     #         if type(image) == str:
-    #             image_path = image 
+    #             image_path = image
     #         else:
     #             image_path = './evaluation/tmp_{}.png'.format(len(messages)//2)
     #             cv2.imwrite(image_path, image)
@@ -333,7 +357,7 @@ class ManipPlannerVLA():
     #             }
     #         )
     #     return current_message
-    
+
     # def json_to_action(self, output_text):
     #     try:
     #         json_object = json.loads(output_text)
@@ -403,7 +427,7 @@ class ManipPlannerVLA():
     #         gripper = [1.0]  # Always open
     #         action = arm + gripper
     #         return [action], None
-    
+
     def reset(self):
         # at the beginning of the episode
         self.episode_messages = []
@@ -421,19 +445,20 @@ class ManipPlannerVLA():
     #     action, _ = self.json_to_action(out)
     #     self.planner_steps += 1
     #     return action, out
-    
+
     def act(self, observation, user_instruction, avg_obj_coord, task_variation):
-        
         if type(observation) == dict:
             obs = observation
         else:
             obs = object_to_dict(observation)
             # obs = observation # input image path
-        
-        prompt = self.process_prompt(user_instruction, avg_obj_coord, task_variation, obs, prev_act_feedback=[])
-        
-        if self.model_type == 'custom':
-            return self.act_custom(prompt, obs[0]) 
+
+        prompt = self.process_prompt(
+            user_instruction, avg_obj_coord, task_variation, obs, prev_act_feedback=[]
+        )
+
+        if self.model_type == "custom":
+            return self.act_custom(prompt, obs[0])
         else:
             attempt = 0
             while attempt < self.max_retries:
@@ -442,7 +467,7 @@ class ManipPlannerVLA():
                     break
                 except:
                     attempt += 1
-                    if self.model_type != 'local':
+                    if self.model_type != "local":
                         time.sleep(60)
                     else:
                         time.sleep(20)
@@ -454,19 +479,19 @@ class ManipPlannerVLA():
                 #     attempt += 1
                 #     if attempt >= self.max_retries:
                 #         raise RuntimeError(f"Model failed after {self.max_retries} attempts") from e
-                    
+
                 #     wait_time = self.sleep_time_remote if self.model_type != 'local' else self.sleep_time_local
                 #     print(f"[Retry {attempt}/{self.max_retries}] Error: {e}. Retrying after {wait_time}s...")
                 #     time.sleep(wait_time)
-                    
+
         if self.chat_history:
             self.episode_messages.append(
                 {
-                "role": "assistant",
-                "content": [{"type": "text", "text": out}],
+                    "role": "assistant",
+                    "content": [{"type": "text", "text": out}],
                 }
             )
-        
+
         logger.debug(f"Model Output:\n{out}\n")
         self.planner_steps += 1
         action = out
@@ -474,8 +499,6 @@ class ManipPlannerVLA():
         return action, out
 
     def update_info(self, info):
-        env_feedback = info['env_feedback']
-        action = info['action']
+        env_feedback = info["env_feedback"]
+        action = info["action"]
         self.episode_act_feedback.append([action, env_feedback])
-
-    

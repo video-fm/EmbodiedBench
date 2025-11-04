@@ -6,11 +6,13 @@ from typing import Any, Optional
 import numpy as np
 from gym import spaces
 from habitat.core.registry import registry
-from habitat.tasks.rearrange.actions.articulated_agent_action import \
-    ArticulatedAgentAction
+from habitat.tasks.rearrange.actions.articulated_agent_action import ArticulatedAgentAction
 from habitat.tasks.rearrange.actions.grip_actions import (
-    GazeGraspAction, GripSimulatorTaskAction, MagicGraspAction,
-    SuctionGraspAction)
+    GazeGraspAction,
+    GripSimulatorTaskAction,
+    MagicGraspAction,
+    SuctionGraspAction,
+)
 from habitat.tasks.rearrange.rearrange_sim import RearrangeSim
 
 from embodiedbench.envs.eb_habitat.utils import get_allowed_actions
@@ -79,9 +81,7 @@ class KinematicArmEEAction(ArticulatedAgentAction):
 
     def reset(self, *args, **kwargs):
         super().reset()
-        cur_ee = self._ik_helper.calc_fk(
-            np.array(self._sim.articulated_agent.arm_joint_pos)
-        )
+        cur_ee = self._ik_helper.calc_fk(np.array(self._sim.articulated_agent.arm_joint_pos))
 
         self.ee_target = cur_ee
 
@@ -121,10 +121,8 @@ class KinematicArmEEAction(ArticulatedAgentAction):
         self.set_desired_ee_pos(ee_delta)
 
         if self._render_ee_target:
-            global_pos = (
-                self._sim.articulated_agent.base_transformation.transform_point(
-                    self.ee_target
-                )
+            global_pos = self._sim.articulated_agent.base_transformation.transform_point(
+                self.ee_target
             )
             self._sim.viz_ids["ee_target"] = self._sim.visualize_position(
                 global_pos, self._sim.viz_ids["ee_target"]
@@ -138,9 +136,7 @@ class PddlHlAction(ArticulatedAgentAction):
 
         self._action_datas = []
         for action in actions:
-            self._action_datas.append(
-                (action.name, [p.name for p in action.param_values])
-            )
+            self._action_datas.append((action.name, [p.name for p in action.param_values]))
         super().__init__(*args, config=config, task=task, **kwargs)
 
     @property
@@ -176,7 +172,5 @@ class PddlHlAction(ArticulatedAgentAction):
         apply_action = task.pddl_problem.actions[action_name].clone()
         apply_action.set_param_values(param_values)
 
-        self._was_prev_action_invalid = not apply_action.apply_if_true(
-            task.pddl_problem.sim_info
-        )
+        self._was_prev_action_invalid = not apply_action.apply_if_true(task.pddl_problem.sim_info)
         self._prev_action = apply_action

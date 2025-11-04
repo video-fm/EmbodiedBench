@@ -8,10 +8,12 @@ from amsolver.backend.utils import get_relative_position_xy, scale_object, selec
 from vlm.tasks.pick_cube import PickCube
 
 relative_pos_list = list(itertools.product(["left", "right", "front", "rear"], repeat=2))
+
+
 class PickCubeRelative(PickCube):
     def init_task(self) -> None:
         super().init_task()
-        self.get_relative_pos=True
+        self.get_relative_pos = True
 
     def modified_init_episode(self, index: int) -> List[str]:
         color_index = np.random.choice(len(colors), len(self.object_list), replace=True)
@@ -25,6 +27,7 @@ class PickCubeRelative(PickCube):
         self.object_target_relative, self.destination_target_relative = relative_pos_list[index]
 
         return None
+
     def variation_count(self) -> int:
         return len(relative_pos_list)
 
@@ -37,19 +40,29 @@ class PickCubeRelative(PickCube):
 
             if hasattr(self, "get_relative_pos"):
                 comparted_target = self.target_spaces[1]
-                target_relative_pose = get_relative_position_xy(Shape(comparted_target.focus_obj_id), Shape(self.target_space.focus_obj_id), self.robot.arm)
+                target_relative_pose = get_relative_position_xy(
+                    Shape(comparted_target.focus_obj_id),
+                    Shape(self.target_space.focus_obj_id),
+                    self.robot.arm,
+                )
                 if target_relative_pose != self.destination_target_relative:
                     continue
-                self.target_space.target_space_descriptions = f"the {target_relative_pose} container"
+                self.target_space.target_space_descriptions = (
+                    f"the {target_relative_pose} container"
+                )
 
             for obj in self.object_list:
                 self.spawn_space.sample(obj, min_distance=0.1)
             if hasattr(self, "get_relative_pos"):
                 comparted_obj = self.object_list[1]
-                object_relative_pose = get_relative_position_xy(comparted_obj.manipulated_part, self.manipulated_obj, self.robot.arm)
+                object_relative_pose = get_relative_position_xy(
+                    comparted_obj.manipulated_part, self.manipulated_obj, self.robot.arm
+                )
                 if object_relative_pose != self.object_target_relative:
                     continue
                 self.manipulated_obj.property["relative_pos"] = object_relative_pose
-                self.manipulated_obj.descriptions = "the {} object".format(self.manipulated_obj.property["relative_pos"])
+                self.manipulated_obj.descriptions = "the {} object".format(
+                    self.manipulated_obj.property["relative_pos"]
+                )
             satisfied = True
             self.pyrep.step()

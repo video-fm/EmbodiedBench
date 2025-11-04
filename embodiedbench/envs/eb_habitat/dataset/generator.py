@@ -13,12 +13,13 @@ import habitat.datasets.rearrange.samplers as samplers
 import numpy as np
 import yaml
 from habitat.core.logging import logger
-from habitat.datasets.rearrange.rearrange_generator import \
-    RearrangeEpisodeGenerator
-from habitat.datasets.rearrange.samplers.receptacle import (OnTopOfReceptacle,
-                                                            ReceptacleSet,
-                                                            ReceptacleTracker,
-                                                            find_receptacles)
+from habitat.datasets.rearrange.rearrange_generator import RearrangeEpisodeGenerator
+from habitat.datasets.rearrange.samplers.receptacle import (
+    OnTopOfReceptacle,
+    ReceptacleSet,
+    ReceptacleTracker,
+    find_receptacles,
+)
 from tqdm import tqdm
 
 from .episodes import LangRearrangeEpisode
@@ -166,9 +167,7 @@ class LangRearrangeEpisodeGenerator(RearrangeEpisodeGenerator):
                 num_failures_per_scene += 1
                 if num_failures_per_instruct > PER_INSTRUCT_LIM:
                     num_failures_per_instruct = 0
-                    logger.warning(
-                        f"Cannot generate for instruct `{self._get_cur_ep().instruct}`"
-                    )
+                    logger.warning(f"Cannot generate for instruct `{self._get_cur_ep().instruct}`")
                     # Advance to the next instruction. For some reason we couldn't generate this one.
                     self._on_successful_sample()
                 if num_failures_per_scene > PER_SCENE_LIM:
@@ -186,9 +185,7 @@ class LangRearrangeEpisodeGenerator(RearrangeEpisodeGenerator):
         if verbose:
             pbar.close()
 
-        logger.info(
-            f"Generated {num_episodes} episodes in {num_episodes+failed_episodes} tries."
-        )
+        logger.info(f"Generated {num_episodes} episodes in {num_episodes + failed_episodes} tries.")
 
         return generated_episodes
 
@@ -227,9 +224,7 @@ class LangRearrangeEpisodeGenerator(RearrangeEpisodeGenerator):
         # Override the object placements to be on the requested receptacles.
         orig_recep_sets = obj_sampler._allowed_recep_set_names[:]
         object_idx_to_recep = {}
-        obj_cls_to_handle_idxs = copy.deepcopy(
-            self._scene_obj_cls_to_handle_idxs[ep_scene_handle]
-        )
+        obj_cls_to_handle_idxs = copy.deepcopy(self._scene_obj_cls_to_handle_idxs[ep_scene_handle])
         for entity_name, obj_name in cur_ep.object_samples.items():
             targ_recep_sampler = cur_ep.object_spawn_recep[entity_name]
             obj_sampler._allowed_recep_set_names = [targ_recep_sampler]
@@ -243,9 +238,7 @@ class LangRearrangeEpisodeGenerator(RearrangeEpisodeGenerator):
             object_idx_to_recep[obj_idx] = recep
         obj_sampler._allowed_recep_set_names = orig_recep_sets
 
-        obj_sampler.target_objects_number = len(
-            self._scene_obj_handles[ep_scene_handle]
-        )
+        obj_sampler.target_objects_number = len(self._scene_obj_handles[ep_scene_handle])
         object_sample_data = obj_sampler.sample(
             self.sim,
             recep_tracker,
@@ -315,9 +308,9 @@ class LangRearrangeEpisodeGenerator(RearrangeEpisodeGenerator):
         sampled_rigid_object_states = []
         for i, sampled_obj in enumerate(self.ep_sampled_objects):
             creation_attrib = sampled_obj.creation_attributes
-            file_handle = creation_attrib.handle.split(creation_attrib.file_directory)[
-                -1
-            ].split("/")[-1]
+            file_handle = creation_attrib.handle.split(creation_attrib.file_directory)[-1].split(
+                "/"
+            )[-1]
             sampled_rigid_object_states.append(
                 (
                     file_handle,
@@ -327,9 +320,7 @@ class LangRearrangeEpisodeGenerator(RearrangeEpisodeGenerator):
 
         self.num_ep_generated += 1
 
-        name_to_receptacle = {
-            k: v.name for k, v in self.object_to_containing_receptacle.items()
-        }
+        name_to_receptacle = {k: v.name for k, v in self.object_to_containing_receptacle.items()}
 
         # Substitute the grounded entities into the goal predicate.
         goal_preds = _recur_dict_replace(instruct.goal_expr, cur_ep.sampled_entities)
@@ -382,9 +373,7 @@ def _process_instruct(phrasing: str, new_entities, name_remap) -> str:
     subbed_instruct = phrasing
     for k, v in renamed_new_entities.items():
         subbed_instruct = subbed_instruct.replace(f"`{k}`", v)
-    assert (
-        "`" not in subbed_instruct
-    ), f"Instruction {subbed_instruct} still has unsubbed tokens"
+    assert "`" not in subbed_instruct, f"Instruction {subbed_instruct} still has unsubbed tokens"
 
     # Make sure instruction ends in punctuation.
     if subbed_instruct[-1] not in [".", "?", "!"]:
@@ -543,9 +532,7 @@ def _get_all_instructs(
             use_recep_sets = _shuffle_select_subset(
                 receptacle_sets, instruct.subsample_entity_ratio
             )
-            use_obj_sets = _shuffle_select_subset(
-                category_groups, instruct.subsample_entity_ratio
-            )
+            use_obj_sets = _shuffle_select_subset(category_groups, instruct.subsample_entity_ratio)
         else:
             use_recep_sets = receptacle_sets
             use_obj_sets = category_groups
@@ -707,9 +694,7 @@ def _parse_instruct(
         lang=instruct["lang"],
         tags=instruct["tags"],
         goal_expr=instruct["goal_expr"],
-        sampled_objects={
-            k: ObjectSampleInfo(**v) for k, v in instruct["sampled_objects"].items()
-        },
+        sampled_objects={k: ObjectSampleInfo(**v) for k, v in instruct["sampled_objects"].items()},
         sampled_receps={
             k: ReceptacleSampleInfo(**v) for k, v in instruct["sampled_receps"].items()
         },
@@ -732,9 +717,7 @@ def log_ep_counts(eps, did_split_subsample=None, did_proc_subsample=None):
             print(f"{k}: {len(v)}")
     else:
         for k, v in eps.items():
-            print(
-                f"{k}: {len(v)} ({did_split_subsample[k]}), ({did_proc_subsample[k]})"
-            )
+            print(f"{k}: {len(v)} ({did_split_subsample[k]}), ({did_proc_subsample[k]})")
 
 
 def _flatten_eps(all_eps, num_eps, instruct_samples) -> List[EpisodeData]:
@@ -746,9 +729,7 @@ def _flatten_eps(all_eps, num_eps, instruct_samples) -> List[EpisodeData]:
         cur_instruct_idx += 1
 
         instruct_eps = all_eps[cur_instruct_id]
-        ep_flat.append(
-            instruct_eps[cur_instruct_ep_idx[cur_instruct_id] % len(instruct_eps)]
-        )
+        ep_flat.append(instruct_eps[cur_instruct_ep_idx[cur_instruct_id] % len(instruct_eps)])
         cur_instruct_ep_idx[cur_instruct_id] += 1
     return ep_flat
 
@@ -778,9 +759,7 @@ def get_flat_eps_split(
         n = len(use_eps)
         if n > total_procs:
             portion_size = n / total_procs
-            use_eps = use_eps[
-                int(proc_idx * portion_size) : int((proc_idx + 1) * portion_size)
-            ]
+            use_eps = use_eps[int(proc_idx * portion_size) : int((proc_idx + 1) * portion_size)]
 
         assert len(use_eps) > 0
         subsel_eps[k] = use_eps

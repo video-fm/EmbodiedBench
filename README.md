@@ -269,10 +269,10 @@ All evaluators support various configuration options through command-line argume
 
 # Citation
 ```
-@article{yang2025embodiedbench,
-  title={EmbodiedBench: Comprehensive Benchmarking Multi-modal Large Language Models for Vision-Driven Embodied Agents},
-  author={Yang, Rui and Chen, Hanyang and Zhang, Junyu and Zhao, Mark and Qian, Cheng and Wang, Kangrui and Wang, Qineng and Koripella, Teja Venkat and Movahedi, Marziyeh and Li, Manling and others},
-  journal={arXiv preprint arXiv:2502.09560},
-  year={2025}
+@inproceedings{huang2025esca,
+      title={ESCA: Contextualizing Embodied Agents via Scene-Graph Generation}, 
+      author={Jiani Huang and Amish Sethi and Matthew Kuo and Mayank Keoliya and Neelay Velingker and JungHo Jung and Ser-Nam Lim and Ziyang Li and Mayur Naik},
+      year={2025},
+      booktitle={The Thirty-Ninth Annual Conference on Neural Information Processing Systems (NeurIPS)},
 }
 ```

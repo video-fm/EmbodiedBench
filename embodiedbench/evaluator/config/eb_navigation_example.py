@@ -1,5 +1,5 @@
 examples = [
-'''
+    """
 Human Instruction : Navigate to the floorlamp and be as close as possible.
 
 Reasoning and reflection: I can see the floorlmap is at left side in front of me, next to the TVStand. Around me is a Cabinet at my left side. Following the guideline, since the floorlamp is at left side, I can approach it\
@@ -32,9 +32,8 @@ Environment Feedback: Step 14 is executed successfully; Step 15 is executed succ
 
 
 Task Success
-'''
-,
-'''
+""",
+    """
 Human Instruction: Navigate to the computer on the desk and be as close as possible.
 
 Reasoning and reflection: According to your instruction, I first need to locate the target object. I can see that the computer is located in my left front direction, placed on a desk. Next, I analyze the obstacles around me. In front of me, slightly to the right, there is a chair blocking my direct path. To avoid it, I decide to move leftward first, followed by a forward movement to approach the desk.
@@ -67,9 +66,8 @@ Environment Feedback: Step 11 is executed successfully; Step 12 is executed succ
 
 Task Success
 
-'''
-,
-'''
+""",
+    """
 Human Instruction: Navigate to the book and be as close as possible.
 
 Reasoning and reflection: At the moment, I cannot see the book in my current field of view. According to the strategy you provided, I will rotate my view ninety degrees at a time until I locate the target object. Since rotation changes my vision, I will not plan any other actions until the book is visible.
@@ -95,11 +93,11 @@ Environment Feedback: Step 8, Step 9, and Step 10 are all executed successfully.
 Task Success
 
 
-'''
-] 
+""",
+]
 
 examples_sg_baseline = [
-'''
+    """
 Human Instruction : Navigate to the floorlamp and be as close as possible.
 
 Visual Description: I can see the floorlmap is at left side in front of me, next to the TVStand. Around me is a Cabinet at my left side.
@@ -146,9 +144,8 @@ Executable plans: [[0, Move forward by 0.25], [0, Move forward by 0.25], [0, Mov
 Environment Feedback: Step 14 is executed successfully; Step 15 is executed successfully; Step 16 is executed successfully.
 
 Task Success
-'''
-,
-'''
+""",
+    """
 Human Instruction: Navigate to the computer on the desk and be as close as possible.
 
 Visual Description: I can see that the computer is located in my left front direction, placed on a desk. In front of me, slightly to the right, there is a chair blocking my direct path.
@@ -191,9 +188,8 @@ Environment Feedback: Step 11 is executed successfully; Step 12 is executed succ
 
 Task Success
 
-'''
-,
-'''
+""",
+    """
 Human Instruction: Navigate to the book and be as close as possible.
 
 Visual Description: I cannot see the book in my current field of view. The shelf where the book might be placed is likely behind or outside my viewing angle.
@@ -225,36 +221,34 @@ Environment Feedback: Step 8, Step 9, and Step 10 are all executed successfully.
 Task Success
 
 
-'''
-] 
+""",
+]
 
 scene_graph_examples = [
-'''Human Instruction: Navigate to the floorlamp and be as close as possible.
+    """Human Instruction: Navigate to the floorlamp and be as close as possible.
    
    Visual Description: I can see the floorlmap is at left side in front of me, next to the TVStand. Around me is a Cabinet at my left side.
    
    Scene Graph Entity in JSON: "scene_graph_entities": ["floorlmap", "TVStand", "cabinet"]
-''',
-
-'''Human Instruction: Navigate to the computer on the desk and be as close as possible.
+""",
+    """Human Instruction: Navigate to the computer on the desk and be as close as possible.
 
     Visual Description: At the first image, I can see that the computer is located in my left front direction, placed on a desk. In front of me, slightly to the right, there is a chair blocking my direct path. 
                         At the second image, I can see that the computer is located in my left front direction, placed on a desk. 
 
     Scene Graph Entity in JSON: "scene_graph_entities": ["computer", "desk", "chair"]
-''', 
-
-''' Human Instruction: Navigate to the book and be as close as possible.
+""",
+    """ Human Instruction: Navigate to the book and be as close as possible.
 
     Visual Description: At the first image, I cannot see the book. 
                         At the second image, I can see the book is directly in front of me, placed on a shelf.
 
     Scene Graph Entity in JSON: "scene_graph_entities": ["book", "shelf"]
-'''
+""",
 ]
 
 target_examples = [
-'''
+    """
    Environmental Feedback: The last action succeeded. 
     
    Human Instruction:  I need a device on my floor to illuminate my workspace. Please navigate to that object and stay near it.
@@ -264,9 +258,8 @@ target_examples = [
    Visual Description: I can see the floorlamp is at left side in front of me, next to the TVStand. Around me is a Cabinet at my left side.
    
    Target Entity in JSON: {"target_name": ["floorlamp"], "blocking_name":[], "target_attribute": ["left side"], "target_relation": [["floorlamp", "next to", "TVStand"]], "related_objects": ["Cabinet", "TVStand"]}
-''',
-
-''' 
+""",
+    """ 
     Environmental Feedback: The last action is invalid. The feedback is: Last action MoveRight is invalid. StandardCounterHeightWidth is blocking Agent 0 from moving by (-0.2500, 0.0000, 0.0000).
     
     Human Instruction: Find the rectangular yellowish object with a soft and smooth surface.
@@ -277,9 +270,8 @@ target_examples = [
                         At the second image, I can see that the rectangular yellowish object is  with a soft and smooth surface is located in my left front direction, placed on a desk. 
 
     Target Entity in JSON: {"target_name": ["object"],  "blocking_name": ["counter"], "target_attribute": ["rectangular", "yellowish"], "target_relation": [["object", "placed on", "desk"]], "related_objects": ["chair", "desk"]}
-''', 
-
-''' Environmental Feedback: The last action is invalid. The feedback is: Last action MoveAhead is invalid. OVENDOOR.002 is blocking Agent 0 from moving by (0.0000, 0.0000, -0.2500). 
+""",
+    """ Environmental Feedback: The last action is invalid. The feedback is: Last action MoveAhead is invalid. OVENDOOR.002 is blocking Agent 0 from moving by (0.0000, 0.0000, -0.2500). 
 
     Human Instruction: Navigate to the book and be as close as possible.
 
@@ -290,11 +282,11 @@ target_examples = [
                         At the second image, I can see the book is directly in front of me, placed on a shelf.
 
     Target Entity in JSON: {"target_name": ["book"], "blocking_name": ["oven door"], "target_attribute": [], "target_relation": [["book", "placed on", "shelf"]], related_objects": ["shelf"]}
-''', 
+""",
 ]
-    
+
 laser_sg_examples = [
-'''
+    """
 
 Human Instruction : Navigate to the floorlamp and be as close as possible.
 
@@ -378,9 +370,8 @@ Environment Feedback: Step 14 is executed successfully; Step 15 is executed succ
 
 
 Task Success
-'''
-,
-'''
+""",
+    """
 Human Instruction: Navigate to the computer on the desk and be as close as possible.
 
 Candidate Target Entities location: 
@@ -451,9 +442,8 @@ Environment Feedback: Step 11 is executed successfully; Step 12 is executed succ
 
 Task Success
 
-'''
-,
-'''
+""",
+    """
 Human Instruction: Navigate to the book and be as close as possible.
 
 Candidate Target Entities location: 
@@ -516,12 +506,12 @@ Environment Feedback: Step 11, Step 12, and Step 13 are all executed successfull
 Task Success
 
 
-'''
-] 
+""",
+]
 
 
 laser_sg_examples_no_revert = [
-'''
+    """
 
 Human Instruction : Navigate to the floorlamp and be as close as possible.
 
@@ -605,9 +595,8 @@ Environment Feedback: Step 14 is executed successfully; Step 15 is executed succ
 
 
 Task Success
-'''
-,
-'''
+""",
+    """
 Human Instruction: Navigate to the computer on the desk and be as close as possible.
 
 Candidate Target Entities location: 
@@ -678,9 +667,8 @@ Environment Feedback: Step 11 is executed successfully; Step 12 is executed succ
 
 Task Success
 
-'''
-,
-'''
+""",
+    """
 Human Instruction: Navigate to the book and be as close as possible.
 
 Candidate Target Entities location: 
@@ -743,8 +731,8 @@ Environment Feedback: Step 11, Step 12, and Step 13 are all executed successfull
 Task Success
 
 
-'''
-] 
+""",
+]
 
 # laser_examples = [
 # '''
@@ -768,7 +756,7 @@ Task Success
 
 # Environment Feedback: Step 1 is executed successfully; Step 2 is executed successfully;
 
-# Reasoning and reflection: I can see now I get closer to the floorlamp. 
+# Reasoning and reflection: I can see now I get closer to the floorlamp.
 # This floorlamp is corresponding to the location[0, 95, 15, 170]. \
 # There could be another floor lamp at [300, 320, 200, 240], but it is more far away from me so I will visit [0, 95, 15, 170] first. \
 # My target floorlamp is still located in front of me at the left. I will try move forward and move leftward in series.
@@ -780,7 +768,7 @@ Task Success
 # This floorlamp is corresponding to the location [0, 120, 10, 200]. \
 # There could be another floor lamp at [340, 350, 120, 150] but it is more far away from me so I will visit [0, 120, 10, 200] first. \
 # It is still in front of me. However, The last action is invalid, showing that I am blocked from moving forward.\
-# That means there is an obstacle in front of me and I can see it is probably a small table. Following the strategy, I can get away by first moving to the left and move forward. 
+# That means there is an obstacle in front of me and I can see it is probably a small table. Following the strategy, I can get away by first moving to the left and move forward.
 # Executable plans: [[3, Move leftward by 0.25], [3, Move leftward by 0.25], [0, Move forward by 0.25], [0, Move forward by 0.25]]
 
 # Environment Feedback: Step 8 is executed successfully; Step 9 is executed successfully; Step 10 is executed successfully; Step 11 is executed successfully;
@@ -792,12 +780,12 @@ Task Success
 # Now I need to move right and I will probably be close to the floorlamp.
 # Executable plans: [[2, Move rightward by 0.25], [2, Move rightward by 0.25]]]
 
-# Environment Feedback: Step 12 is executed successfully; Step 13 is executed successfully. 
+# Environment Feedback: Step 12 is executed successfully; Step 13 is executed successfully.
 
 # Reasoning and reflection: Last two action brought me closer to the floorlamp. \
 # This floorlamp is corresponding to the location [20, 120, 60, 300,]. \
 # There could be another floor lamp at [360, 350, 140, 150] but it is more far away from me so I will visit [20, 120, 60, 300,] first. \
-# following the strategy, I should not complete now since I can still be closer to the floorlamp by moving forward a few steps. 
+# following the strategy, I should not complete now since I can still be closer to the floorlamp by moving forward a few steps.
 # Executable plans: [[0, Move forward by 0.25], [0, Move forward by 0.25], [0, Move forward by 0.25]]
 
 # Environment Feedback: Step 14 is executed successfully; Step 15 is executed successfully; Step 16 is executed successfully.
@@ -810,7 +798,7 @@ Task Success
 # Human Instruction: Navigate to the computer on the desk and be as close as possible.
 
 # Reasoning and reflection: According to your instruction, I first need to locate the target object. \
-# The candidate computer is at [35, 75, 65, 150]. 
+# The candidate computer is at [35, 75, 65, 150].
 # There could be another computer at [300, 75, 400, 150], but it is more far away from me so I will visit [35, 75, 65, 150] first. \
 # I can see that the computer is located in my left front direction, placed on a desk. Next, I analyze the obstacles around me. In front of me, slightly to the right, there is a chair blocking my direct path. To avoid it, I decide to move leftward first, followed by a forward movement to approach the desk.
 # Executable plans: [[0, Move forward by 0.25], [3, Move leftward by 0.25]]
@@ -821,7 +809,7 @@ Task Success
 # The candidate computer is at [25, 45, 55, 160]. \
 # There could be another computer at [320, 55, 420, 180], but it is more far away from me so I will visit [25, 45, 55, 160] first. \
 # It remains in my left front direction. My last leftward movement failed because a StandardHeightTable is blocking my path. However, following the strategy, \
-# I need not address the invalid action since forward movement can still bring me closer to the target object. So I will still make forward movements for now. 
+# I need not address the invalid action since forward movement can still bring me closer to the target object. So I will still make forward movements for now.
 # Executable plans: [[0, Move forward by 0.25], [0, Move forward by 0.25], [0, Move forward by 0.25]]
 
 # Environment Feedback: Step 3 is executed successfully; Step 4 is executed successfully; Step 5 is Invalid, as a StandardHeightTable is blocking you from moving forward.
@@ -845,7 +833,7 @@ Task Success
 
 # Environment Feedback: Step 8 is executed successfully; Step 9 is executed successfully; Step 10 is executed successfully.
 
-# Reasoning and reflection: Now, I can see that the computer has shifted to my right front direction. 
+# Reasoning and reflection: Now, I can see that the computer has shifted to my right front direction.
 # The candidate computer is at [220, 75, 300, 150]. \
 # There are no longer any visible obstacles blocking my way. I deduce that the computer is now to my right because my previous leftward movements adjusted my position significantly to clear the earlier obstacle. Since the path is clear, I plan to approach the computer by moving forward three times and then rightward once to align myself next to it.
 # Executable plans: [[0, Move forward by 0.25], [0, Move forward by 0.25], [0, Move forward by 0.25], [2, Move rightward by 0.25]]
@@ -899,4 +887,4 @@ Task Success
 
 
 # '''
-# ] 
+# ]

@@ -9,6 +9,7 @@ from vlm.tasks.pick_cube import PickCube
 
 size_permutations = list(itertools.product(["small", "large"], repeat=2))
 
+
 class PickCubeSize(PickCube):
     def init_task(self) -> None:
         # self.model_path = "cube/cube_basic/cube_basic.ttm"
@@ -26,9 +27,11 @@ class PickCubeSize(PickCube):
             large_obj = self.object_list[0]
         small_obj.manipulated_part.descriptions = "the {} object".format("smaller")
         large_obj.manipulated_part.descriptions = "the {} object".format("larger")
-        for obj, scale_factor in zip([small_obj, large_obj],[np.random.uniform(0.6, 0.9), np.random.uniform(1.1, 1.2)]):
+        for obj, scale_factor in zip(
+            [small_obj, large_obj], [np.random.uniform(0.6, 0.9), np.random.uniform(1.1, 1.2)]
+        ):
             relative_factor = scale_object(obj, scale_factor)
-            if abs(relative_factor-1)>1e-2:
+            if abs(relative_factor - 1) > 1e-2:
                 local_grasp_pose = obj.manipulated_part.local_grasp
                 local_grasp_pose[:, :3, 3] *= relative_factor
                 obj.manipulated_part.local_grasp = local_grasp_pose
@@ -41,7 +44,10 @@ class PickCubeSize(PickCube):
             large_target = self.target_spaces[0]
         small_target.target_space_descriptions = "the smaller container"
         large_target.target_space_descriptions = "the larger container"
-        for target, scale_factor in zip([small_target, large_target],[np.random.uniform(0.8, 0.9), np.random.uniform(1.1, 1.25)]):
+        for target, scale_factor in zip(
+            [small_target, large_target],
+            [np.random.uniform(0.8, 0.9), np.random.uniform(1.1, 1.25)],
+        ):
             relative_factor = scale_object(Shape(target.focus_obj_id), scale_factor)
 
         color_index = np.random.choice(len(colors), len(self.object_list), replace=True)
@@ -53,5 +59,6 @@ class PickCubeSize(PickCube):
             Shape(target_space.focus_obj_id).set_color(colors[target_space_colors[i]][1])
         self.pyrep.step()
         return None
+
     def variation_count(self) -> int:
         return len(size_permutations)

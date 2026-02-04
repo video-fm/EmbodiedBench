@@ -11,38 +11,64 @@ import socket
 import getpass
 import yaml
 
-if __name__=="__main__":
+if __name__ == "__main__":
     user_name = getpass.getuser()
-    default_image_name = user_name + '-alfred'
+    default_image_name = user_name + "-alfred"
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--image", type=str,
-                        help="(required) name of the image that this container is derived from", default=default_image_name)
+    parser.add_argument(
+        "-i",
+        "--image",
+        type=str,
+        help="(required) name of the image that this container is derived from",
+        default=default_image_name,
+    )
 
-    parser.add_argument("-c", "--container", type=str, default="alfred", help="(optional) name of the container")
+    parser.add_argument(
+        "-c", "--container", type=str, default="alfred", help="(optional) name of the container"
+    )
 
-    parser.add_argument("-d", "--data", type=str, default="data/", help="(optional) external data directory")
+    parser.add_argument(
+        "-d", "--data", type=str, default="data/", help="(optional) external data directory"
+    )
 
-    parser.add_argument("-hl", "--headless",  action='store_true', help="(optional) run in headless mode")
+    parser.add_argument(
+        "-hl", "--headless", action="store_true", help="(optional) run in headless mode"
+    )
 
-    parser.add_argument("-r", "--root", action='store_true', help="(optional) login as root instead of user")
+    parser.add_argument(
+        "-r", "--root", action="store_true", help="(optional) login as root instead of user"
+    )
 
-    parser.add_argument("-g", "--gpus", type=str, default="all", help="(optional) gpus for nvidia docker")
+    parser.add_argument(
+        "-g", "--gpus", type=str, default="all", help="(optional) gpus for nvidia docker"
+    )
 
-    parser.add_argument("-dr", "--dry_run", action='store_true', help="(optional) perform a dry_run, print the command that would have been executed but don't execute it.")
+    parser.add_argument(
+        "-dr",
+        "--dry_run",
+        action="store_true",
+        help="(optional) perform a dry_run, print the command that would have been executed but don't execute it.",
+    )
 
-    parser.add_argument("-p", "--passthrough", type=str, default="", help="(optional) extra string that will be tacked onto the docker run command, allows you to pass extra options. Make sure to put this in quotes and leave a space before the first character")
+    parser.add_argument(
+        "-p",
+        "--passthrough",
+        type=str,
+        default="",
+        help="(optional) extra string that will be tacked onto the docker run command, allows you to pass extra options. Make sure to put this in quotes and leave a space before the first character",
+    )
 
     args = parser.parse_args()
-    print("running docker container derived from image %s" %args.image)
+    print("running docker container derived from image %s" % args.image)
     source_dir = os.getcwd()
 
     image_name = args.image
-    home_directory = '/home/' + user_name
+    home_directory = "/home/" + user_name
 
     cmd = "xhost +local:root \n" if not args.headless else ""
     cmd += "docker run "
     if args.container:
-        cmd += " --name %(container_name)s " % {'container_name': args.container}
+        cmd += " --name %(container_name)s " % {"container_name": args.container}
 
     # gpus
     cmd += " --gpus %s" % (args.gpus)
@@ -51,18 +77,24 @@ if __name__=="__main__":
     if args.headless:
         cmd += " -v /usr/bin/nvidia-xconfig:/usr/bin/nvidia-xconfig "
     else:
-        cmd += " -e DISPLAY -e QT_X11_NO_MITSHM=1 -v /tmp/.X11-unix:/tmp/.X11-unix:rw "    # enable graphics
+        cmd += " -e DISPLAY -e QT_X11_NO_MITSHM=1 -v /tmp/.X11-unix:/tmp/.X11-unix:rw "  # enable graphics
 
     # bindings
-    cmd += " -v %(source_dir)s:%(home_directory)s/alfred " \
-           % {'source_dir': source_dir, 'home_directory': home_directory}                  # mount source
-    cmd += " -v ~/.ssh:%(home_directory)s/.ssh " % {'home_directory': home_directory}      # mount ssh keys
-    cmd += " -v ~/.torch:%(home_directory)s/.torch " % {'home_directory': home_directory}  # mount torch folder
+    cmd += " -v %(source_dir)s:%(home_directory)s/alfred " % {
+        "source_dir": source_dir,
+        "home_directory": home_directory,
+    }  # mount source
+    cmd += " -v ~/.ssh:%(home_directory)s/.ssh " % {
+        "home_directory": home_directory
+    }  # mount ssh keys
+    cmd += " -v ~/.torch:%(home_directory)s/.torch " % {
+        "home_directory": home_directory
+    }  # mount torch folder
 
-    cmd += " --user %s " % ("root" if args.root else user_name)                            # login
+    cmd += " --user %s " % ("root" if args.root else user_name)  # login
 
     # custom data path
-    cmd += " -v %s:/data " %(os.path.join(source_dir, args.data))
+    cmd += " -v %s:/data " % (os.path.join(source_dir, args.data))
 
     # expose UDP ports
     cmd += " -p 8888:8888 "
@@ -75,7 +107,7 @@ if __name__=="__main__":
 
     cmd += " --privileged"
 
-    cmd += " --rm " # remove the image when you exit
+    cmd += " --rm "  # remove the image when you exit
 
     cmd += "-it "
     cmd += args.image

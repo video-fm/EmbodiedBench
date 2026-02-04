@@ -1,9 +1,8 @@
-#Copy From the rlbench: https://github.com/stepjam/RLBench
+# Copy From the rlbench: https://github.com/stepjam/RLBench
 import numpy as np
 
 
 class Demo(object):
-
     def __init__(self, observations, random_seed=None):
         self._observations = observations
         self.random_seed = random_seed

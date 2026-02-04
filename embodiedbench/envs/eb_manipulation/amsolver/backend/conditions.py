@@ -1,4 +1,4 @@
-#Modified From the rlbench: https://github.com/stepjam/RLBench
+# Modified From the rlbench: https://github.com/stepjam/RLBench
 from typing import List
 import math
 from pyrep.objects.shape import Shape
@@ -24,7 +24,7 @@ class ColorCondition(object):
 
     def condition_met(self):
         obj_rgb = self.shape.get_color()
-        met = (obj_rgb == self.success_rgb)
+        met = obj_rgb == self.success_rgb
         return met, False
 
 
@@ -35,12 +35,13 @@ class ColorCondition(object):
 #         self._original_pos = joint.get_joint_position()
 #         self._pos = position
 
+
 #     def condition_met(self):
 #         met = math.fabs(
 #             self._joint.get_joint_position() - self._original_pos) > self._pos
 #         return met, False
 class JointCondition(Condition):
-    def __init__(self, joint: Joint, position: float, position_bound = None):
+    def __init__(self, joint: Joint, position: float, position_bound=None):
         """in radians if revoloute, or meters if prismatic"""
         self._joint = joint.get_name()
         self._original_pos = joint.get_joint_position()
@@ -49,12 +50,12 @@ class JointCondition(Condition):
 
     def condition_met(self):
         joint = Joint(self._joint)
-        current_angle = math.fabs(
-            joint.get_joint_position() - self._original_pos)
+        current_angle = math.fabs(joint.get_joint_position() - self._original_pos)
         met = current_angle > self._pos
         if self._position_bound is not None:
-            met = self._position_bound> current_angle > self._pos
+            met = self._position_bound > current_angle > self._pos
         return met, False
+
 
 # class DetectedCondition(Condition):
 #     def __init__(self, obj: Object, detector: ProximitySensor,
@@ -72,9 +73,9 @@ class JointCondition(Condition):
 #         except:
 #             return False, False
 
+
 class DetectedCondition(Condition):
-    def __init__(self, obj: Object, detector: ProximitySensor,
-                 negated: bool = False):
+    def __init__(self, obj: Object, detector: ProximitySensor, negated: bool = False):
         self._obj = obj.get_name()
         self._detector = detector.get_name()
         self._negated = negated
@@ -89,6 +90,7 @@ class DetectedCondition(Condition):
             return met, False
         except:
             return False, False
+
 
 class NothingGrasped(Condition):
     def __init__(self, gripper: Gripper):
@@ -105,14 +107,21 @@ class GraspedCondition(Condition):
         self._object_handle = object.get_handle()
 
     def condition_met(self):
-        met = len([ob for ob in self._gripper.get_grasped_objects()
-                   if self._object_handle == ob.get_handle()]) > 0
+        met = (
+            len(
+                [
+                    ob
+                    for ob in self._gripper.get_grasped_objects()
+                    if self._object_handle == ob.get_handle()
+                ]
+            )
+            > 0
+        )
         return met, False
 
 
 class DetectedSeveralCondition(Condition):
-    def __init__(self, objects: List[Object], detector: ProximitySensor,
-                 number_needed: int):
+    def __init__(self, objects: List[Object], detector: ProximitySensor, number_needed: int):
         self._objects = objects
         self._detector = detector
         self._number_needed = number_needed
@@ -129,7 +138,6 @@ class DetectedSeveralCondition(Condition):
 
 
 class EmptyCondition(Condition):
-
     def __init__(self, container: list):
         self._container = container
 
@@ -139,10 +147,14 @@ class EmptyCondition(Condition):
 
 
 class FollowCondition(Condition):
-
-    def __init__(self, obj: Object, points: list,
-                 relative_to: Object = None, delta_limit: float = 0.01,
-                 start_after_first: bool = True):
+    def __init__(
+        self,
+        obj: Object,
+        points: list,
+        relative_to: Object = None,
+        delta_limit: float = 0.01,
+        start_after_first: bool = True,
+    ):
         self._obj = obj
         self._ponts = points
         self._relative_to = relative_to
@@ -156,9 +168,7 @@ class FollowCondition(Condition):
         first = True
         for i in range(self._index, len(self._ponts)):
             p = self._ponts[i]
-            dist = math.sqrt((pos[0] - p[0]) ** 2 +
-                             (pos[1] - p[1]) ** 2 +
-                             (pos[2] - p[2]) ** 2)
+            dist = math.sqrt((pos[0] - p[0]) ** 2 + (pos[1] - p[1]) ** 2 + (pos[2] - p[2]) ** 2)
             # Check we aren't too far away from the next point
             if dist > self._delta_limit:
                 # Check if we are ignoring until we reach the first point
@@ -180,8 +190,12 @@ class FollowCondition(Condition):
 
 
 class ConditionSet(Condition):
-    def __init__(self, conditions: List[Condition], order_matters: bool = False,
-                 simultaneously_met: bool = True):
+    def __init__(
+        self,
+        conditions: List[Condition],
+        order_matters: bool = False,
+        simultaneously_met: bool = True,
+    ):
         """alternative would be sequentially met"""
         self._conditions = conditions
         self._order_matters = order_matters
@@ -193,7 +207,7 @@ class ConditionSet(Condition):
         # term = False
         if self._order_matters:
             if self._current_condition_index < len(self._conditions):
-                for cond in self._conditions[self._current_condition_index:]:
+                for cond in self._conditions[self._current_condition_index :]:
                     ismet, term = cond.condition_met()
                     if not ismet:
                         break

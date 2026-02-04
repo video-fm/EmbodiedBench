@@ -15,22 +15,21 @@ from typing import TYPE_CHECKING, Any, Dict, List
 import numpy as np
 import pandas as pd
 from habitat.core.logging import logger
-from habitat.datasets.rearrange.rearrange_generator import \
-    RearrangeEpisodeGenerator
+from habitat.datasets.rearrange.rearrange_generator import RearrangeEpisodeGenerator
 from habitat.datasets.rearrange.run_episode_generator import (
-    RearrangeEpisodeGeneratorConfig, get_arg_parser, get_config_defaults,
-    print_metadata_mediator)
-from habitat.datasets.rearrange.samplers.receptacle import \
-    get_all_scenedataset_receptacles
+    RearrangeEpisodeGeneratorConfig,
+    get_arg_parser,
+    get_config_defaults,
+    print_metadata_mediator,
+)
+from habitat.datasets.rearrange.samplers.receptacle import get_all_scenedataset_receptacles
 from habitat.utils.common import cull_string_list_by_substrings
 from omegaconf import OmegaConf
 from torch import multiprocessing as mp
 
 
 from episodes import LangRearrangeDatasetV0
-from generator import (LangRearrangeEpisodeGenerator,
-                                     generate_all_instructions,
-                                     get_flat_eps_split)
+from generator import LangRearrangeEpisodeGenerator, generate_all_instructions, get_flat_eps_split
 from utils import get_category_info
 from ..utils import get_parser
 
@@ -68,9 +67,7 @@ def summarize_episodes(episodes, show_examples=False, tokenizer_name=None):
             tokens = tokenizer(
                 ep.instruction,
                 return_tensors="np",
-            )[
-                "input_ids"
-            ][0]
+            )["input_ids"][0]
             token_lens.append(tokens.shape[0])
         print("max token len ", max(token_lens))
     instructs = defaultdict(int)
@@ -126,9 +123,7 @@ def start(args):
 
     cfg = OmegaConf.create(LangEpisodeGeneratorConfig())
     if args.config is not None:
-        assert osp.exists(
-            args.config
-        ), f"Provided config, '{args.config}', does not exist."
+        assert osp.exists(args.config), f"Provided config, '{args.config}', does not exist."
         override_config = OmegaConf.load(args.config)
         cfg = OmegaConf.merge(cfg, override_config)  # type: ignore[assignment]
 
@@ -162,9 +157,7 @@ def start(args):
 
     # By default, these are the Hydra list type.
     cat_groups = {k: list(v["included"]) for k, v in cfg.category_groups.items()}
-    recep_sets = {
-        k: list(v.included_receptacle_substrings) for k, v in recep_sets.items()
-    }
+    recep_sets = {k: list(v.included_receptacle_substrings) for k, v in recep_sets.items()}
     all_eps, instruct_samples = generate_all_instructions(
         args.instruct_path,
         obj_sets,
@@ -236,9 +229,7 @@ def start(args):
             continue
         n_eps_collected = len(result)
         not_collected.pop(not_collected.index(i))
-        print(
-            f"Collected {n_eps_collected} episodes from worker {i}. Waiting for {not_collected}"
-        )
+        print(f"Collected {n_eps_collected} episodes from worker {i}. Waiting for {not_collected}")
         dataset.episodes.extend(result)
         if n_eps_collected != args.num_episodes:
             logger.warning(

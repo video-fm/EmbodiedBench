@@ -7,16 +7,22 @@ import string
 
 def get_time_str():
     tt = time.localtime()
-    time_str = ('%04d_%02d_%02d_%02d_%02d_%02d' %
-                (tt.tm_year, tt.tm_mon, tt.tm_mday, tt.tm_hour, tt.tm_min, tt.tm_sec))
+    time_str = "%04d_%02d_%02d_%02d_%02d_%02d" % (
+        tt.tm_year,
+        tt.tm_mon,
+        tt.tm_mday,
+        tt.tm_hour,
+        tt.tm_min,
+        tt.tm_sec,
+    )
     return time_str
 
 
-def encode(string, encoding='utf-8'):
+def encode(string, encoding="utf-8"):
     return string.encode(encoding)
 
 
-def decode(string, encoding='utf-8'):
+def decode(string, encoding="utf-8"):
     return string.decode(encoding)
 
 
@@ -34,7 +40,7 @@ def multireplace(string, replacements):
     substrs = sorted(replacements, key=len, reverse=True)
 
     # Create a big OR regex that matches any of the substrings to replace
-    regexp = re.compile('|'.join(map(re.escape, substrs)))
+    regexp = re.compile("|".join(map(re.escape, substrs)))
 
     # For each match, look up the new string in the replacements
     return regexp.sub(lambda match: replacements[match.group(0)], string)
@@ -68,7 +74,7 @@ def walklevel(some_dir, level=1):
 
 
 def remove_spaces(s):
-    cs = ' '.join(s.split())
+    cs = " ".join(s.split())
     return cs
 
 
@@ -79,6 +85,6 @@ def remove_spaces_and_lower(s):
 
 
 def remove_punctuation(s):
-    cs = s.translate(str.maketrans('', '', string.punctuation))
+    cs = s.translate(str.maketrans("", "", string.punctuation))
     cs = remove_spaces_and_lower(cs)
     return cs

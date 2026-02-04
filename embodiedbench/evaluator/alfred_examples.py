@@ -1,5 +1,5 @@
 laser_sg_examples_no_revert = [
-'''
+    """
 Human instruction: Pick up the alarm clock and turn on the lamp.
 The target state: I am holding an alarm clock and there should be a lightened lamp in my sight.
 The current state: I am in a bedroom.  A small alarm clock sits on the bedside table next to a switched-off desk lamp. 
@@ -25,9 +25,8 @@ Output: {
         {"action_id": 151, "action_name": "turn on the DeskLamp"}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Examine a credit card by the light of a tall lamp.
 The target state: I am holding a credit card, and a tall lamp is lightened in the scene so that I can see the card clearly.
 The current state: I am in a lounge with a floor lamp in the corner and a credit card lying on a coffee table.
@@ -53,9 +52,8 @@ Output: {
         {"action_id": 153, "action_name": "turn on the FloorLamp"}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Use lamp light to look at the remote.
 The target state: I am holding a remote control, and a floor lamp is turned on so I can inspect the remote clearly.
 The current state: I am in a living room. A sofa faces a dark floor lamp. A remote control rests on the arm of the sofa.
@@ -81,9 +79,8 @@ Output: {
         {"action_id": 153, "action_name": "turn on the FloorLamp"}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Set the box on the table.
 The target state: The box should be placed on top of the dining table.
 The current state: I am in a dining area. A cardboard box is on the floor near a dining table.
@@ -109,9 +106,8 @@ Output: {
         {"action_id": 133, "action_name": "put down the object in hand"}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Place a heated slice of tomato in the kitchen sink.
 The target state: A slice of tomato that has been heated is placed inside the kitchen sink.
 The current state: I am in a kitchen. A whole tomato sits on the counter; a microwave and a sink are visible nearby.
@@ -155,9 +151,8 @@ Output: {
         {"action_id": 133, "action_name": "put down the object in hand"}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Move the towel on the hanger into the cabinet.
 The target state: The hand towel should be placed inside the cabinet, and the cabinet should be closed.
 The current state: I am in a bathroom. A hand towel hangs from a wall-mounted holder; a closed cabinet stands nearby.
@@ -185,9 +180,8 @@ Output: {
         {"action_id": 146, "action_name": "close the Cabinet"}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Place a microwaved slice of apple on to the white table.
 The target state: A microwaved apple slice is placed on the white dining table.
 The current state: I am in a kitchen. A whole apple lies next to a microwave; a white dining table is visible across the kitchen.
@@ -233,9 +227,8 @@ Output: {
         {"action_id": 133, "action_name": "put down the object in hand"}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: slice a loaf of bread put a slice on the counter.
 The target state: A sliced piece of bread is placed on the countertop. The knife is no longer in use.
 The current state: I am in a kitchen. A loaf of bread sits beside a bread knife on the countertop.
@@ -277,9 +270,8 @@ Output: {
         {"action_id": 133, "action_name": "put down the object in hand"}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Put a clean pan in the refrigerator.
 The target state: A clean pan is placed inside the refrigerator, and the fridge is closed.
 The current state: I am in a kitchen. A dirty pan rests in the sink next to a faucet; the fridge is across the room.
@@ -314,9 +306,8 @@ Output: {
         {"action_id": 140, "action_name": "close the Fridge"}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Put a box from the couch with a phone in it on the black desk.
 The target state: A phone is inside the box, and the box is placed on the black desk.
 The current state: I am in a living room. A cellphone lies beside an open cardboard box on the couch; a black desk stands opposite.
@@ -345,11 +336,11 @@ Output: {
         {"action_id": 133, "action_name": "put down the object in hand"}
     ]
 }
-'''
+""",
 ]
 
 laser_sg_examples_pre_post = [
-'''
+    """
 Human instruction: Pick up the alarm clock and turn on the lamp.
 The target state: I am holding an alarm clock and there should be a lightened lamp in my sight.
 The current state: I am in a bedroom.  A small alarm clock sits on the bedside table next to a switched-off desk lamp. 
@@ -375,9 +366,8 @@ Output: {
         {"action_id": 151, "action_name": "turn on the DeskLamp"}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Examine a credit card by the light of a tall lamp.
 The target state: I am holding a credit card, and a tall lamp is lightened in the scene so that I can see the card clearly.
 The current state: I am in a lounge with a floor lamp in the corner and a credit card lying on a coffee table.
@@ -403,9 +393,8 @@ Output: {
         {"action_id": 153, "action_name": "turn on the FloorLamp"}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Use lamp light to look at the remote.
 The target state: I am holding a remote control, and a floor lamp is turned on so I can inspect the remote clearly.
 The current state: I am in a living room. A sofa faces a dark floor lamp. A remote control rests on the arm of the sofa.
@@ -431,9 +420,8 @@ Output: {
         {"action_id": 153, "action_name": "turn on the FloorLamp"}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Set the box on the table.
 The target state: The box should be placed on top of the dining table.
 The current state: I am in a dining area. A cardboard box is on the floor near a dining table.
@@ -459,9 +447,8 @@ Output: {
         {"action_id": 133, "action_name": "put down the object in hand"}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Place a heated slice of tomato in the kitchen sink.
 The target state: A slice of tomato that has been heated is placed inside the kitchen sink.
 The current state: I am in a kitchen. A whole tomato sits on the counter; a microwave and a sink are visible nearby.
@@ -611,9 +598,8 @@ Output: {
         }
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Move the towel on the hanger into the cabinet.
 The target state: The hand towel should be placed inside the cabinet, and the cabinet should be closed.
 The current state: I am in a bathroom. A hand towel hangs from a wall-mounted holder; a closed cabinet stands nearby.
@@ -671,9 +657,8 @@ Output: {
         }
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Place a microwaved slice of apple on to the white table.
 The target state: A microwaved apple slice is placed on the white dining table.
 The current state: I am in a kitchen. A whole apple lies next to a microwave; a white dining table is visible across the kitchen.
@@ -845,9 +830,8 @@ Output: {
         }
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: slice a loaf of bread put a slice on the counter.
 The target state: A sliced piece of bread is placed on the countertop. The knife is no longer in use.
 The current state: I am in a kitchen. A loaf of bread sits beside a bread knife on the countertop.
@@ -941,9 +925,8 @@ Output: {
         }
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Put a clean pan in the refrigerator.
 The target state: A clean pan is placed inside the refrigerator, and the fridge is closed.
 The current state: I am in a kitchen. A dirty pan rests in the sink next to a faucet; the fridge is across the room.
@@ -978,9 +961,8 @@ Output: {
         {"action_id": 140, "action_name": "close the Fridge", "pre_condition": [["open", "fridge"]],  "post_condition": [["closed", "fridge"]]}
     ]
 }
-''',
-
-'''
+""",
+    """
 Human instruction: Put a box from the couch with a phone in it on the black desk.
 The target state: A phone is inside the box, and the box is placed on the black desk.
 The current state: I am in a living room. A cellphone lies beside an open cardboard box on the couch; a black desk stands opposite.
@@ -1009,6 +991,5 @@ Output: {
         {"action_id": 133, "action_name": "put down the object in hand", "pre_condition": ["focus on", "desk"], "post_condition": [["box", "on", "desk"]] }
     ]
 }
-''',
-
+""",
 ]

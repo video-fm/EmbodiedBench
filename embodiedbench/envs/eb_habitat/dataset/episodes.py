@@ -15,12 +15,15 @@ from habitat.core.dataset import EpisodeIterator
 from habitat.core.logging import logger
 from habitat.core.registry import registry
 from habitat.core.utils import DatasetFloatJSONEncoder
-from habitat.datasets.rearrange.rearrange_dataset import (RearrangeDatasetV0,
-                                                          RearrangeEpisode)
+from habitat.datasets.rearrange.rearrange_dataset import RearrangeDatasetV0, RearrangeEpisode
+
 # from habitat.datasets.utils import check_and_gen_physics_config
 from habitat.tasks.rearrange.multi_task.pddl_predicate import Predicate
 
-DEFAULT_PHYSICS_CONFIG_PATH = os.path.join(os.path.dirname(__file__), '../data/default.physics_config.json')
+DEFAULT_PHYSICS_CONFIG_PATH = os.path.join(
+    os.path.dirname(__file__), "../data/default.physics_config.json"
+)
+
 
 def check_and_gen_physics_config():
     if os.path.exists(DEFAULT_PHYSICS_CONFIG_PATH):
@@ -70,9 +73,7 @@ class LangRearrangeDatasetV0(RearrangeDatasetV0):
             with open(datasetfile_path, "rb") as f:
                 self.from_binary(pickle.load(f), scenes_dir=config.scenes_dir)
 
-            self.episodes = list(
-                filter(self.build_content_scenes_filter(config), self.episodes)
-            )
+            self.episodes = list(filter(self.build_content_scenes_filter(config), self.episodes))
         else:
             self.episodes = preset_eps
 
@@ -147,15 +148,11 @@ class LangRearrangeDatasetV0(RearrangeDatasetV0):
             "all_eps": all_eps,
         }
 
-    def from_binary(
-        self, data_dict: Dict[str, Any], scenes_dir: Optional[str] = None
-    ) -> None:
+    def from_binary(self, data_dict: Dict[str, Any], scenes_dir: Optional[str] = None) -> None:
         all_T = data_dict["all_transforms"]
         idx_to_name = data_dict["idx_to_name"]
         for i, ep in enumerate(data_dict["all_eps"]):
-            ep["rigid_objs"] = [
-                [idx_to_name[ni], all_T[ti]] for ni, ti in ep["rigid_objs"]
-            ]
+            ep["rigid_objs"] = [[idx_to_name[ni], all_T[ti]] for ni, ti in ep["rigid_objs"]]
             ep["ao_states"] = {idx_to_name[ni]: v for ni, v in ep["ao_states"].items()}
             ep["name_to_receptacle"] = {
                 idx_to_name[k]: idx_to_name[v] for k, v in ep["name_to_receptacle"]
@@ -213,7 +210,9 @@ class CustomEpisodeIterator(EpisodeIterator):
         # sample episodes
         if num_episode_sample >= 0:
             episodes = np.random.choice(  # type: ignore[assignment]
-                episodes, num_episode_sample, replace=False  # type: ignore[arg-type]
+                episodes,
+                num_episode_sample,
+                replace=False,  # type: ignore[arg-type]
             )
 
         if not isinstance(episodes, list):
@@ -259,10 +258,7 @@ class CustomEpisodeIterator(EpisodeIterator):
 
             next_episode = next(self._iterator)
 
-        if (
-            self._prev_scene_id != next_episode.scene_id
-            and self._prev_scene_id is not None
-        ):
+        if self._prev_scene_id != next_episode.scene_id and self._prev_scene_id is not None:
             self._rep_count = 0
             self._step_count = 0
 
@@ -270,9 +266,7 @@ class CustomEpisodeIterator(EpisodeIterator):
         return next_episode
 
     def _forced_scene_switch(self) -> None:
-        grouped_episodes = [
-            list(g) for k, g in groupby(self._iterator, key=lambda x: x.scene_id)
-        ]
+        grouped_episodes = [list(g) for k, g in groupby(self._iterator, key=lambda x: x.scene_id)]
 
         if len(grouped_episodes) > 1:
             # Ensure we swap by moving the current group to the end
@@ -306,9 +300,7 @@ class CustomEpisodeIterator(EpisodeIterator):
 
     @staticmethod
     def _randomize_value(value: int, value_range: float) -> int:
-        return random.randint(
-            int(value * (1 - value_range)), int(value * (1 + value_range))
-        )
+        return random.randint(int(value * (1 - value_range)), int(value * (1 + value_range)))
 
     def _set_shuffle_intervals(self) -> None:
         if self.max_scene_repetition_episodes > 0:
@@ -328,10 +320,7 @@ class CustomEpisodeIterator(EpisodeIterator):
         self._rep_count += 1
 
         # Shuffle if a scene has been selected more than _max_rep_episode times in a row
-        if (
-            self._max_rep_episode is not None
-            and self._rep_count >= self._max_rep_episode
-        ):
+        if self._max_rep_episode is not None and self._rep_count >= self._max_rep_episode:
             do_switch = True
 
         # Shuffle if a scene has been used for more than _max_rep_step steps in a row

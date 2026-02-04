@@ -17,7 +17,10 @@ from habitat.tasks.rearrange.multi_task.pddl_domain import PddlDomain
 from habitat.tasks.rearrange.multi_task.pddl_logical_expr import LogicalExpr
 from habitat.tasks.rearrange.multi_task.pddl_predicate import Predicate
 from habitat.tasks.rearrange.multi_task.rearrange_pddl import (
-    ExprType, PddlEntity, SimulatorObjectType)
+    ExprType,
+    PddlEntity,
+    SimulatorObjectType,
+)
 from habitat.tasks.rearrange.rearrange_task import RearrangeTask
 from habitat.tasks.rearrange.utils import add_perf_timing_func
 from omegaconf import DictConfig, ListConfig
@@ -28,7 +31,7 @@ import embodiedbench.envs.eb_habitat.config
 from embodiedbench.envs.eb_habitat.dataset.episodes import LangRearrangeEpisode
 from embodiedbench.envs.eb_habitat.dataset.utils import get_category_info
 from embodiedbench.envs.eb_habitat.actions import KinematicArmEEAction
-from embodiedbench.envs.eb_habitat.utils import PLACABLE_RECEP_TYPE, get_pddl 
+from embodiedbench.envs.eb_habitat.utils import PLACABLE_RECEP_TYPE, get_pddl
 
 
 @registry.register_task(name="RearrangePredicateTask-v0")
@@ -36,9 +39,7 @@ class RearrangePredicateTask(RearrangeTask):
     def __init__(self, *args, sim, config, dataset, **kwargs):
         print(f"Num episodes {len(dataset.episodes)}")
 
-        self._all_cls, obj_cats, self._name_to_cls = get_category_info(
-            config.skip_load_receps
-        )
+        self._all_cls, obj_cats, self._name_to_cls = get_category_info(config.skip_load_receps)
 
         self.pddl = get_pddl(config, self._all_cls, obj_cats)
         self._fix_agent_pos = config.fix_agent_pos
@@ -126,14 +127,10 @@ class RearrangePredicateTask(RearrangeTask):
                 on_top_pred = f"on_top({obj_ref},{entity_name})"
                 cmp_pred_cond = pred_conds[0].replace(" ", "")
                 if len(pred_conds) == 1 and cmp_pred_cond == on_top_pred:
-                    use_entity_name: str = self._sim.ep_info.name_to_receptacle[
-                        obj_name.name
-                    ]
+                    use_entity_name: str = self._sim.ep_info.name_to_receptacle[obj_name.name]
                     entity = self.pddl.all_entities[use_entity_name]
                 else:
-                    raise ValueError(
-                        f"Could not find match for {entity_name}: {entity_conds}"
-                    )
+                    raise ValueError(f"Could not find match for {entity_name}: {entity_conds}")
             elif self._sample_entities_use_constant_sampling:
                 entity = matches[0]
             else:
@@ -172,9 +169,7 @@ class RearrangePredicateTask(RearrangeTask):
     def _load_goal_preds(self, episode):
         if self._goal_template is None:
             # Load from the episode.
-            return self.pddl.parse_only_logical_expr(
-                episode.goal_preds, self.pddl.all_entities
-            )
+            return self.pddl.parse_only_logical_expr(episode.goal_preds, self.pddl.all_entities)
         else:
             # Load from the config.
             goal_d = dict(self._goal_template)
@@ -228,9 +223,7 @@ class RearrangePredicateTask(RearrangeTask):
         for subgoal in episode.subgoals:
             subgoal_preds = []
             for subgoal_predicate in subgoal:
-                pred = self.pddl.parse_predicate(
-                    subgoal_predicate, self.pddl.all_entities
-                )
+                pred = self.pddl.parse_predicate(subgoal_predicate, self.pddl.all_entities)
                 subgoal_preds.append(pred)
             if len(subgoal_preds) != 0:
                 ret_subgoals.append(subgoal_preds)
@@ -331,9 +324,7 @@ def _filter_matching_pred_conds(
         for pred_cond in pred_conds:
             subbed_pred_cond = pred_cond.replace(entity_name, match.name)
             for other_entity_name, other_entity in other_entities.items():
-                subbed_pred_cond = subbed_pred_cond.replace(
-                    other_entity_name, other_entity.name
-                )
+                subbed_pred_cond = subbed_pred_cond.replace(other_entity_name, other_entity.name)
             pred = pddl.parse_predicate(subbed_pred_cond, pddl.all_entities)
 
             if not pred.is_true(pddl.sim_info):
@@ -360,9 +351,7 @@ def fix_top_down_cam_pos(sim):
         # mn.Vector3(2.5, 0.0, 1.0),
         mn.Vector3(0.0, 0.0, 4.0),
     )
-    sim._sensors["top_down_rgb"]._sensor_object.node.transformation = (
-        rot_mat @ look_at_mat
-    )
+    sim._sensors["top_down_rgb"]._sensor_object.node.transformation = rot_mat @ look_at_mat
 
 
 def convert_rearrange_ep_to_lang_rearrange(

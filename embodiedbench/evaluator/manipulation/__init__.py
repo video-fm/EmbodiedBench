@@ -2,5 +2,4 @@
 
 from .base import EB_ManipulationEvaluator as ManipulationBaseEvaluator
 
-__all__ = ['ManipulationBaseEvaluator']
-
+__all__ = ["ManipulationBaseEvaluator"]

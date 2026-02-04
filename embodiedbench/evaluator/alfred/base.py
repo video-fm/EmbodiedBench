@@ -1,18 +1,10 @@
 import os
-
-# os.environ["CUDA_VISIBLE_DEVICES"] = "1,2"
-# os.environ["remote_url"] = "http://0.0.0.0:15238/v1"
-# os.environ["DISPLAY"] = "cherry:11.0"
-# os.environ["OPENAI_API_KEY"] = "sk-proj-klfjalfadsil;fkadsl;kfsjfkl"
-# home_dir = "/home/asethi04/embody/EmbodiedBench"
-# existing_path = os.environ.get("PYTHONPATH", "")
-# os.environ["PYTHONPATH"] = f"{home_dir}:{existing_path}"
 import numpy as np
 from tqdm import tqdm
 import time
 import json
 from embodiedbench.envs.eb_alfred.EBAlfEnv import EBAlfEnv, ValidEvalSets
-from embodiedbench.planner.vlm_planner import VLMPlanner
+from embodiedbench.planner.alfred import AlfredBASE_VLMPlanner
 from embodiedbench.evaluator.summarize_result import average_json_values
 from embodiedbench.evaluator.evaluator_utils import (
     load_saved_data,
@@ -38,9 +30,7 @@ class EB_AlfredEvaluator:
 
     def check_config_valid(self):
         if self.config["multistep"] + self.config["chat_history"] > 1:
-            raise ValueError(
-                "Only one of multistep, chat_history can be enabled at a time."
-            )
+            raise ValueError("Only one of multistep, chat_history can be enabled at a time.")
 
         if self.config["language_only"]:
             if self.config["multistep"]:
@@ -92,7 +82,7 @@ class EB_AlfredEvaluator:
                 else json.load(open(exploration_example_path, "r+"))
             )
             model_type = self.config.get("model_type", "remote")
-            self.planner = VLMPlanner(
+            self.planner = AlfredBASE_VLMPlanner(
                 self.model_name,
                 model_type,
                 self.env.language_skill_set,
@@ -165,10 +155,7 @@ class EB_AlfredEvaluator:
                             "task_progress": episode_info.get("task_progress", 0),
                             "env_step": self.env._current_step,
                         }
-                        if (
-                            self.env._cur_invalid_actions
-                            >= self.env._max_invalid_actions
-                        ):
+                        if self.env._cur_invalid_actions >= self.env._max_invalid_actions:
                             break
                         continue
 
@@ -196,9 +183,7 @@ class EB_AlfredEvaluator:
                             self.planner.update_info(info)
                             img_path = self.env.save_image(obs)
                             episode_info["reward"].append(reward)
-                            episode_info["num_invalid_actions"] += (
-                                info["last_action_success"] == 0
-                            )
+                            episode_info["num_invalid_actions"] += info["last_action_success"] == 0
                             if done or not info["last_action_success"]:
                                 # stop or replanning
                                 print(
@@ -206,13 +191,9 @@ class EB_AlfredEvaluator:
                                 )
                                 break
                     else:  # single action
-                        obs, reward, done, info = self.env.step(
-                            action, reasoning=reasoning
-                        )
+                        obs, reward, done, info = self.env.step(action, reasoning=reasoning)
                         action_str = (
-                            action
-                            if type(action) == str
-                            else self.env.language_skill_set[action]
+                            action if type(action) == str else self.env.language_skill_set[action]
                         )
                         print(
                             f"Executed action: {action_str}, Task success: {info['task_success']}"
@@ -223,9 +204,7 @@ class EB_AlfredEvaluator:
                         self.planner.update_info(info)
                         img_path = self.env.save_image(obs)
                         episode_info["reward"].append(reward)
-                        episode_info["num_invalid_actions"] += (
-                            info["last_action_success"] == 0
-                        )
+                        episode_info["num_invalid_actions"] += info["last_action_success"] == 0
 
                 except Exception as e:
                     print(e)
@@ -261,20 +240,12 @@ if __name__ == "__main__":
         parser = argparse.ArgumentParser(description="Change configuration parameters.")
         parser.add_argument("--model_name", type=str, help="Name of the model.")
         parser.add_argument("--n_shots", type=int, help="Number of examples")
-        parser.add_argument(
-            "--down_sample_ratio", type=float, help="Down sample ratio."
-        )
+        parser.add_argument("--down_sample_ratio", type=float, help="Down sample ratio.")
         parser.add_argument("--model_type", type=str, help="Type of the model.")
-        parser.add_argument(
-            "--language_only", type=int, help="Set to True for language only mode."
-        )
+        parser.add_argument("--language_only", type=int, help="Set to True for language only mode.")
         parser.add_argument("--exp_name", type=str, help="Name of the experiment.")
-        parser.add_argument(
-            "--chat_history", type=int, help="Set to True to enable chat history."
-        )
-        parser.add_argument(
-            "--detection_box", type=int, help="Set to True to enable detection."
-        )
+        parser.add_argument("--chat_history", type=int, help="Set to True to enable chat history.")
+        parser.add_argument("--detection_box", type=int, help="Set to True to enable detection.")
         parser.add_argument(
             "--eval_sets",
             type=lambda s: s.split(","),

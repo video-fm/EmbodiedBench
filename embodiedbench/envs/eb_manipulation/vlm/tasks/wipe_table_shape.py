@@ -9,18 +9,20 @@ from pyrep.const import ObjectType, PrimitiveShape
 
 shape_list = list(planes.keys())
 DIRT_POINTS = 50
+
+
 class WipeTableShape(WipeTable):
     def init_task(self) -> None:
         self.area_num = 1
         self.area_class_num = len(shape_list)
         return super().init_task()
-        
+
     def modified_init_episode(self, index: int):
         selected_shapes = shape_list[index]
         self.target_list = [self.shape_lib[selected_shapes][0]]
         other_shapes_index = list(range(len(shape_list)))
         other_shapes_index.remove(index)
-        distractor_number = np.random.randint(1,min(len(shape_list),3))
+        distractor_number = np.random.randint(1, min(len(shape_list), 3))
         distractor_index = np.random.choice(other_shapes_index, distractor_number, replace=False)
         for i in distractor_index:
             selected_shapes = shape_list[i]
@@ -31,6 +33,6 @@ class WipeTableShape(WipeTable):
             target.set_color(colors[target_space_colors[i]][1])
 
         return None
-    
+
     def variation_count(self) -> int:
         return len(planes)

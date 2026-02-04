@@ -3,10 +3,11 @@ import numpy as np
 
 LIMIT = 99999999
 
+
 def clip_bbox(bboxes, min_clip, max_x_clip, max_y_clip):
-    '''
+    """
     # BBoxes are [x1, y1, x2, y2]
-    '''
+    """
     bboxes_out = bboxes
     added_axis = False
     if len(bboxes_out.shape) == 1:
@@ -20,9 +21,9 @@ def clip_bbox(bboxes, min_clip, max_x_clip, max_y_clip):
 
 
 def xyxy_to_xywh(bboxes, clip_min=-LIMIT, clip_width=LIMIT, clip_height=LIMIT, round=False):
-    '''
+    """
     [x1 y1, x2, y2] to [xMid, yMid, width, height]
-    '''
+    """
     added_axis = False
     if isinstance(bboxes, list):
         bboxes = np.array(bboxes).astype(np.float32)
@@ -50,9 +51,9 @@ def xyxy_to_xywh(bboxes, clip_min=-LIMIT, clip_width=LIMIT, clip_height=LIMIT, r
 
 
 def xywh_to_xyxy(bboxes, clip_min=-LIMIT, clip_width=LIMIT, clip_height=LIMIT, round=False):
-    '''
+    """
     [xMid, yMid, width, height] to [x1 y1, x2, y2]
-    '''
+    """
     added_axis = False
     if isinstance(bboxes, list):
         bboxes = np.array(bboxes).astype(np.float32)
@@ -79,12 +80,20 @@ def xywh_to_xyxy(bboxes, clip_min=-LIMIT, clip_width=LIMIT, clip_height=LIMIT, r
     return bboxes_out
 
 
-def scale_bbox(bboxes, scalars, clip_min=-LIMIT, clip_width=LIMIT, clip_height=LIMIT, round=False, in_place=False):
-    '''
+def scale_bbox(
+    bboxes,
+    scalars,
+    clip_min=-LIMIT,
+    clip_width=LIMIT,
+    clip_height=LIMIT,
+    round=False,
+    in_place=False,
+):
+    """
     @bboxes {np.array} 4xn array of boxes to be scaled
     @scalars{number or arraylike} scalars for width and height of boxes
     @in_place{bool} If false, creates new bboxes.
-    '''
+    """
     added_axis = False
     if isinstance(bboxes, list):
         bboxes = np.array(bboxes, dtype=np.float32)

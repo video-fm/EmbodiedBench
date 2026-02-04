@@ -5,7 +5,12 @@ from amsolver.backend.task import Task
 from pyrep.objects.shape import Shape
 from pyrep.objects.dummy import Dummy
 from pyrep.objects.proximity_sensor import ProximitySensor
-from amsolver.backend.unit_tasks import T0_ObtainControl, T2_MoveObjectConstraints, TargetSpace, VLM_Object
+from amsolver.backend.unit_tasks import (
+    T0_ObtainControl,
+    T2_MoveObjectConstraints,
+    TargetSpace,
+    VLM_Object,
+)
 from amsolver.backend.conditions import JointCondition
 from amsolver.const import colors, complex_door_list
 from amsolver.backend.conditions import DetectedCondition
@@ -14,16 +19,14 @@ from pyrep.objects.joint import Joint
 
 from vlm.tasks.open_door import OpenDoor
 
-door_states = {
-    "open":["Fully close", "Slightly close"],
-    "close":["Fully open", "Slightly open"]
-}
-class OpenDoorComplex(OpenDoor):
+door_states = {"open": ["Fully close", "Slightly close"], "close": ["Fully open", "Slightly open"]}
 
+
+class OpenDoorComplex(OpenDoor):
     def init_task(self) -> None:
-        model_dir = os.path.dirname(os.path.realpath(__file__)).replace("tasks","object_models/")
-        model_path = model_dir+complex_door_list[0]['path']
-        self.spawn_space = SpawnBoundary([Shape('workspace')])
+        model_dir = os.path.dirname(os.path.realpath(__file__)).replace("tasks", "object_models/")
+        model_path = model_dir + complex_door_list[0]["path"]
+        self.spawn_space = SpawnBoundary([Shape("workspace")])
         self.boundary_root_ori = Shape("boundary_root").get_orientation()
         self.attach_point = Dummy.create()
         self.attach_point.set_name("door_attach_point")
@@ -47,28 +50,57 @@ class OpenDoorComplex(OpenDoor):
         goal_angel, goal_description = self.door_setting(index)
         try_times = 0
         self.door_joint.set_motor_locked_at_zero_velocity(False)
-        while len(self.temporary_waypoints)==0 and try_times<200:
+        while len(self.temporary_waypoints) == 0 and try_times < 200:
             self.sample_method()
             init_states = self.get_state()[0]
-        
+
             self.door.manipulated_part.descriptions = "the handle of door"
             door_target_description = "the door"
             if "Slightly" in goal_description:
                 door_target_description += " slightly"
-            door_target = TargetSpace(self.door_joint, None,
-                                            np.deg2rad(goal_angel), np.deg2rad(goal_angel), door_target_description, self.door.manipulated_part.visual)
+            door_target = TargetSpace(
+                self.door_joint,
+                None,
+                np.deg2rad(goal_angel),
+                np.deg2rad(goal_angel),
+                door_target_description,
+                self.door.manipulated_part.visual,
+            )
             door_target.set_target(self.door.parts[1])
-            door_task = T2_MoveObjectConstraints(self.robot, self.pyrep, door_target, self.task_base, fail_times=2)
+            door_task = T2_MoveObjectConstraints(
+                self.robot, self.pyrep, door_target, self.task_base, fail_times=2
+            )
             post_grasp_task = door_task
             if not self.door_unlocked:
-                handle_target = TargetSpace(self.handle_joint, None,
-                                                np.deg2rad(25), np.deg2rad(25), "the handle of door", self.door.manipulated_part.visual)
+                handle_target = TargetSpace(
+                    self.handle_joint,
+                    None,
+                    np.deg2rad(25),
+                    np.deg2rad(25),
+                    "the handle of door",
+                    self.door.manipulated_part.visual,
+                )
                 handle_target.set_target(self.door.manipulated_part)
-                handle_task = T2_MoveObjectConstraints(self.robot, self.pyrep, handle_target, self.task_base, fail_times=2, next_task_fuc=door_task.get_path_with_constraints)
+                handle_task = T2_MoveObjectConstraints(
+                    self.robot,
+                    self.pyrep,
+                    handle_target,
+                    self.task_base,
+                    fail_times=2,
+                    next_task_fuc=door_task.get_path_with_constraints,
+                )
                 post_grasp_task = handle_task
-            grasp_task = T0_ObtainControl(self.robot, self.pyrep, self.door.manipulated_part, self.task_base, try_times=200,
-                    need_post_grasp=False, grasp_sort_key="horizontal", next_task_fuc=post_grasp_task.get_path_with_constraints)
-            if try_times>100:
+            grasp_task = T0_ObtainControl(
+                self.robot,
+                self.pyrep,
+                self.door.manipulated_part,
+                self.task_base,
+                try_times=200,
+                need_post_grasp=False,
+                grasp_sort_key="horizontal",
+                next_task_fuc=post_grasp_task.get_path_with_constraints,
+            )
+            if try_times > 100:
                 waypoints = grasp_task.get_path(try_ik_sampling=True, ignore_collisions=False)
             else:
                 waypoints = grasp_task.get_path(try_ik_sampling=False, ignore_collisions=False)
@@ -78,11 +110,11 @@ class OpenDoorComplex(OpenDoor):
             self.reset_robot()
             self.pyrep.set_configuration_tree(init_states)
             self.pyrep.step()
-            for i,waypoint in enumerate(self.temporary_waypoints):
-                waypoint.set_name('waypoint{}'.format(i))
+            for i, waypoint in enumerate(self.temporary_waypoints):
+                waypoint.set_name("waypoint{}".format(i))
         if not self.door_unlocked:
             self.door_joint.set_motor_locked_at_zero_velocity(True)
-        return [f'{goal_description} the door.']
+        return [f"{goal_description} the door."]
 
     def variation_count(self) -> int:
         # TODO: The number of variations for this task.
@@ -99,23 +131,26 @@ class OpenDoorComplex(OpenDoor):
 
     def is_static_workspace(self) -> bool:
         return True
-    
+
     def sample_method(self):
         Shape("boundary_root").set_orientation(self.boundary_root_ori)
         self.spawn_space.clear()
-        self.spawn_space.sample(Shape("boundary_root"), 
-            min_rotation=[0, 0, -3.14 / 8.], max_rotation=[0, 0, 3.14 / 8.])
-        # SpawnBoundary([Shape('boundary_root')]).sample(self.attach_point, 
+        self.spawn_space.sample(
+            Shape("boundary_root"),
+            min_rotation=[0, 0, -3.14 / 8.0],
+            max_rotation=[0, 0, 3.14 / 8.0],
+        )
+        # SpawnBoundary([Shape('boundary_root')]).sample(self.attach_point,
         #         min_rotation=[0, 0, 0], max_rotation=[0, 0, 0])
 
     def door_setting(self, index):
-        if index in [0,1]:
+        if index in [0, 1]:
             init_state = "open"
             self.door_joint.set_joint_position(np.deg2rad(30), True)
         else:
             init_state = "close"
             self.door_joint.set_joint_position(np.deg2rad(0), True)
-        sub_index = index%2
+        sub_index = index % 2
         goal_state = door_states[init_state][sub_index]
         if init_state == "close":
             self.door_unlocked = False
@@ -132,5 +167,7 @@ class OpenDoorComplex(OpenDoor):
                 goal_angel = 30
             else:
                 goal_angel = 0
-        self.register_success_conditions([JointCondition(self.door_joint, np.deg2rad(detect_angle), np.deg2rad(detect_bound))])
+        self.register_success_conditions(
+            [JointCondition(self.door_joint, np.deg2rad(detect_angle), np.deg2rad(detect_bound))]
+        )
         return goal_angel, goal_state

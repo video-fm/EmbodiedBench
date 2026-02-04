@@ -3,7 +3,7 @@ import sys
 from os.path import join, dirname, abspath, isfile
 
 CURRENT_DIR = dirname(abspath(__file__))
-sys.path.insert(0, join(CURRENT_DIR, '..'))  # Use local amsolver rather than installed
+sys.path.insert(0, join(CURRENT_DIR, ".."))  # Use local amsolver rather than installed
 
 import traceback
 import readline
@@ -26,14 +26,17 @@ from tools.task_validator import task_smoke, TaskValidationError
 CURRENT_DIR = dirname(abspath(__file__))
 
 
-def print_fail(message, end='\n'):
+def print_fail(message, end="\n"):
     message = str(message)
-    sys.stderr.write('\x1b[1;31m' + message.strip() + '\x1b[0m' + end)
+    sys.stderr.write("\x1b[1;31m" + message.strip() + "\x1b[0m" + end)
 
 
 def setup_list_completer(TASKS_PATH):
-    task_files = [t.replace('.py', '') for t in os.listdir(TASKS_PATH)
-                  if t != '__init__.py' and t.endswith('.py')]
+    task_files = [
+        t.replace(".py", "")
+        for t in os.listdir(TASKS_PATH)
+        if t != "__init__.py" and t.endswith(".py")
+    ]
 
     def list_completer(_, state):
         line = readline.get_line_buffer()
@@ -48,7 +51,6 @@ def setup_list_completer(TASKS_PATH):
 
 
 class LoadedTask(object):
-
     def __init__(self, pr: PyRep, scene: Scene, robot: Robot, parent_folder="vlm"):
         self.pr = pr
         self.scene = scene
@@ -62,54 +64,53 @@ class LoadedTask(object):
         self.task = self.task_class(self.pr, self.robot)  # task constructor
         try:
             # Try and load the task
-            scene.load(self.task, ttms_folder='./{}/task_ttms'.format(self.parent_folder))
+            scene.load(self.task, ttms_folder="./{}/task_ttms".format(self.parent_folder))
         except FileNotFoundError as e:
             # The .ttt file must not exist
             handle = Dummy.create()
-            handle.set_name(self.task_file.replace('.py', ''))
+            handle.set_name(self.task_file.replace(".py", ""))
             handle.set_model(True)
             # Put the dummy at the centre of the workspace
-            self.task.get_base().set_position(Shape('workspace').get_position())
+            self.task.get_base().set_position(Shape("workspace").get_position())
 
     def _edit_new_task(self):
-        task_file = input('What task would you like to edit?\n')
-        task_file = task_file.strip(' ')
-        if len(task_file) > 3 and task_file[-3:] != '.py':
-            task_file += '.py'
+        task_file = input("What task would you like to edit?\n")
+        task_file = task_file.strip(" ")
+        if len(task_file) > 3 and task_file[-3:] != ".py":
+            task_file += ".py"
         try:
             task_class = name_to_task_class(task_file, parent_folder=self.parent_folder)
         except:
-            print('There was no task named: %s. '
-                  'Would you like to create it?' % task_file)
+            print("There was no task named: %s. Would you like to create it?" % task_file)
             inp = input()
-            if inp == 'y':
+            if inp == "y":
                 self._create_python_file(task_file)
                 task_class = name_to_task_class(task_file, parent_folder=self.parent_folder)
             else:
-                print('Pick a defined task in that case...')
+                print("Pick a defined task in that case...")
                 task_class, task_file = self._edit_new_task()
         return task_class, task_file
 
     def _create_python_file(self, task_file: str):
-        with open(join(CURRENT_DIR, 'assets', 'task_template.txt'), 'r') as f:
+        with open(join(CURRENT_DIR, "assets", "task_template.txt"), "r") as f:
             file_content = f.read()
         class_name = self._file_to_class_name(task_file)
         file_content = file_content % (class_name,)
-        new_file_path = join(CURRENT_DIR, '../{}/tasks'.format(self.parent_folder), task_file)
+        new_file_path = join(CURRENT_DIR, "../{}/tasks".format(self.parent_folder), task_file)
         if isfile(new_file_path):
-            raise RuntimeError('File already exists. Will not override this.')
-        with open(new_file_path, 'w+') as f:
+            raise RuntimeError("File already exists. Will not override this.")
+        with open(new_file_path, "w+") as f:
             f.write(file_content)
 
     def _file_to_class_name(self, name):
-        name = name.replace('.py', '')
-        return ''.join([w[0].upper() + w[1:] for w in name.split('_')])
+        name = name.replace(".py", "")
+        return "".join([w[0].upper() + w[1:] for w in name.split("_")])
 
     def reload_python(self):
         try:
             task_class = name_to_task_class(self.task_file, parent_folder=self.parent_folder)
         except Exception as e:
-            print_fail('The python file could not be loaded!')
+            print_fail("The python file could not be loaded!")
             traceback.print_exc()
             return None, None
         self.task = task_class(self.pr, self.robot)  # task constructor
@@ -120,7 +121,7 @@ class LoadedTask(object):
         self.task_class, self.task_file = self._edit_new_task()
         self._load_task_to_scene()
         self.pr.step_ui()
-        print('You are now editing: %s' % str(self.task_class))
+        print("You are now editing: %s" % str(self.task_class))
 
     def reset_variation(self):
         self._variation_index = 0
@@ -129,8 +130,9 @@ class LoadedTask(object):
         try:
             self._variation_index += 1
             descriptions = self.scene.init_episode(
-                self._variation_index % self.task.variation_count())
-            print('Task descriptions: ', descriptions)
+                self._variation_index % self.task.variation_count()
+            )
+            print("Task descriptions: ", descriptions)
         except (WaypointError, BoundaryError, Exception) as ex:
             traceback.print_exc()
         self.pr.step_ui()
@@ -138,9 +140,9 @@ class LoadedTask(object):
     def new_episode(self):
         try:
             descriptions = self.scene.init_episode(
-                self._variation_index % self.task.variation_count(),
-                max_attempts=1)
-            print('Task descriptions: ', descriptions)
+                self._variation_index % self.task.variation_count(), max_attempts=1
+            )
+            print("Task descriptions: ", descriptions)
         except (WaypointError, BoundaryError, Exception) as ex:
             traceback.print_exc()
             self.scene.reset()
@@ -160,18 +162,22 @@ class LoadedTask(object):
         self.pr.step_ui()
 
     def save_task(self):
-        ttm_path = join(CURRENT_DIR, '../{}/task_ttms'.format(self.parent_folder),
-                        self.task_file.replace('.py', '.ttm'))
+        ttm_path = join(
+            CURRENT_DIR,
+            "../{}/task_ttms".format(self.parent_folder),
+            self.task_file.replace(".py", ".ttm"),
+        )
         self.task.get_base().save_model(ttm_path)
-        print('Task saved to:', ttm_path)
+        print("Task saved to:", ttm_path)
 
     def run_task_validator(self):
-        print('About to perform task validation.')
-        print("What variation to test? Pick int in range: 0 to %d, or -1 to "
-              "test all. Or press 'e' to exit."
-              % self.task.variation_count())
+        print("About to perform task validation.")
+        print(
+            "What variation to test? Pick int in range: 0 to %d, or -1 to "
+            "test all. Or press 'e' to exit." % self.task.variation_count()
+        )
         inp = input()
-        if inp == 'e':
+        if inp == "e":
             return
         self.pr.start()
         try:
@@ -183,57 +189,62 @@ class LoadedTask(object):
         self.pr.stop()
 
     def rename(self):
-        print('Enter new name (or q to abort).')
+        print("Enter new name (or q to abort).")
         inp = input()
-        if inp == 'q':
+        if inp == "q":
             return
 
-        name = inp.replace('.py', '')
-        python_file = name + '.py'
+        name = inp.replace(".py", "")
+        python_file = name + ".py"
 
         # Change name of base
-        handle = Dummy(self.task_file.replace('.py', ''))
+        handle = Dummy(self.task_file.replace(".py", ""))
         handle.set_name(name)
 
         # Change the class name
-        old_file_path = join(CURRENT_DIR, '../{}/tasks'.format(self.parent_folder), self.task_file)
+        old_file_path = join(CURRENT_DIR, "../{}/tasks".format(self.parent_folder), self.task_file)
         old_class_name = self._file_to_class_name(self.task_file)
         new_class_name = self._file_to_class_name(name)
-        with open(old_file_path, 'r') as f:
+        with open(old_file_path, "r") as f:
             content = f.read()
         content = content.replace(old_class_name, new_class_name)
-        with open(old_file_path, 'w') as f:
+        with open(old_file_path, "w") as f:
             f.write(content)
 
         # Rename python task file
-        new_file_path = join(CURRENT_DIR, '../{}/tasks'.format(self.parent_folder), python_file)
+        new_file_path = join(CURRENT_DIR, "../{}/tasks".format(self.parent_folder), python_file)
         os.rename(old_file_path, new_file_path)
 
         # Rename .ttt
-        old_ttm_path = join(CURRENT_DIR, '../{}/task_ttms'.format(self.parent_folder),
-                        self.task_file.replace('.py', '.ttm'))
-        new_ttm_path = join(CURRENT_DIR, '../{}/task_ttms'.format(self.parent_folder),
-                            python_file.replace('.py', '.ttm'))
+        old_ttm_path = join(
+            CURRENT_DIR,
+            "../{}/task_ttms".format(self.parent_folder),
+            self.task_file.replace(".py", ".ttm"),
+        )
+        new_ttm_path = join(
+            CURRENT_DIR,
+            "../{}/task_ttms".format(self.parent_folder),
+            python_file.replace(".py", ".ttm"),
+        )
         os.rename(old_ttm_path, new_ttm_path)
 
         self.task_file = python_file
         self.reload_python()
         self.save_task()
-        print('Rename complete')
+        print("Rename complete")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     task_path = "./vlm/tasks"
     setup_list_completer(task_path)
 
     pr = PyRep()
-    ttt_file = join(CURRENT_DIR, '..', 'amsolver', TTT_FILE)
+    ttt_file = join(CURRENT_DIR, "..", "amsolver", TTT_FILE)
     pr.launch(ttt_file, responsive_ui=True)
     pr.step_ui()
 
     robot = Robot(Panda(), PandaGripper())
-    cam_config = CameraConfig(rgb=True, depth=False, mask=False,
-                              render_mode=RenderMode.OPENGL)
+    cam_config = CameraConfig(rgb=True, depth=False, mask=False, render_mode=RenderMode.OPENGL)
     obs_config = ObservationConfig()
     obs_config.set_all(False)
     obs_config.right_shoulder_camera = cam_config
@@ -245,68 +256,68 @@ if __name__ == '__main__':
     scene = Scene(pr, robot, obs_config)
     loaded_task = LoadedTask(pr, scene, robot, parent_folder="vlm")
 
-    print('  ,')
-    print(' /(  ___________')
-    print('|  >:===========`  Welcome to task builder!')
-    print(' )(')
+    print("  ,")
+    print(" /(  ___________")
+    print("|  >:===========`  Welcome to task builder!")
+    print(" )(")
     print(' ""')
 
     loaded_task.new_task()
 
     while True:
         # os.system('cls' if os.name == 'nt' else 'clear')
-        print('\n-----------------\n')
-        print('The python file will be reloaded when simulation is restarted.')
-        print('(q) to quit.')
+        print("\n-----------------\n")
+        print("The python file will be reloaded when simulation is restarted.")
+        print("(q) to quit.")
         if pr.running:
-            print('(+) stop the simulator')
-            print('(v) for task variation.')
-            print('(e) for episode of same variation.')
-            print('(d) for demo.')
-            print('(p) for running the sim for 100 steps (with rendering).')
+            print("(+) stop the simulator")
+            print("(v) for task variation.")
+            print("(e) for episode of same variation.")
+            print("(d) for demo.")
+            print("(p) for running the sim for 100 steps (with rendering).")
         else:
-            print('(!) to run task validator.')
-            print('(+) run the simulator')
-            print('(n) for new task.')
-            print('(s) to save the .ttm')
-            print('(r) to rename the task')
+            print("(!) to run task validator.")
+            print("(+) run the simulator")
+            print("(n) for new task.")
+            print("(s) to save the .ttm")
+            print("(r) to rename the task")
 
         inp = input()
 
-        if inp == 'q':
+        if inp == "q":
             break
 
         if pr.running:
-            if inp == '+':
+            if inp == "+":
                 pr.stop()
                 loaded_task._load_task_to_scene()
                 pr.step_ui()
-            elif inp == 'p':
+            elif inp == "p":
                 [(pr.step(), scene.get_observation()) for _ in range(100)]
-            elif inp == 'd':
+            elif inp == "d":
                 loaded_task.new_demo()
-            elif inp == 'v':
+            elif inp == "v":
                 loaded_task.new_variation()
-            elif inp == 'e':
+            elif inp == "e":
                 loaded_task.new_episode()
         else:
-            if inp == '+':
+            if inp == "+":
                 loaded_task.reload_python()
                 loaded_task.reset_variation()
                 pr.start()
                 pr.step_ui()
-            elif inp == 'n':
-                inp = input('Do you want to save the current task first?\n')
-                if inp == 'y':
+            elif inp == "n":
+                inp = input("Do you want to save the current task first?\n")
+                if inp == "y":
                     loaded_task.save_task()
                 loaded_task.new_task()
-            elif inp == 's':
+            elif inp == "s":
                 loaded_task.save_task()
-            elif inp == '!':
+            elif inp == "!":
                 loaded_task.run_task_validator()
-            elif inp == 'r':
+            elif inp == "r":
                 loaded_task.rename()
 
     pr.stop()
     pr.shutdown()
-    print('Done. Goodbye!')
+    print("Done. Goodbye!")

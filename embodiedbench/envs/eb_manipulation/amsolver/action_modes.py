@@ -1,9 +1,8 @@
-#Copy From the rlbench: https://github.com/stepjam/RLBench
+# Copy From the rlbench: https://github.com/stepjam/RLBench
 from enum import Enum
 
 
 class ArmActionMode(Enum):
-
     # Absolute arm joint velocities
     ABS_JOINT_VELOCITY = 0
 
@@ -53,15 +52,15 @@ class ArmActionMode(Enum):
 
 
 class GripperActionMode(Enum):
-
     # The open amount (0 >= x <= 1) of the gripper. 0 is close, 1 is open.
     OPEN_AMOUNT = 0
 
 
 class ActionMode(object):
-
-    def __init__(self,
-                 arm: ArmActionMode = ArmActionMode.ABS_JOINT_VELOCITY,
-                 gripper: GripperActionMode = GripperActionMode.OPEN_AMOUNT):
+    def __init__(
+        self,
+        arm: ArmActionMode = ArmActionMode.ABS_JOINT_VELOCITY,
+        gripper: GripperActionMode = GripperActionMode.OPEN_AMOUNT,
+    ):
         self.arm = arm
         self.gripper = gripper

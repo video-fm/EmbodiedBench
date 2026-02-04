@@ -11,8 +11,7 @@ import torch
 from habitat.core.registry import registry
 from habitat.core.simulator import Sensor, SensorTypes
 from habitat.tasks.rearrange.multi_task.pddl_predicate import Predicate
-from habitat.tasks.rearrange.multi_task.rearrange_pddl import \
-    SimulatorObjectType
+from habitat.tasks.rearrange.multi_task.rearrange_pddl import SimulatorObjectType
 from habitat.tasks.rearrange.utils import batch_transform_point
 
 from embodiedbench.envs.eb_habitat.dataset.utils import get_category_info, get_name_mappings
@@ -94,9 +93,9 @@ class SimpleTargetSensor(Sensor):
             add_special_tokens=self._add_special_tokens,
         )["input_ids"][0]
 
-        assert (
-            tokens.shape[0] == self._max_len
-        ), f"Instruction is too many tokens at {tokens.shape[0]} but the max is {self._max_len} for instruction {target_name}"
+        assert tokens.shape[0] == self._max_len, (
+            f"Instruction is too many tokens at {tokens.shape[0]} but the max is {self._max_len} for instruction {target_name}"
+        )
         self.cur_lang_goal = target_name
         return tokens
 
@@ -176,9 +175,9 @@ class VocabLangGoalSensor(Sensor):
             max_length=self._max_len,
             add_special_tokens=self._add_special_tokens,
         )["input_ids"][0]
-        assert (
-            tokens.shape[0] == self._max_len
-        ), f"Instruction is too many tokens at {tokens.shape[0]} but the max is {self._max_len}"
+        assert tokens.shape[0] == self._max_len, (
+            f"Instruction is too many tokens at {tokens.shape[0]} but the max is {self._max_len}"
+        )
         return tokens
 
 
@@ -295,9 +294,7 @@ class ObsLangSensor(Sensor):
     def get_observation(self, *args, **kwargs):
         # Fetch the predicates that are true in the current simulator step.
         sim_info = self._task.pddl_problem.sim_info
-        true_preds: List[Predicate] = [
-            p for p in self.predicates_list if p.is_true(sim_info)
-        ]
+        true_preds: List[Predicate] = [p for p in self.predicates_list if p.is_true(sim_info)]
 
         # Conver the predicates to a string representation.
         true_preds_s: List[str] = [p.compact_str for p in true_preds]
@@ -366,9 +363,7 @@ class ClosestTargetObjectPosSensor(Sensor):
     def get_observation(self, *args, task, **kwargs):
         targ_type = task.get_sampled()[0]
         matches = list(task.pddl.find_entities(targ_type.expr_type))
-        obj_pos = np.array(
-            [task.pddl.sim_info.get_entity_pos(match) for match in matches]
-        )
+        obj_pos = np.array([task.pddl.sim_info.get_entity_pos(match) for match in matches])
 
         ee_pos = task._sim.articulated_agent.ee_transform().translation
 

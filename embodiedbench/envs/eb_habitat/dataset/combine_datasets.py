@@ -21,8 +21,8 @@ from habitat.datasets import make_dataset
 from habitat.config.default_structured_configs import register_hydra_plugin
 from habitat.tasks.rearrange.multi_task.pddl_action import PddlAction
 from habitat.tasks.rearrange.multi_task.pddl_predicate import Predicate
-from habitat.tasks.rearrange.multi_task.rearrange_pddl import (
-    PddlEntity, SimulatorObjectType)
+from habitat.tasks.rearrange.multi_task.rearrange_pddl import PddlEntity, SimulatorObjectType
+
 # from habitat_baselines.config.default_structured_configs import \
 #     HabitatBaselinesConfigPlugin
 from PIL import Image
@@ -31,7 +31,8 @@ from tqdm import tqdm
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, T5Model
 
 import sys
-sys.path.append('../')
+
+sys.path.append("../")
 import config
 import dataset
 from create_episodes import summarize_episodes
@@ -59,9 +60,7 @@ def start(args):
             print(f"Could not find {path}")
             continue
         config = habitat.get_config(args.cfg, [f"habitat.dataset.data_path={path}"])
-        dataset = make_dataset(
-            config.habitat.dataset.type, config=config.habitat.dataset
-        )
+        dataset = make_dataset(config.habitat.dataset.type, config=config.habitat.dataset)
         all_eps.extend(dataset.episodes)
     print("Total eps", len(all_eps))
     summarize_episodes(all_eps)

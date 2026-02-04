@@ -1,11 +1,12 @@
 import torch
 
+
 def delete_keys_from_dict(dict_del, lst_keys):
     """
     Delete the keys present in lst_keys from the dictionary.
     Loops recursively over nested dictionaries.
     """
-    dict_foo = dict_del.copy()  #Used as iterator to avoid the 'DictionaryHasChanged' error
+    dict_foo = dict_del.copy()  # Used as iterator to avoid the 'DictionaryHasChanged' error
     for field in dict_foo.keys():
         if field in lst_keys:
             del dict_del[field]
